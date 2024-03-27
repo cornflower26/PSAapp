@@ -1,0 +1,3 @@
+/Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local/CMakeFiles/SLAP.dir
+/Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local/CMakeFiles/edit_cache.dir
+/Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local/CMakeFiles/rebuild_cache.dir
