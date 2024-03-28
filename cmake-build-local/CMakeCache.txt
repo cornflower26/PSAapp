@@ -219,6 +219,9 @@ SLAP_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 SLAP_SOURCE_DIR:STATIC=/Users/antoniajanuszewicz/Downloads/NDPSA/SLAP
 
+//The directory containing a CMake configuration file for openfhe.
+openfhe_DIR:PATH=/usr/local/lib/OpenFHE
+
 
 ########################
 # INTERNAL cache entries

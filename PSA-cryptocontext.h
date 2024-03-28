@@ -7,6 +7,7 @@
 
 #include "PSA-constants.h"
 #include "PSA-base-scheme.h"
+#include <core/lattice/lat-hal.h>
 
 namespace lbcrypto {
 

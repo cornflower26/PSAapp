@@ -6,10 +6,7 @@
 #define OPENFHE_PSA_BASE_SCHEME_H
 
 #include "PSA-constants.h"
-#include "lattice/lat-hal.h"
-#include <OpenFHE>
-#include <NTL/zz.h>
-
+#include <core/lattice/lat-hal.h>
 
 
 namespace lbcrypto {
