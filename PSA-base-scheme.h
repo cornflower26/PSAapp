@@ -9,26 +9,28 @@
 #include <core/lattice/lat-hal.h>
 
 
-namespace lbcrypto {
-
+using namespace lbcrypto;
 
 class PSAScheme {
 private:
     ILDCRTParams<NativeInteger> ciphertextParams;
     ILDCRTParams<NativeInteger> plaintextParams;
 
+protected:
+    Scheme scheme = NS;
+    const uint64_t ts;
 public:
 
-    virtual void SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& privateKeys, bool dummy = false);
+    void SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& privateKeys, bool dummy = false);
 
-    virtual DCRTPoly PublicKey(const uint64_t ts, bool dummy=false);
+    DCRTPoly PublicKey(const uint64_t ts, bool dummy=false);
 
     virtual DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey,
                            bool do_noise,
                            double & noise_time, double & enc_time);
 
-    virtual DCRTPoly NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey);
-    virtual DCRTPoly MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey);
+     DCRTPoly NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey);
+     DCRTPoly MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey);
 
     virtual DCRTPoly Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
                            double & dec_time, unsigned int num_additions=0);
@@ -36,9 +38,9 @@ public:
     virtual DCRTPoly Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
                              double & dec_time, unsigned int num_additions=0);
 
-    DCRTPoly NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly privateKey,
+    DCRTPoly NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
                                 unsigned int num_additions=0);
-    DCRTPoly MSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly privateKey,
+    DCRTPoly MSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
                        unsigned int num_additions=0);
 
 
@@ -52,5 +54,5 @@ public:
     std::vector<float> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
                                          double & dec_time, unsigned int num_additions=0){ return std::vector<float>();}
 };
-}
+
 #endif  //OPENFHE_PSA_BASE_SCHEME_H

@@ -7,10 +7,13 @@
     int main() {
         std::cout << "Hello, World!" << std::endl;
         //DCRTPoly a = DCRTPoly();
+        unsigned int plain_bits = 9;
+        unsigned int packing_size = 1;
+        unsigned int num_users = 1;
+        unsigned int iters = 1;
+        unsigned int k_prime = 1;
 
-        lbcrypto::CCParams<lbcrypto::CryptoContextCKKSRNS> parameters;
-        parameters.SetMultiplicativeDepth(5);
-        parameters.SetScalingModSize(10);
+
         return 0;
     }
 
