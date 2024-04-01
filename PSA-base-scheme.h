@@ -18,7 +18,7 @@ private:
 
 protected:
     Scheme scheme = NS;
-    const uint64_t ts;
+    const uint64_t ts = 0;
 public:
 
     void SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& privateKeys, bool dummy = false);

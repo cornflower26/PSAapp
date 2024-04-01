@@ -19,13 +19,14 @@ private:
     long double a;
     long double delta = 0.1f;
     long double epsilon = 1.0f;
-    unsigned int plainBits;
+    BasicInteger plainBits;
     unsigned int packingSize;
     unsigned int numUsers;
     unsigned int iters;
     long double scale = 0.5f;
     unsigned int maxCtexts = 20;
     unsigned int kPrime;
+    unsigned int N;
 
 public:
     PSAScheme aggregator;
@@ -37,7 +38,10 @@ public:
     std::vector<DCRTPoly> ciphertexts;
     std::vector<DCRTPoly> plaintexts;
 
-    PSACryptoconext();
+    PSACryptoconext(unsigned int t, unsigned int w, unsigned int n,
+                    unsigned int i, unsigned int k, unsigned int N, Scheme scheme1);
+
+    void calculateParams();
 
     void TestEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
                         std::vector<double>& enc_times);
