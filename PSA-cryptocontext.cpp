@@ -49,6 +49,10 @@ void PSACryptoconext::calculateParams() {
     return;
 }
 
+void PSACryptoconext::genSlapScheme() {
+
+}
+
 PSACryptoconext::PSACryptoconext(unsigned int t, unsigned int w,
                                  unsigned int n, unsigned int i, unsigned int k,
                                  unsigned int N, Scheme scheme1){
@@ -81,4 +85,6 @@ PSACryptoconext::PSACryptoconext(unsigned int t, unsigned int w,
     }
 
     calculateParams();
+
+    genSlapScheme();
 }

@@ -8,6 +8,7 @@
 #include "PSA-constants.h"
 #include "PSA-base-scheme.h"
 #include <core/lattice/lat-hal.h>
+#include <scheme/bfvrns/bfvrns-cryptoparameters.h>
 
 using namespace lbcrypto;
 
@@ -42,6 +43,8 @@ public:
                     unsigned int i, unsigned int k, unsigned int N, Scheme scheme1);
 
     void calculateParams();
+
+    void genSlapScheme();
 
     void TestEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
                         std::vector<double>& enc_times);

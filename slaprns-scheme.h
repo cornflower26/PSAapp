@@ -7,11 +7,16 @@
 
 #include "PSA-base-scheme.h"
 #include <core/lattice/lat-hal.h>
+#include <scheme/bfvrns/bfvrns-cryptoparameters.h>
 
 using namespace lbcrypto;
 
 class SLAPScheme : public PSAScheme {
+private:
+    CryptoParametersBFVRNS cryptoParams;
 public:
+    SLAPScheme();
+
     DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey,
                              bool do_noise,
                              double & noise_time, double & enc_time) override;
@@ -26,6 +31,8 @@ public:
                        unsigned int num_additions=0);
     DCRTPoly MSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
                        unsigned int num_additions=0);
+
+    void SwitchBasis(DCRTPoly & ciphertext);
 };
 
 

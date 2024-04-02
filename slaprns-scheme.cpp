@@ -6,6 +6,29 @@
 
 using namespace lbcrypto;
 
+void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext) {
+
+    DCRTPoly retValue = ciphertext.CloneEmpty();
+
+    // converts to coefficient representation before rounding
+    ciphertext.SetFormat(Format::COEFFICIENT);
+        // Performs the scaling by t/Q followed by rounding; the result is in the
+        // CRT basis P
+        ciphertext =
+                ciphertext.ScaleAndRound(cryptoParams.GetParamsRl(), cryptoParams.GettRSHatInvModsDivsModr(),
+                                        cryptoParams.GettRSHatInvModsDivsFrac(), cryptoParams.GetModrBarrettMu());
+
+        // Converts from the CRT basis P to Q
+        ciphertext = ciphertext.SwitchCRTBasis(cryptoParams.GetElementParams(), cryptoParams.GetRlHatInvModr(),
+                                             cryptoParams.GetRlHatInvModrPrecon(), cryptoParams.GetRlHatModq(),
+                                             cryptoParams.GetalphaRlModq(), cryptoParams.GetModqBarrettMu(),
+                                             cryptoParams.GetrInv());
+
+
+    //retValue.SetElements(std::move(ciphertexts));
+
+}
+
 DCRTPoly SLAPScheme::Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey,
                  bool do_noise,
                  double & noise_time, double & enc_time){
@@ -34,7 +57,8 @@ DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateK
     //Add in the error to make a RLWE term
     ret += e;
     //Raise x to base q
-    DCRTPoly x_raised = ret.SwitchCRTBasis(something);
+    DCRTPoly x_raised = ret.Clone();
+    SwitchBasis(x_raised);
             //x.base_conv(ctext_parms, *t_to_q);
     //Now add the message
     ret += x_raised;
@@ -50,7 +74,9 @@ DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateK
     //Add in the error to make a RLWE term
     ret += e;
     //Raise x to base q
-    DCRTPoly x_raised = ret.SwitchCRTBasis(something);
+    DCRTPoly x_raised = ret.Clone();
+    SwitchBasis(x_raised);
+    //DCRTPoly x_raised = ret.SwitchCRTBasis(something);
             //x.base_conv(ctext_parms, *t_to_q);
     //Scale x by delta
     x_raised *= delta_mod_q;
@@ -67,8 +93,8 @@ DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly a
     return ret;
 }
 
-DCRTPoly NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
-                   unsigned int num_additions=0){
+DCRTPoly SLAPScheme::NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+                   unsigned int num_additions){
 
     DCRTPoly ret = aggregationKey*publicKey;
     if(!num_additions){
@@ -83,7 +109,8 @@ DCRTPoly NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggreg
         ret += ciphertexts[idx];
     }
     //return ret.base_conv(plain_parms, *q_to_t);
-    return ret.SwitchCRTBasis(something);
+    SwitchBasis(ret);
+    return ret;
 }
 
 DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
@@ -103,5 +130,7 @@ DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCR
     }
     //Now scale and reduce
     //return ret.scale_down(plain_parms, *q_to_t);
-    return ret.SwitchCRTBasis(something);
+    SwitchBasis(ret);
+
+    return ret;
 }
