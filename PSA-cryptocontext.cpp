@@ -2,6 +2,7 @@
 // Created by Antonia Januszewicz on 4/1/24.
 //
 #include "PSA-cryptocontext.h"
+#include "utils.cpp"
 #define LOG2_3 2
 
 using namespace lbcrypto;
@@ -72,8 +73,8 @@ PSACryptoconext::PSACryptoconext(unsigned int t, unsigned int w,
     unsigned int log_num_users = NumUsers.GetLengthForBase(2);
 
     packingSize = packingSize + log_num_users;
-
-    if(NTL::weight(numUsers) != 1){
+    //ceil of log or self make
+    if(hammingWeight(numUsers) != 1){
         log_num_users++;
     }
     unsigned int log_q;
@@ -87,4 +88,67 @@ PSACryptoconext::PSACryptoconext(unsigned int t, unsigned int w,
     calculateParams();
 
     genSlapScheme();
+}
+
+void PSACryptoconext::TestEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
+                    std::vector<double>& enc_times){
+    ciphertexts.clear();
+    noise_times.clear();
+    enc_times.clear();
+    //auto params_pair = aggregator.parms_ptrs();
+    DCRTPoly input = aggregator.plaintextParams.CloneParametersOnly();
+
+
+    ciphertexts.reserve(numUsers);
+    aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
+    DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
+    for(unsigned int i = 0; i < numUsers; i++){
+        //First, get some random vector for user input
+        input.AddRandomNoise(input.GetModulus());
+        //Then, do the encryption
+        double noise_time, enc_time;
+        result = aggregator.Encrypt(input, privateKeys[i], publicKey,
+                         do_noise,
+                         noise_time, enc_time);
+        if(i < num_to_generate){
+            //WARNING: don't push_back a temporary Polynomial. Just don't.
+            ciphertexts.push_back(result); //Hope this copies it
+        }
+
+        noise_times.push_back(noise_time);
+        enc_times.push_back(enc_time);
+    }
+
+}
+
+void PSACryptoconext::TestPolynomialEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
+                              std::vector<double>& enc_times){
+    ciphertexts.clear();
+    noise_times.clear();
+    enc_times.clear();
+    //auto params_pair = agg.parms_ptrs();
+    //DCRTPoly input(params_pair.first);
+    DCRTPoly input = aggregator.plaintextParams.CloneParametersOnly();
+    //unsigned int users = aggregator.user_count();
+
+    ciphertexts.reserve(numUsers);
+    aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
+    //Polynomial result(params_pair.first);
+    DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
+    for(unsigned int i = 0; i < numUsers; i++){
+        //First, get some random vector for user input
+        input.AddRandomNoise(input.GetModulus());
+        //Then, do the encryption
+        double noise_time, enc_time;
+        result = aggregator.PolynomialEncrypt(input, privateKeys[i], publicKey,
+                              do_noise,
+                              noise_time, enc_time,1);
+        if(i < num_to_generate){
+            ciphertexts.push_back(result); //Hope this copies it
+        }
+
+        noise_times.push_back(noise_time);
+        enc_times.push_back(enc_time);
+    }
+
 }

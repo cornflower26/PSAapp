@@ -29,19 +29,20 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext) {
 
 }
 
-DCRTPoly SLAPScheme::Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey,
+DCRTPoly SLAPScheme::Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
                  bool do_noise,
                  double & noise_time, double & enc_time){
     DCRTPoly noisy_input = plaintext;
     if(do_noise){
-        noisy_input.add_dp_noise(this->dl, num, den);
+        //noisy_input.add_dp_noise(this->dl, num, den);
+        dl.addRandomNoise(noisy_input,scale);
     }
     else{
         noise_time = 0.0;
     }
     //Now get key and do encryption
-    DCRTPoly pk = PublicKey(ts);
-    DCRTPoly enc_result = (scheme==NS)? NSEncrypt(privateKey, noisy_input, pk) : MSEncrypt(privateKey, noisy_input, pk);
+    DCRTPoly enc_result = (scheme==NS)? NSEncrypt(privateKey, noisy_input, publicKey) :
+            MSEncrypt(privateKey, noisy_input, publicKey);
     return enc_result;
 }
 
@@ -49,9 +50,10 @@ DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateK
     //Multiply secret and public keys
     DCRTPoly ret = privateKey*publicKey;
     //Get the error, and scale it by the plaintext modulus
-    DCRTPoly e(this->ctext_parms);
+    DCRTPoly e = ciphertextParams.CloneParametersOnly();
     //TODO replace this - taken out for debugging
-    e.error(this->dl);
+    //e.error(this->dl);
+    dl.addRandomNoise(e,scale);
     //e.zero();
     e *= t_mod_q; //Per-modulus scaling
     //Add in the error to make a RLWE term
@@ -69,8 +71,9 @@ DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateK
     //Multiply secret and public keys
     DCRTPoly ret = privateKey*publicKey;
     //Get the error, and scale it by the plaintext modulus
-    DCRTPoly e(this->ctext_parms);
-    e.error(this->dl);
+    DCRTPoly e = ciphertextParams.CloneParametersOnly();
+    //e.error(this->dl);
+    dl.addRandomNoise(e,scale);
     //Add in the error to make a RLWE term
     ret += e;
     //Raise x to base q

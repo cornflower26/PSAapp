@@ -210,6 +210,33 @@ CMAKE_STRIP:FILEPATH=/Library/Developer/CommandLineTools/usr/bin/strip
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//No help, variable specified on the command line.
+HAVE_CXX_FLAG_STD_CXX11:UNINITIALIZED=ON
+
+//No help, variable specified on the command line.
+HAVE_CXX_FLAG_STD_WEXTRA:UNINITIALIZED=ON
+
+//No help, variable specified on the command line.
+HAVE_CXX_FLAG_WALL:UNINITIALIZED=ON
+
+//No help, variable specified on the command line.
+HAVE_CXX_FLAG_WERROR:UNINITIALIZED=ON
+
+//No help, variable specified on the command line.
+HAVE_CXX_FLAG_WSHADOW:UNINITIALIZED=ON
+
+//No help, variable specified on the command line.
+HAVE_GNU_POSIX_REGEX:UNINITIALIZED=ON
+
+//No help, variable specified on the command line.
+HAVE_POSIX_REGEX:UNINITIALIZED=ON
+
+//No help, variable specified on the command line.
+HAVE_STD_REGEX:UNINITIALIZED=ON
+
+//No help, variable specified on the command line.
+HAVE_STEADY_CLOCK:UNINITIALIZED=ON
+
 //Value Computed by CMake
 SLAP_BINARY_DIR:STATIC=/Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local
 

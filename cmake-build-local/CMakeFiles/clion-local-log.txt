@@ -1,4 +1,29 @@
-/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/ninja -G Ninja -S /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP -B /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local
--- Configuring done (0.1s)
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/ninja -DHAVE_CXX_FLAG_STD_CXX11=ON -DHAVE_CXX_FLAG_WALL=ON -DHAVE_CXX_FLAG_STD_WEXTRA=ON -DHAVE_CXX_FLAG_WSHADOW=ON -DHAVE_CXX_FLAG_WERROR=ON -DHAVE_STD_REGEX=ON -DHAVE_GNU_POSIX_REGEX=ON -DHAVE_CXX_FLAG_STD_WEXTRA=ON -DHAVE_POSIX_REGEX=ON -DHAVE_STEADY_CLOCK=ON -G Ninja -S /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP -B /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local
+-- The C compiler identification is AppleClang 15.0.0.15000100
+-- The CXX compiler identification is AppleClang 15.0.0.15000100
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /Library/Developer/CommandLineTools/usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /Library/Developer/CommandLineTools/usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (2.2s)
 -- Generating done (0.0s)
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    HAVE_CXX_FLAG_STD_CXX11
+    HAVE_CXX_FLAG_WALL
+    HAVE_CXX_FLAG_WERROR
+    HAVE_CXX_FLAG_WSHADOW
+    HAVE_GNU_POSIX_REGEX
+    HAVE_POSIX_REGEX
+    HAVE_STD_REGEX
+    HAVE_STEADY_CLOCK
+
+
 -- Build files have been written to: /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local

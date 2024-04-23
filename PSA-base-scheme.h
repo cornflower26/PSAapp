@@ -6,26 +6,28 @@
 #define OPENFHE_PSA_BASE_SCHEME_H
 
 #include "PSA-constants.h"
+#include "dgsampler.h"
 #include <core/lattice/lat-hal.h>
 
 
 using namespace lbcrypto;
 
 class PSAScheme {
-private:
-    ILDCRTParams<NativeInteger> ciphertextParams;
-    ILDCRTParams<NativeInteger> plaintextParams;
-
 protected:
     Scheme scheme = NS;
-    const uint64_t ts = 0;
+    uint64_t ts = 0;
+    double scale;
 public:
+    DCRTPoly ciphertextParams;
+    DCRTPoly plaintextParams;
+    DiscreteGaussianGeneratorImpl<DCRTPoly> * agg_dgg;
+    DiscreteLaplacianGenerator dl;
 
-    void SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& privateKeys, bool dummy = false);
+    void SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& privateKeys, int numUsers, bool dummy = false);
 
     DCRTPoly PublicKey(const uint64_t ts, bool dummy=false);
 
-    virtual DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey,
+    virtual DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
                            bool do_noise,
                            double & noise_time, double & enc_time);
 

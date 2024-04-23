@@ -14,10 +14,13 @@ using namespace lbcrypto;
 class SLAPScheme : public PSAScheme {
 private:
     CryptoParametersBFVRNS cryptoParams;
+    uint64_t * delta_mod_q = NULL;
+    uint64_t * t_mod_q = NULL;
+
 public:
     SLAPScheme();
 
-    DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey,
+    DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey,const DCRTPoly  publicKey,
                              bool do_noise,
                              double & noise_time, double & enc_time) override;
 

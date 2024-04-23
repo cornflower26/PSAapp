@@ -10,8 +10,11 @@ add_executable(SLAP main.cpp
         PSA-constants.h
         slaprns-scheme.h
         PSA-cryptocontext.h
+        dgsampler.h
         slaprns-scheme.cpp
-        PSA-cryptocontext.cpp)
+        PSA-cryptocontext.cpp
+        PSA-base-scheme.cpp
+        utils.cpp)
 
 add_library(openfhecorelib SHARED IMPORTED)
 add_library(openfhepkelib SHARED IMPORTED)
