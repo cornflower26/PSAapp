@@ -6,7 +6,8 @@
 #define OPENFHE_PSA_CRYPTOCONTEXT_H
 
 #include "PSA-constants.h"
-#include "PSA-base-scheme.h"
+#include "slaprns-scheme.h"
+#include "utils.h"
 #include <core/lattice/lat-hal.h>
 #include <scheme/bfvrns/bfvrns-cryptoparameters.h>
 
@@ -30,7 +31,7 @@ private:
     unsigned int N;
 
 public:
-    PSAScheme aggregator;
+    SLAPScheme aggregator;
 
     std::vector<DCRTPoly> privateKeys;
     DCRTPoly aggregationKey;

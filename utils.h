@@ -1,6 +1,8 @@
 //
 // Created by Antonia Januszewicz on 4/16/24.
 //
+#ifndef OPENFHE_UTILS_H
+#define OPENFHE_UTILS_H
 
 // Function to calculate the Hamming weight
 unsigned int hammingWeight(unsigned int n) {
@@ -11,3 +13,5 @@ unsigned int hammingWeight(unsigned int n) {
     }
     return count;
 }
+
+#endif

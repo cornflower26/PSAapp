@@ -2,7 +2,6 @@
 // Created by Antonia Januszewicz on 4/1/24.
 //
 #include "PSA-cryptocontext.h"
-#include "utils.cpp"
 #define LOG2_3 2
 
 using namespace lbcrypto;
@@ -97,7 +96,6 @@ void PSACryptoconext::TestEncryption(const bool do_noise, const unsigned int num
     enc_times.clear();
     //auto params_pair = aggregator.parms_ptrs();
     DCRTPoly input = aggregator.plaintextParams.CloneParametersOnly();
-
 
     ciphertexts.reserve(numUsers);
     aggregator.SecretKey(aggregationKey, privateKeys, numUsers);

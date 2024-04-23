@@ -6,6 +6,10 @@
 
 using namespace lbcrypto;
 
+SLAPScheme::SLAPScheme() : PSAScheme() {
+    int a = a;
+}
+
 void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext) {
 
     DCRTPoly retValue = ciphertext.CloneEmpty();
@@ -30,8 +34,8 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext) {
 }
 
 DCRTPoly SLAPScheme::Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
-                 bool do_noise,
-                 double & noise_time, double & enc_time){
+        const bool do_noise,
+        double & noise_time, double & enc_time){
     DCRTPoly noisy_input = plaintext;
     if(do_noise){
         //noisy_input.add_dp_noise(this->dl, num, den);
@@ -93,6 +97,13 @@ DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly a
     DCRTPoly publicKey = PublicKey(ts);
     DCRTPoly ret = (scheme == NS) ?
             NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
+    return ret;
+}
+
+DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+                 double & dec_time, unsigned int num_additions){
+    DCRTPoly ret = (scheme == NS) ?
+                   NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
     return ret;
 }
 

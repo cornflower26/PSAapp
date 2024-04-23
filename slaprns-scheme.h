@@ -20,8 +20,8 @@ private:
 public:
     SLAPScheme();
 
-    DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey,const DCRTPoly  publicKey,
-                             bool do_noise,
+    DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
+                             const bool do_noise,
                              double & noise_time, double & enc_time) override;
 
     DCRTPoly NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey);
@@ -30,12 +30,18 @@ public:
     DCRTPoly Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
                              double & dec_time, unsigned int num_additions=0) override;
 
+    DCRTPoly Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+                     double & dec_time, unsigned int num_additions=0) override;
+
     DCRTPoly NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
                        unsigned int num_additions=0);
     DCRTPoly MSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
                        unsigned int num_additions=0);
 
     void SwitchBasis(DCRTPoly & ciphertext);
+
+    ~SLAPScheme() {};
+
 };
 
 
