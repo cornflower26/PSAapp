@@ -38,7 +38,7 @@ static DCRTPoly encoding_to_Polynomial(const Plaintext & vals, const DCRTPoly pa
     return ret;
 }
 
-void ppow(DCRTPoly & rop, const  DCRTPoly& a, const uint64_t exp) {
+static void ppow(DCRTPoly & rop, const  DCRTPoly& a, const uint64_t exp) {
     auto values = a.GetAllElements();
     BigVector ans(values.size(), 5);
 
