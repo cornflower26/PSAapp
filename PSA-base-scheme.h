@@ -5,6 +5,7 @@
 #ifndef OPENFHE_PSA_BASE_SCHEME_H
 #define OPENFHE_PSA_BASE_SCHEME_H
 
+#include "utils.cpp"
 #include "PSA-constants.h"
 #include "dgsampler.h"
 #include <core/lattice/lat-hal.h>
@@ -52,11 +53,11 @@ public:
                                         bool do_noise, double & noise_time,
                                         double & enc_time, const uint64_t e){ return DCRTPoly();};
 
-    std::vector<float> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
-                                 double & dec_time, unsigned int num_additions=0){ return std::vector<float>();}
+    std::vector<double> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+                                 double & dec_time, unsigned int num_additions=0){ return std::vector<double>();}
 
-    std::vector<float> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
-                                         double & dec_time, unsigned int num_additions=0){ return std::vector<float>();}
+    std::vector<double> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
+                                         double & dec_time, unsigned int num_additions=0){ return std::vector<double>();}
 
     virtual ~PSAScheme() {};
 };
