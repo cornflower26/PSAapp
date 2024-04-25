@@ -37,20 +37,28 @@ static DCRTPoly encoding_to_Polynomial(const Plaintext & vals, const DCRTPoly pa
     ret.SetValues(intermediate2, COEFFICIENT);
     return ret;
 }
-/**
-void ppow(DCRTPoly & rop, const  DCRTPoly& a, const uint64_t exp) {
 
-    size_t n = a.poly_mod_degree();
-    for(size_t mod_idx = 0; mod_idx < ; mod_idx++) {
-        uint64_t modulus = a.parms->moduli_data[mod_idx];
-        for(size_t coeff_idx = 0; coeff_idx < n; coeff_idx++) {
-            uint128_t tmp = pow(a.at(coeff_idx).ConvertToInt(),exp);
+void ppow(DCRTPoly & rop, const  DCRTPoly& a, const uint64_t exp) {
+    auto values = a.GetAllElements();
+    BigVector ans(values.size(), 5);
+
+    std::vector<int> mods;
+    mods.reserve(a.GetParams()->GetParams().size());
+    for (auto& p : a.GetParams()->GetParams())
+        mods.emplace_back(p->GetModulus().ConvertToInt());
+
+    for(size_t mod_idx = 0; mod_idx < mods.size(); mod_idx++) {
+        uint64_t modulus = mods[mod_idx];
+        auto temp = values[mod_idx].GetValues();
+        for(size_t coeff_idx = 0; coeff_idx < temp.GetLength(); coeff_idx++) {
+            uint128_t tmp = pow(temp[coeff_idx].ConvertToInt(),exp);
+            //a.at(coeff_idx).ConvertToInt()
             tmp %= modulus;
-            *rop_ptr = (uint64_t) tmp;
-            a_ptr++;
-            rop_ptr++;
+            values[mod_idx].at(coeff_idx) = tmp;
         }
+        rop.SetElementAtIndex(mod_idx,values[mod_idx]);
     }
-}**/
+
+}
 
 #endif

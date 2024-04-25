@@ -1,4 +1,4 @@
 /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/ninja -DHAVE_CXX_FLAG_STD_CXX11=ON -DHAVE_CXX_FLAG_WALL=ON -DHAVE_CXX_FLAG_STD_WEXTRA=ON -DHAVE_CXX_FLAG_WSHADOW=ON -DHAVE_CXX_FLAG_WERROR=ON -DHAVE_STD_REGEX=ON -DHAVE_GNU_POSIX_REGEX=ON -DHAVE_CXX_FLAG_STD_WEXTRA=ON -DHAVE_POSIX_REGEX=ON -DHAVE_STEADY_CLOCK=ON -G Ninja -S /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP -B /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local
--- Configuring done (0.2s)
+-- Configuring done (0.1s)
 -- Generating done (0.0s)
 -- Build files have been written to: /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local

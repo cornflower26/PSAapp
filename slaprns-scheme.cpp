@@ -188,7 +188,6 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(std::vector<DCRTPoly> cipherte
 
     DCRTPoly ret = (scheme == NS) ?
                    NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
-    //ret.ppow(ret,ret,M_E);
     std::vector<double> int_result = Polynomial_to_double_encoding(ret);
     std::vector<std::complex<double>> cvec( int_result.size() );
     std::transform( int_result.begin(), int_result.end(), int_result.begin(), cvec.begin(), []( double da, double db ) {
