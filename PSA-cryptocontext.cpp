@@ -2,11 +2,14 @@
 // Created by Antonia Januszewicz on 4/1/24.
 //
 #include "PSA-cryptocontext.h"
+#include <openfhe.h>
+#include <core/lattice/lat-hal.h>
+#include "utils/parmfactory.h"
 #define LOG2_3 2
 
 using namespace lbcrypto;
 
-void PSACryptoconext::calculateParams() {
+void PSACryptocontext::calculateParams() {
     unsigned int del_interval = packingSize ? packingSize : log2(plainBits);
     if(del_interval < (epsilon/3)){
         return;
@@ -49,11 +52,11 @@ void PSACryptoconext::calculateParams() {
     return;
 }
 
-void PSACryptoconext::genSlapScheme() {
+void PSACryptocontext::genSlapScheme() {
 
 }
 
-PSACryptoconext::PSACryptoconext(unsigned int t, unsigned int w,
+PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
                                  unsigned int n, unsigned int i, unsigned int k,
                                  unsigned int N, Scheme scheme1){
     plainBits = t;
@@ -84,12 +87,15 @@ PSACryptoconext::PSACryptoconext(unsigned int t, unsigned int w,
         log_q = 2*(plainBits+1) + log_num_users + LOG2_3;
     }
 
+    usint m = choose_parameters(log_q) << 1;
+    //const std::shared_ptr<Params> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(ceil(log_q / log(2)))),1,log_q/plainBits);
+    //aggregator.ciphertextParams = DCRTPoly(parms,COEFFICIENT);
     calculateParams();
 
     genSlapScheme();
 }
 
-void PSACryptoconext::TestEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
+void PSACryptocontext::TestEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
                     std::vector<double>& enc_times){
     ciphertexts.clear();
     noise_times.clear();
@@ -119,7 +125,7 @@ void PSACryptoconext::TestEncryption(const bool do_noise, const unsigned int num
 
 }
 
-void PSACryptoconext::TestPolynomialEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
+void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
                               std::vector<double>& enc_times){
     ciphertexts.clear();
     noise_times.clear();
@@ -147,6 +153,31 @@ void PSACryptoconext::TestPolynomialEncryption(const bool do_noise, const unsign
 
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
+        input.SetValuesToZero();
     }
 
+}
+
+void PSACryptocontext::TestDecryption(){
+    DCRTPoly res = aggregator.ciphertextParams.CloneParametersOnly();
+    std::vector<double> dec_times;
+    for(unsigned int i = 0; i < iters; i++){
+        double dec_time;
+        res = aggregator.Decrypt(ciphertexts, aggregationKey, aggregator.ts, dec_time, numUsers);
+        dec_times.push_back(dec_time);
+    }
+}
+
+void PSACryptocontext::TestPolynomialDecryption(){
+    std::vector<double> res;
+    std::vector<double> mult_res;
+    std::vector<double> dec_times;
+    for(unsigned int i = 0; i < iters; i++){
+        double dec_time;
+        res = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, aggregator.ts, dec_time, numUsers);
+        if (i == 0) for (int j = 0; j < mult_res.size(); j++) mult_res.at(j) *= res.at(j);
+        else mult_res = res;
+        //os << res << '\n';
+        dec_times.push_back(dec_time);
+    }
 }

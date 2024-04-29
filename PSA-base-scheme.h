@@ -16,15 +16,15 @@ using namespace lbcrypto;
 class PSAScheme {
 protected:
     Scheme scheme = NS;
-    uint64_t ts = 0;
     double scale;
 public:
     DCRTPoly ciphertextParams;
     DCRTPoly plaintextParams;
     DiscreteGaussianGeneratorImpl<DCRTPoly> * agg_dgg;
     DiscreteLaplacianGenerator dl;
+    uint64_t ts = 0;
 
-    PSAScheme(){};
+    PSAScheme();
 
     void SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& privateKeys, int numUsers, bool dummy = false);
 

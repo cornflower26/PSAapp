@@ -2,6 +2,8 @@
 //#include <core/lattice/lat-hal.h>
 #include <pke/openfhe.h>
 
+#include "PSA-cryptocontext.h"
+
 
 
     int main() {
@@ -12,7 +14,25 @@
         unsigned int num_users = 1;
         unsigned int iters = 1;
         unsigned int k_prime = 1;
+        unsigned int N = 1;
 
+        unsigned int MAX_CTEXTS_DEFAULT = 20;
+
+        PSACryptocontext p = PSACryptocontext(plain_bits, packing_size, num_users, iters, k_prime,N, MS);
+        std::vector<double> noise_times;
+        std::vector<double> enc_times;
+
+        p.TestEncryption(1, MAX_CTEXTS_DEFAULT, noise_times, enc_times);
+
+        p.TestDecryption();
+
+        std::vector<double> poly_noise_times;
+        std::vector<double> poly_enc_times;
+
+        p.TestPolynomialEncryption(1, MAX_CTEXTS_DEFAULT, poly_noise_times, poly_enc_times);
+
+
+        p.TestPolynomialDecryption();
 
         return 0;
     }

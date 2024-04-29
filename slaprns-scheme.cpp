@@ -2,12 +2,20 @@
 // Created by Antonia Januszewicz on 3/27/24.
 //
 
+#include <openfhe.h>
 #include "slaprns-scheme.h"
 
 using namespace lbcrypto;
 
 SLAPScheme::SLAPScheme() : PSAScheme() {
-    int a = a;
+    // Sample Program: Step 1 - Set CryptoContext
+
+
+    CKKSparameters.SetMultiplicativeDepth(1);
+    CKKSparameters.SetScalingModSize(scale);
+    CKKSparameters.SetBatchSize(8);
+
+    CKKSContext = GenCryptoContext(CKKSparameters);
 }
 
 void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext) {
@@ -174,7 +182,7 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const DCRTPoly plaintext, const DCRTPoly 
         float_result.at(i) = log(float_result.at(i));
     }
     Plaintext ckks_result = CKKSContext->MakeCKKSPackedPlaintext(float_result);
-    //ckks_result->Encode();
+    ckks_result->Encode();
     DCRTPoly poly_result = encoding_to_Polynomial(ckks_result,plaintext);
 
     DCRTPoly enc_result = (scheme==NS)? NSEncrypt(privateKey, noisy_input, publicKey) :

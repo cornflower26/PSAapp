@@ -12,7 +12,7 @@
 
 using namespace lbcrypto;
 
-class PSACryptoconext {
+class PSACryptocontext {
 private:
     Scheme scheme = NS;
     long double b;
@@ -39,7 +39,7 @@ public:
     std::vector<DCRTPoly> ciphertexts;
     std::vector<DCRTPoly> plaintexts;
 
-    PSACryptoconext(unsigned int t, unsigned int w, unsigned int n,
+    PSACryptocontext(unsigned int t, unsigned int w, unsigned int n,
                     unsigned int i, unsigned int k, unsigned int N, Scheme scheme1);
 
     void calculateParams();
@@ -49,8 +49,12 @@ public:
     void TestEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
                         std::vector<double>& enc_times);
 
+    void TestDecryption();
+
     void TestPolynomialEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
                         std::vector<double>& enc_times);
+
+    void TestPolynomialDecryption();
 
 
 };

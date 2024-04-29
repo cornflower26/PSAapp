@@ -4,6 +4,11 @@
 
 #include "PSA-base-scheme.h"
 
+PSAScheme::PSAScheme() {
+
+
+}
+
 DCRTPoly PSAScheme::PublicKey(const uint64_t ts, bool dummy){
     DCRTPoly pk = ciphertextParams.CloneParametersOnly();
     //make a new noise vector and add it? direct access?

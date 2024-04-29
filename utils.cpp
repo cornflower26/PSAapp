@@ -50,15 +50,35 @@ static void ppow(DCRTPoly & rop, const  DCRTPoly& a, const uint64_t exp) {
     for(size_t mod_idx = 0; mod_idx < mods.size(); mod_idx++) {
         uint64_t modulus = mods[mod_idx];
         auto temp = values[mod_idx].GetValues();
-        for(size_t coeff_idx = 0; coeff_idx < temp.GetLength(); coeff_idx++) {
-            uint128_t tmp = pow(temp[coeff_idx].ConvertToInt(),exp);
+        for (size_t coeff_idx = 0; coeff_idx < temp.GetLength(); coeff_idx++) {
+            uint128_t tmp = pow(temp[coeff_idx].ConvertToInt(), exp);
             //a.at(coeff_idx).ConvertToInt()
             tmp %= modulus;
             values[mod_idx].at(coeff_idx) = tmp;
         }
-        rop.SetElementAtIndex(mod_idx,values[mod_idx]);
-    }
+        rop.SetElementAtIndex(mod_idx, values[mod_idx]);
 
+    }
 }
+
+
+
+static size_t choose_parameters(unsigned int required_q) {
+    size_t n;
+        //Ok
+        if (required_q <= 27) {n = 1 << 10;}
+            //This is the problematic one
+        else if (required_q <= 54) {n = 1 << 11;}
+            //Ok
+        else if (required_q <= 109) {n = 1 << 12;}
+            //Ok
+        else if (required_q <= 218) { n = 1 << 13;}
+            //Also problematic
+        else if (required_q <= 438) { n = 1 << 14;}
+            //Also problematic
+        else if (required_q <= 881) { n = 1 << 15;}
+        else {n = 0;}
+        return n;
+    }
 
 #endif
