@@ -4,9 +4,10 @@
 
 #include "PSA-base-scheme.h"
 
-PSAScheme::PSAScheme() {
-
-
+PSAScheme::PSAScheme(Scheme scheme, double scale) {
+    this->scheme = scheme;
+    this->scale = scale;
+    ts = 0xDEADBEEF;
 }
 
 DCRTPoly PSAScheme::PublicKey(const uint64_t ts, bool dummy){
@@ -35,7 +36,8 @@ void PSAScheme::SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& priva
 #endif
         if(!dummy){
             //privateKeys[i].error(this->dl);
-            dl.addRandomNoise(privateKeys[i],scale);
+            //dl.addRandomNoise(privateKeys[i],scale);
+            privateKeys[i].AddRandomNoise(privateKeys[i].GetModulus());
         }
         else{
             privateKeys[i].SetValuesToZero();

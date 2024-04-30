@@ -21,7 +21,7 @@ private:
     uint64_t * t_mod_q = NULL;
 
 public:
-    SLAPScheme();
+    SLAPScheme(Scheme scheme, double scale);
 
     DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
                              const bool do_noise,

@@ -58,7 +58,7 @@ void PSACryptocontext::genSlapScheme() {
 
 PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
                                  unsigned int n, unsigned int i, unsigned int k,
-                                 unsigned int N, Scheme scheme1){
+                                 unsigned int N, Scheme scheme1) : aggregator(scheme, scale) {
     plainBits = t;
     packingSize = w;
     numUsers = n;
@@ -87,12 +87,12 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
         log_q = 2*(plainBits+1) + log_num_users + LOG2_3;
     }
 
-    usint m = choose_parameters(log_q) << 1;
-    //const std::shared_ptr<Params> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(ceil(log_q / log(2)))),1,log_q/plainBits);
-    //aggregator.ciphertextParams = DCRTPoly(parms,COEFFICIENT);
-    calculateParams();
+    //usint m = choose_parameters(log_q) << 1;
+    std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(ceil(log_q / log(2)))),1,log_q/plainBits);
+    aggregator.ciphertextParams = DCRTPoly(parms,COEFFICIENT);
 
-    genSlapScheme();
+    static const float SCALE_DEFAULT = 0.5f;
+    calculateParams();
 }
 
 void PSACryptocontext::TestEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,

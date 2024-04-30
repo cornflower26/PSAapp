@@ -7,8 +7,19 @@
 
 using namespace lbcrypto;
 
-SLAPScheme::SLAPScheme() : PSAScheme() {
+SLAPScheme::SLAPScheme(Scheme scheme, double scale) : PSAScheme(scheme, scale) {
     // Sample Program: Step 1 - Set CryptoContext
+    CCParams<CryptoContextBGVRNS> parameters;
+    parameters.SetMultiplicativeDepth(2);
+    parameters.SetPlaintextModulus(plaintextParams.GetModulus().ConvertToLongDouble());
+
+    CryptoContext<DCRTPoly> cryptoContext = GenCryptoContext(parameters);
+    // Enable features that you wish to use
+    cryptoContext->Enable(PKE);
+    cryptoContext->Enable(KEYSWITCH);
+    cryptoContext->Enable(LEVELEDSHE);
+    cryptoParams = *std::dynamic_pointer_cast<CryptoParametersBFVRNS>(cryptoContext->GetCryptoParameters()).get();
+
 
 
     CKKSparameters.SetMultiplicativeDepth(1);
@@ -19,7 +30,7 @@ SLAPScheme::SLAPScheme() : PSAScheme() {
 }
 
 void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext) {
-
+    //const auto cryptoParams   = std::dynamic_pointer_cast<CryptoParametersBFVRNS>(ciphertext.GetCryptoParameters());
     DCRTPoly retValue = ciphertext.CloneEmpty();
 
     // converts to coefficient representation before rounding

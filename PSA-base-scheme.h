@@ -24,7 +24,7 @@ public:
     DiscreteLaplacianGenerator dl;
     uint64_t ts = 0;
 
-    PSAScheme();
+    PSAScheme(Scheme scheme, double scale);
 
     void SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& privateKeys, int numUsers, bool dummy = false);
 
