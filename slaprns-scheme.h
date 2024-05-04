@@ -17,10 +17,12 @@ private:
     CryptoParametersBFVRNS cryptoParams;
     CCParams<CryptoContextCKKSRNS> CKKSparameters;
     CryptoContext<DCRTPoly> CKKSContext;
-    uint64_t * delta_mod_q = NULL;
-    uint64_t * t_mod_q = NULL;
 
 public:
+    std::vector<BigInteger> delta_mod_q;
+    std::vector<BigInteger> t_mod_q;
+
+
     SLAPScheme(Scheme scheme, double scale);
 
     DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
@@ -43,7 +45,7 @@ public:
 
     void SwitchBasis(DCRTPoly & ciphertext);
 
-    DCRTPoly PolynomialEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
+    DCRTPoly PolynomialEncrypt(const std::vector<double> plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
                                bool do_noise, double & noise_time,
                                double & enc_time, const uint64_t e);
 

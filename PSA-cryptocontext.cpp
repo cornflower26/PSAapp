@@ -54,31 +54,65 @@ void PSACryptocontext::calculateParams() {
 
 void PSACryptocontext::genSlapScheme() {
 
+    auto q = aggregator.ciphertextParams.GetModulus();
+    N = aggregator.ciphertextParams.GetNumOfElements();
+            //ctext_parms->poly_mod_degree();
+
+    unsigned int plain_mod_size = plainBits < PLAIN_MOD_SIZE_MAX ? plainBits : PLAIN_MOD_SIZE_MAX;
+    unsigned int num_plain_moduli = plainBits / packingSize;
+    if(!num_plain_moduli){
+        num_plain_moduli += 1;
+    }
+
+    std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(plainBits)),
+            numTowers(plainBits),plainBits);
+    aggregator.plaintextParams = DCRTPoly(parms,COEFFICIENT);
+
+    BigInteger t = aggregator.plaintextParams.GetModulus();
+
+    //I feel like this is wrong
+    kPrime = aggregator.ciphertextParams.GetParams()->GetParams().size();
+    //mod_count
+
+    aggregator.delta_mod_q.reserve(kPrime);
+    aggregator.t_mod_q.reserve(kPrime);
+
+
+    BigInteger tmp;
+    BigInteger delta = q/t;
+    BigInteger tmp_mod;
+    //Fill delta mod q for later scaling
+    for(size_t i = 0; i < kPrime; i++){
+        BigInteger qi = aggregator.ciphertextParams.GetModulus();
+        BigInteger tmp_delta, tmp_t;
+        //TODO fix - don't write directly to array
+        tmp_mod = qi.GetBitAtIndex(i);
+        tmp = delta % tmp_mod;
+        tmp_delta = tmp;
+        aggregator.delta_mod_q[i] = tmp_delta;
+        tmp = t % tmp_mod;
+        tmp_t = tmp.GetBitAtIndex(i);
+        aggregator.t_mod_q[i] = tmp_t;
+    }
+
 }
 
 PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
-                                 unsigned int n, unsigned int i, unsigned int k,
-                                 unsigned int N, Scheme scheme1) : aggregator(scheme, scale) {
+                                 unsigned int n, unsigned int i, Scheme scheme1) : aggregator(scheme, scale) {
     plainBits = t;
     packingSize = w;
     numUsers = n;
     iters = i;
-    kPrime = k;
     scheme = scheme1;
-    this->N = N;
 
-    if (kPrime < 1){
-        throw std::invalid_argument("Invalid Argument kPrime Value");
-    }
 
     NativeInteger NumUsers = NativeInteger(numUsers);
     unsigned int log_num_users = NumUsers.GetLengthForBase(2);
-
-    packingSize = packingSize + log_num_users;
     //ceil of log or self make
     if(hammingWeight(numUsers) != 1){
         log_num_users++;
     }
+    packingSize = packingSize + log_num_users;
     unsigned int log_q;
     if(scheme == NS){
         log_q = (plainBits+1) + log_num_users + LOG2_3;
@@ -87,12 +121,14 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
         log_q = 2*(plainBits+1) + log_num_users + LOG2_3;
     }
 
-    //usint m = choose_parameters(log_q) << 1;
-    std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(ceil(log_q / log(2)))),1,log_q/plainBits);
+    std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(ceil(log_q / log(2)))),
+                                                                                     numTowers(log_q/plainBits),log_q/plainBits);
     aggregator.ciphertextParams = DCRTPoly(parms,COEFFICIENT);
 
-    static const float SCALE_DEFAULT = 0.5f;
     calculateParams();
+
+    genSlapScheme();
+
 }
 
 void PSACryptocontext::TestEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
@@ -133,8 +169,11 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     //auto params_pair = agg.parms_ptrs();
     //DCRTPoly input(params_pair.first);
     DCRTPoly input = aggregator.plaintextParams.CloneParametersOnly();
-    //unsigned int users = aggregator.user_count();
+    std::vector<double> inputvec;
+    //TODO Change
+    inputvec.reserve(kPrime);
 
+    //unsigned int users = aggregator.user_count();
     ciphertexts.reserve(numUsers);
     aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
     //Polynomial result(params_pair.first);
@@ -142,9 +181,10 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     for(unsigned int i = 0; i < numUsers; i++){
         //First, get some random vector for user input
         input.AddRandomNoise(input.GetModulus());
+        dl.addGaussianNoise(inputvec, scale);
         //Then, do the encryption
         double noise_time, enc_time;
-        result = aggregator.PolynomialEncrypt(input, privateKeys[i], publicKey,
+        result = aggregator.PolynomialEncrypt(inputvec, privateKeys[i], publicKey,
                               do_noise,
                               noise_time, enc_time,1);
         if(i < num_to_generate){
@@ -153,7 +193,9 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
 
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
+
         input.SetValuesToZero();
+        inputvec.clear();
     }
 
 }

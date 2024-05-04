@@ -12,6 +12,10 @@
 
 using namespace lbcrypto;
 
+//Lower than necessary - just in case
+static const unsigned int PLAIN_MOD_SIZE_MAX = 50;
+static const float SCALE_DEFAULT = 0.5f;
+
 class PSACryptocontext {
 private:
     Scheme scheme = NS;
@@ -39,8 +43,10 @@ public:
     std::vector<DCRTPoly> ciphertexts;
     std::vector<DCRTPoly> plaintexts;
 
+    DiscreteLaplacianGenerator dl;
+
     PSACryptocontext(unsigned int t, unsigned int w, unsigned int n,
-                    unsigned int i, unsigned int k, unsigned int N, Scheme scheme1);
+                    unsigned int i, Scheme scheme1);
 
     void calculateParams();
 

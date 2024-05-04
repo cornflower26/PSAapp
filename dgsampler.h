@@ -93,51 +93,21 @@ public:
         }
     }
 
+    int dg(const double scale){
+        std::random_device rd;
+        std::mt19937 rng(rd());
+        return sample_dgauss(scale, rng);
+    }
+
+    void addGaussianNoise(std::vector<double> &input, const double scale){
+        for (size_t i = 0; i < input.size(); i++){
+            input.at(i) += dg(scale);
+        }
+    }
+
+
     const static unsigned int CONV_ITERS = 1000;
     constexpr const static float ERROR = 1e-5;
-// https://stackoverflow.com/questions/5124743/algorithm-for-simplifying-decimal-to-fractions/42085412#42085412
-//Not horribly inefficient, but not the best either...best not to call this in a loop
-    int float_to_frac(float x, int & num, int & den, const float error = ERROR, const unsigned int iters=CONV_ITERS){
-        //Assume that argument is positive
-        int n = floor(x);
-        x -= n;
-        if(x < error){
-            num = n;
-            den = 1;
-            return 0;
-        }
-        else if(1-error < x){
-            num = n+1;
-            den = 1;
-            return 0;
-        }
-        int lower_n = 0;
-        int lower_d = 1;
-        int upper_n = 1;
-        int upper_d = 1;
-        int middle_n = 0;
-        int middle_d = 0;
-        for(unsigned int i = 0; i < iters; i++){
-            middle_n = lower_n + upper_n;
-            middle_d = lower_d + upper_d;
-            if(middle_d*(x+error) < middle_n){
-                upper_n = middle_n;
-                upper_d = middle_d;
-            }
-            else if(middle_n < (x-error)*middle_d){
-                lower_n = middle_n;
-                lower_d = middle_d;
-            }
-            else{
-                num = (n*middle_d)+middle_n;
-                den = middle_d;
-                return 0;
-            }
-        }
-        num = (n*middle_d)+middle_n;
-        den = middle_d;
-        return 1;
-    }
 
     //The actual function to sample from the discrete Laplacian distribution
     const static int BETA_SCALE = 1000;
@@ -162,6 +132,12 @@ public:
         //}
         output.SetValues(GenerateVector(input.GetNumOfElements(), scale, input.GetModulus()), COEFFICIENT);
         input += output;
+    }
+
+    void addRandomNoise(std::vector<double> &input, const double scale){
+        for (size_t i = 0; i < input.size(); i++){
+            input.at(i) += dl(scale);
+        }
     }
 
     //discretegaussiangenerator-impl.h

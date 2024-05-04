@@ -18,7 +18,7 @@
 
         unsigned int MAX_CTEXTS_DEFAULT = 20;
 
-        PSACryptocontext p = PSACryptocontext(plain_bits, packing_size, num_users, iters, k_prime,N, MS);
+        PSACryptocontext p = PSACryptocontext(plain_bits, packing_size, num_users, iters, MS);
         std::vector<double> noise_times;
         std::vector<double> enc_times;
 

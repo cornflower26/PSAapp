@@ -49,7 +49,7 @@ public:
                        unsigned int num_additions=0) {return DCRTPoly();};
 
 
-    DCRTPoly PolynomialEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
+    DCRTPoly PolynomialEncrypt(const std::vector<double> plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
                                         bool do_noise, double & noise_time,
                                         double & enc_time, const uint64_t e){ return DCRTPoly();};
 

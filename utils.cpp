@@ -81,4 +81,22 @@ static size_t choose_parameters(unsigned int required_q) {
         return n;
     }
 
+    static size_t numTowers(unsigned int pbits){
+    if (pbits < 64){
+        return 1;
+    }
+    else if (pbits < 128){
+        return 2;
+    }
+    else if (pbits < 192){
+        return 3;
+    }
+    else if (pbits < 256){
+        return 4;
+    }
+    else {
+        return 0;
+    }
+}
+
 #endif
