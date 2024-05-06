@@ -222,14 +222,14 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(std::vector<DCRTPoly> cipherte
                                                  ret.GetParams(), CKKSContext->GetEncodingParams());
 
     auto decryptedCKKS = std::dynamic_pointer_cast<CKKSPackedEncoding>(decrypted);
-    //decryptedCKKS->SetNoiseScaleDeg(ret.GetNoiseScaleDeg());
-    //decryptedCKKS->SetLevel(ret.GetLevel());
-    //decryptedCKKS->SetScalingFactor(scale);
-    //decryptedCKKS->SetSlots(ret.GetSlots());
+    decryptedCKKS->SetNoiseScaleDeg(2); //2
+    decryptedCKKS->SetLevel(1); // 1
+    decryptedCKKS->SetScalingFactor(40); // 40
+    decryptedCKKS->SetSlots(ret.GetNumOfElements()); //which is the N/2
 
     const auto cryptoParamsCKKS = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(CKKSContext->GetCryptoParameters());
 
-    decryptedCKKS->Decode(1, scale,
+    decryptedCKKS->Decode(1, 40,
                           cryptoParamsCKKS->GetScalingTechnique(), cryptoParamsCKKS->GetExecutionMode());
 
     //CKKSPackedEncoding float_result = CKKSPackedEncoding(cvec,0);
