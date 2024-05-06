@@ -26,13 +26,15 @@
 
         p.TestDecryption();
 
+        PSACryptocontext pp = PSACryptocontext(plain_bits, packing_size, num_users, iters, MS);
+
         std::vector<double> poly_noise_times;
         std::vector<double> poly_enc_times;
 
-        p.TestPolynomialEncryption(1, MAX_CTEXTS_DEFAULT, poly_noise_times, poly_enc_times);
+        pp.TestPolynomialEncryption(1, MAX_CTEXTS_DEFAULT, poly_noise_times, poly_enc_times);
 
 
-        p.TestPolynomialDecryption();
+        pp.TestPolynomialDecryption();
 
         return 0;
     }

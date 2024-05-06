@@ -23,14 +23,14 @@ void PSACryptocontext::calculateParams() {
 
     scale = del_interval / epsilon;
     gamma = log(1/delta);
-    gamma /= N;
+    gamma /= numUsers;
 
 
     //Directly from the paper
     if(b == 0.0f){
         static const unsigned int B_SCALE = 10;
         b = (long double) 1/gamma;
-        b /= N;
+        b /= numUsers;
         long double tmp = log(1/delta);
         //b *= tmp;
         unsigned int b_int = B_SCALE*b;
@@ -40,15 +40,15 @@ void PSACryptocontext::calculateParams() {
     }
 
     a = 1/gamma;
-    if (isfinite(a)) throw std::invalid_argument("Infinite a");
+    if (!isfinite(a)) throw std::invalid_argument("Infinite a");
     a *= log(1/delta);
-    if (isfinite(a)) throw std::invalid_argument("Infinite a");
+    if (!isfinite(a)) throw std::invalid_argument("Infinite a");
     a *= log(2/b);
-    if (isfinite(a)) throw std::invalid_argument("Infinite a");
+    if (!isfinite(a)) throw std::invalid_argument("Infinite a");
     a = sqrt(a);
-    if (isfinite(a)) throw std::invalid_argument("Infinite a");
+    if (!isfinite(a)) throw std::invalid_argument("Infinite a");
     a *= (4*del_interval)/(long double)epsilon;
-    if (isfinite(a)) throw std::invalid_argument("Infinite a");
+    if (!isfinite(a)) throw std::invalid_argument("Infinite a");
     return;
 }
 
@@ -80,18 +80,18 @@ void PSACryptocontext::genSlapScheme() {
 
     BigInteger tmp;
     BigInteger delta = q/t;
-    BigInteger tmp_mod;
+    ///BigInteger tmp_mod;
     //Fill delta mod q for later scaling
     for(size_t i = 0; i < kPrime; i++){
-        BigInteger qi = aggregator.ciphertextParams.GetModulus();
+        BigInteger qi = aggregator.ciphertextParams.GetElementAtIndex(i).GetModulus();
         BigInteger tmp_delta, tmp_t;
         //TODO fix - don't write directly to array
-        tmp_mod = qi.GetBitAtIndex(i);
-        tmp = delta % tmp_mod;
+        //tmp_mod = qi.ConvertToLongDouble();
+        tmp = delta % qi;
         tmp_delta = tmp;
         aggregator.delta_mod_q[i] = tmp_delta;
-        tmp = t % tmp_mod;
-        tmp_t = tmp.GetBitAtIndex(i);
+        tmp = t % qi;
+        tmp_t = tmp;
         aggregator.t_mod_q[i] = tmp_t;
     }
 
@@ -124,10 +124,10 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
     std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(ceil(log_q / log(2)))),
                                                                                      numTowers(log_q/plainBits),log_q/plainBits);
     aggregator.ciphertextParams = DCRTPoly(parms,COEFFICIENT);
-
+    genSlapScheme();
     calculateParams();
 
-    genSlapScheme();
+    aggregator.Init();
 
 }
 
@@ -144,7 +144,8 @@ void PSACryptocontext::TestEncryption(const bool do_noise, const unsigned int nu
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
     for(unsigned int i = 0; i < numUsers; i++){
         //First, get some random vector for user input
-        input.AddRandomNoise(input.GetModulus());
+        dl.addRandomNoise(input, scale, UNIFORM);
+        //input.AddRandomNoise(input.GetModulus());
         //Then, do the encryption
         double noise_time, enc_time;
         result = aggregator.Encrypt(input, privateKeys[i], publicKey,
@@ -171,7 +172,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     DCRTPoly input = aggregator.plaintextParams.CloneParametersOnly();
     std::vector<double> inputvec;
     //TODO Change
-    inputvec.reserve(kPrime);
+    inputvec.reserve(input.GetNumOfElements());
 
     //unsigned int users = aggregator.user_count();
     ciphertexts.reserve(numUsers);
@@ -180,8 +181,8 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
     for(unsigned int i = 0; i < numUsers; i++){
         //First, get some random vector for user input
-        input.AddRandomNoise(input.GetModulus());
-        dl.addGaussianNoise(inputvec, scale);
+        dl.addRandomNoise(input, scale, UNIFORM);
+        dl.addRandomNoise(inputvec, scale, UNIFORM);
         //Then, do the encryption
         double noise_time, enc_time;
         result = aggregator.PolynomialEncrypt(inputvec, privateKeys[i], publicKey,

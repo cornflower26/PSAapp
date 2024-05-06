@@ -8,8 +8,11 @@
 using namespace lbcrypto;
 
 SLAPScheme::SLAPScheme(Scheme scheme, double scale) : PSAScheme(scheme, scale) {
+}
+
+void SLAPScheme::Init(){
     // Sample Program: Step 1 - Set CryptoContext
-    CCParams<CryptoContextBGVRNS> parameters;
+    CCParams<CryptoContextBFVRNS> parameters;
     parameters.SetMultiplicativeDepth(2);
     parameters.SetPlaintextModulus(plaintextParams.GetModulus().ConvertToLongDouble());
 
@@ -18,7 +21,15 @@ SLAPScheme::SLAPScheme(Scheme scheme, double scale) : PSAScheme(scheme, scale) {
     cryptoContext->Enable(PKE);
     cryptoContext->Enable(KEYSWITCH);
     cryptoContext->Enable(LEVELEDSHE);
-    cryptoParams = *std::dynamic_pointer_cast<CryptoParametersBFVRNS>(cryptoContext->GetCryptoParameters()).get();
+    //auto crypto = cryptoContext->GetCryptoParameters();
+    auto crypto = cryptoContext->GetCryptoParameters();
+    auto cryptop = std::dynamic_pointer_cast<CryptoParametersBFVRNS>(crypto);
+    //auto cryptoParam = std::dynamic_pointer_cast<CryptoParametersBFVRNS>(cryptoContext->GetCryptoParameters());
+    //std::dynamic_pointer_cast<CryptoParametersBFVRNS>
+    int a = crypto->GetDigitSize();
+    int b = cryptop->GetDigitSize();
+    std::cout << a << b << std::endl;
+    //cryptoParams = cryptoParam;
 
 
 
@@ -58,7 +69,7 @@ DCRTPoly SLAPScheme::Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey
     DCRTPoly noisy_input = plaintext;
     if(do_noise){
         //noisy_input.add_dp_noise(this->dl, num, den);
-        dl.addRandomNoise(noisy_input,scale);
+        dl.addRandomNoise(noisy_input,scale, LAPLACIAN);
     }
     else{
         noise_time = 0.0;
@@ -76,13 +87,13 @@ DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateK
     DCRTPoly e = ciphertextParams.CloneParametersOnly();
     //TODO replace this - taken out for debugging
     //e.error(this->dl);
-    dl.addRandomNoise(e,scale);
+    dl.addRandomNoise(e,3, UNIFORM);
     //e.zero();
     e .Times(t_mod_q); //Per-modulus scaling
     //Add in the error to make a RLWE term
     ret += e;
     //Raise x to base q
-    DCRTPoly x_raised = ret.Clone();
+    DCRTPoly x_raised = plaintext.Clone();
     SwitchBasis(x_raised);
             //x.base_conv(ctext_parms, *t_to_q);
     //Now add the message
@@ -96,11 +107,11 @@ DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateK
     //Get the error, and scale it by the plaintext modulus
     DCRTPoly e = ciphertextParams.CloneParametersOnly();
     //e.error(this->dl);
-    dl.addRandomNoise(e,scale);
+    dl.addRandomNoise(e,3, UNIFORM);
     //Add in the error to make a RLWE term
     ret += e;
     //Raise x to base q
-    DCRTPoly x_raised = ret.Clone();
+    DCRTPoly x_raised = plaintext.Clone();
     SwitchBasis(x_raised);
     //DCRTPoly x_raised = ret.SwitchCRTBasis(something);
             //x.base_conv(ctext_parms, *t_to_q);
@@ -177,7 +188,8 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double> plaintext,
     std::vector<double> noisy_input = plaintext;
     if(do_noise){
         //noisy_input.add_dpg_noise(this->dl, num, den);
-        dl.addRandomNoise(noisy_input,scale);
+        //dl.addRandomNoise(noisy_input,scale,);
+        dl.addRandomNoise(noisy_input,scale, LAPLACIAN);
     }
     else{
         noise_time = 0.0;

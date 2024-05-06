@@ -17,6 +17,21 @@ public:
         return dist(rng);
     }
 
+    int u(const double scale){
+        std::random_device rd;
+        std::mt19937 rng(rd());
+        return sample_uniform(scale, rng);
+    }
+
+    void uniform(DCRTPoly input){
+        for(size_t j = 0; j < input.GetNumOfElements(); j++){
+            uint64_t qi = input.GetElementAtIndex(j).GetModulus().ConvertToInt();
+            auto element = input.GetElementAtIndex(j).GetValues();
+            input.GetElementAtIndex(j).Plus(u(qi));
+        }
+    }
+
+
 // Sample from a Bernoulli(p) distribution
     int sample_bernoulli(double p, std::mt19937 &rng) {
         std::bernoulli_distribution dist(p);
@@ -123,27 +138,35 @@ public:
         }
     }
 
-    void addRandomNoise(DCRTPoly &input, const double scale){
+    void addRandomNoise(DCRTPoly &input, const double scale, const Distribution dist){
         DCRTPoly output(input.GetParams());
         //std::vector<std::complex<double>> randomIntVector;
         //output.SetValuesToZero();
         //for (size_t i = 0; i < input.GetNumOfElements(); i++){
         //    randomIntVector.push_back(dl(scale));
         //}
-        output.SetValues(GenerateVector(input.GetNumOfElements(), scale, input.GetModulus()), COEFFICIENT);
+        output.SetValues(GenerateVector(input.GetNumOfElements(), scale, input.GetModulus(), dist), COEFFICIENT);
         input += output;
     }
 
-    void addRandomNoise(std::vector<double> &input, const double scale){
+    void addRandomNoise(std::vector<double> &input, const double scale, const Distribution dist){
         for (size_t i = 0; i < input.size(); i++){
-            input.at(i) += dl(scale);
+            if (dist == LAPLACIAN){
+                input.at(i) += dl(scale);
+            }
+            else if (dist == GAUSS){
+                input.at(i) += dg(scale);
+            }
+            else if (dist == UNIFORM){
+                input.at(i) += u(scale);
+            }
         }
     }
 
     //discretegaussiangenerator-impl.h
     BigVector GenerateVector(const usint size, const double scale,
-                           const typename BigVector::Integer& modulus) {
-        auto result = GenerateIntVector(size, scale);
+                           const typename BigVector::Integer& modulus, const Distribution dist) {
+        auto result = GenerateIntVector(size, scale, dist);
         BigVector ans(size, modulus);
         for (usint i = 0; i < size; i++) {
             int32_t v = (result.get())[i];
@@ -155,10 +178,19 @@ public:
         return ans;
     }
 
-    std::shared_ptr<int64_t> GenerateIntVector(usint size, const double scale) {
+    std::shared_ptr<int64_t> GenerateIntVector(usint size, const double scale, const Distribution dist) {
         std::shared_ptr<int64_t> ans(new int64_t[size], std::default_delete<int64_t[]>());
         for (usint i = 0; i < size; ++i) {
-            int64_t val = dl(scale);
+            int64_t val;
+            if (dist == LAPLACIAN){
+                val = dl(scale);
+            }
+            else if (dist == GAUSS){
+                val = dg(scale);
+            }
+            else if (dist == UNIFORM){
+                val = u(scale);
+            }
             (ans.get())[i] = val;
         }
         return ans;

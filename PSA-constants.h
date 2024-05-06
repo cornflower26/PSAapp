@@ -7,11 +7,14 @@
 
 enum Scheme{NS, MS};
 
+enum Distribution{GAUSS, LAPLACIAN, UNIFORM};
+
 struct SLAPparams{
     unsigned int N, t, n, q, seed;
     Scheme sc;
     //May need some OpenFHE things here too
 };
+
 
 
 #endif  //OPENFHE_PSA_CONSTANTS_H

@@ -15,7 +15,8 @@ DCRTPoly PSAScheme::PublicKey(const uint64_t ts, bool dummy){
     //make a new noise vector and add it? direct access?
     //dl.refresh(ts);
     if(!dummy){
-        pk.AddRandomNoise(pk.GetModulus());
+        //pk.AddRandomNoise(pk.GetModulus());
+        dl.uniform(pk);
     }
     else{
         pk.SetValuesToZero();
@@ -37,7 +38,8 @@ void PSAScheme::SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& priva
         if(!dummy){
             //privateKeys[i].error(this->dl);
             //dl.addRandomNoise(privateKeys[i],scale);
-            privateKeys[i].AddRandomNoise(privateKeys[i].GetModulus());
+            //privateKeys[i].AddRandomNoise(privateKeys[i].GetModulus());
+            dl.addRandomNoise(privateKeys[i],3,UNIFORM);
         }
         else{
             privateKeys[i].SetValuesToZero();

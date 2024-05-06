@@ -25,6 +25,8 @@ public:
 
     SLAPScheme(Scheme scheme, double scale);
 
+    void Init();
+
     DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
                              const bool do_noise,
                              double & noise_time, double & enc_time) override;

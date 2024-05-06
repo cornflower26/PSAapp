@@ -19,9 +19,9 @@ static const float SCALE_DEFAULT = 0.5f;
 class PSACryptocontext {
 private:
     Scheme scheme = NS;
-    long double b;
-    long double gamma;
-    long double a;
+    long double b = 0.0f;
+    long double gamma = 0.0f;
+    long double a = 0.0f;
     long double delta = 0.1f;
     long double epsilon = 1.0f;
     BasicInteger plainBits;
