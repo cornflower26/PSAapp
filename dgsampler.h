@@ -139,14 +139,27 @@ public:
     }
 
     void addRandomNoise(DCRTPoly &input, const double scale, const Distribution dist){
-        DCRTPoly output(input.GetParams());
+
+        DCRTPoly res(input.GetParams(), input.GetFormat());
+        auto c{input.GetParams()->GetCyclotomicOrder()};
+        const auto& m{input.GetParams()->GetModulus()};
+        auto parm{std::make_shared<ILParamsImpl<BigInteger>>(c, m, 1)};
+        DCRTPolyImpl<BigVector>::PolyLargeType element(parm);
+        element.SetValues(GenerateVector(c/2,scale, m,dist), input.GetFormat());
+        input = element;
+
+        //input.Plus(GenerateVector(c/2,scale, m,dist));
+
+        //input.Plus(GenerateVector(input.GetNumOfElements(),c / 2, m,dist));
+
+        //DCRTPoly output(input.GetParams());
         //std::vector<std::complex<double>> randomIntVector;
         //output.SetValuesToZero();
         //for (size_t i = 0; i < input.GetNumOfElements(); i++){
         //    randomIntVector.push_back(dl(scale));
         //}
-        output.SetValues(GenerateVector(input.GetNumOfElements(), scale, input.GetModulus(), dist), COEFFICIENT);
-        input += output;
+        //output.SetValues(GenerateVector(input.GetNumOfElements(), scale, input.GetModulus(), dist), COEFFICIENT);
+        //input += output;
     }
 
     void addRandomNoise(std::vector<double> &input, const double scale, const Distribution dist){
