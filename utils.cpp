@@ -34,7 +34,7 @@ static DCRTPoly encoding_to_Polynomial(const Plaintext & vals, const DCRTPoly pa
     for(size_t i = 0; i < intermediate1.size(); i++){
         intermediate2 = (BigInteger(intermediate1[i]));
     }
-    ret.SetValues(intermediate2, COEFFICIENT);
+    ret.SetValues(intermediate2, EVALUATION);
     return ret;
 }
 
@@ -96,6 +96,37 @@ static size_t choose_parameters(unsigned int required_q) {
     }
     else {
         return 0;
+    }
+}
+
+template <typename P>
+inline static void encodeVec(P& poly, const PlaintextModulus& mod, int64_t lb, int64_t ub,
+                             const std::vector<int64_t>& value, SCHEME schemeID) {
+    if (ub > INT32_MAX || lb < INT32_MIN)
+        OPENFHE_THROW(config_error, "Cannot encode a coefficient larger than 32 bits");
+
+    poly.SetValuesToZero();
+    for (size_t i = 0; i < value.size() && i < poly.GetLength(); i++) {
+        if (value[i] <= lb || value[i] > ub)
+            OPENFHE_THROW(config_error, "Cannot encode integer " + std::to_string(value[i]) + " at position " +
+                                        std::to_string(i) + " because it is out of range of plaintext modulus " +
+                                        std::to_string(mod));
+
+        typename P::Integer entry{value[i]};
+
+        if (value[i] < 0) {
+            if (schemeID == SCHEME::BFVRNS_SCHEME) {
+                // TODO: Investigate why this doesn't work with q instead of t.
+                uint64_t adjustedVal{mod - static_cast<uint64_t>(llabs(value[i]))};
+                entry = typename P::Integer(adjustedVal);
+            }
+            else {
+                // It is more efficient to encode negative numbers using the ciphertext
+                // modulus no noise growth occurs
+                entry = poly.GetModulus() - typename P::Integer(static_cast<uint64_t>(llabs(value[i])));
+            }
+        }
+        poly[i] = entry;
     }
 }
 

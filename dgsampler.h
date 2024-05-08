@@ -5,6 +5,7 @@
 #include <random>
 #include <cmath>
 #include <core/lattice/lat-hal.h>
+#include "utils.cpp"
 
 using namespace lbcrypto;
 
@@ -23,12 +24,15 @@ public:
         return sample_uniform(scale, rng);
     }
 
-    void uniform(DCRTPoly input){
+    void uniform(DCRTPoly &input){
+    std::vector<int64_t> value;
         for(size_t j = 0; j < input.GetNumOfElements(); j++){
             uint64_t qi = input.GetElementAtIndex(j).GetModulus().ConvertToInt();
-            auto element = input.GetElementAtIndex(j).GetValues();
-            input.GetElementAtIndex(j).Plus(u(qi));
+            //auto element = input.GetElementAtIndex(j).GetValues();
+            value.push_back(u(qi));
         }
+        PlaintextModulus mod = input.GetModulus().ConvertToInt();
+        encodeVec(input, mod, 0, 32768,value, INVALID_SCHEME);
     }
 
 
@@ -140,13 +144,15 @@ public:
 
     void addRandomNoise(DCRTPoly &input, const double scale, const Distribution dist){
 
-        DCRTPoly res(input.GetParams(), input.GetFormat());
+        //DCRTPoly res(input.GetParams(), input.GetFormat());
+        //auto test = input.GetParams();
         auto c{input.GetParams()->GetCyclotomicOrder()};
         const auto& m{input.GetParams()->GetModulus()};
         auto parm{std::make_shared<ILParamsImpl<BigInteger>>(c, m, 1)};
         DCRTPolyImpl<BigVector>::PolyLargeType element(parm);
         element.SetValues(GenerateVector(c/2,scale, m,dist), input.GetFormat());
-        input = element;
+        DCRTPolyImpl<BigVector> test(element, input.GetParams());
+        input = DCRTPoly(test);
 
         //input.Plus(GenerateVector(c/2,scale, m,dist));
 

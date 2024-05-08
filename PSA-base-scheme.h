@@ -22,13 +22,12 @@ public:
     DCRTPoly plaintextParams;
     DiscreteGaussianGeneratorImpl<DCRTPoly> * agg_dgg;
     DiscreteLaplacianGenerator dl;
-    uint64_t ts = 0;
 
     PSAScheme(Scheme scheme, double scale);
 
     void SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& privateKeys, int numUsers, bool dummy = false);
 
-    DCRTPoly PublicKey(const uint64_t ts, bool dummy=false);
+    void PublicKey(DCRTPoly& pk, const uint64_t ts, bool dummy=false);
 
     virtual DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
                            const bool do_noise,

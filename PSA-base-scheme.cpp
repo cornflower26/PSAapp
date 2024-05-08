@@ -7,11 +7,11 @@
 PSAScheme::PSAScheme(Scheme scheme, double scale) {
     this->scheme = scheme;
     this->scale = scale;
-    ts = 0xDEADBEEF;
 }
 
-DCRTPoly PSAScheme::PublicKey(const uint64_t ts, bool dummy){
-    DCRTPoly pk = ciphertextParams.CloneParametersOnly();
+void PSAScheme::PublicKey(DCRTPoly& pk, const uint64_t ts, bool dummy){
+    pk = ciphertextParams.CloneParametersOnly();
+    //pk.SetValuesToZero();
     //make a new noise vector and add it? direct access?
     //dl.refresh(ts);
     if(!dummy){
@@ -21,7 +21,6 @@ DCRTPoly PSAScheme::PublicKey(const uint64_t ts, bool dummy){
     else{
         pk.SetValuesToZero();
     }
-    return pk;
 }
 
 void PSAScheme::SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& privateKeys, int num_users, bool dummy){
@@ -39,7 +38,9 @@ void PSAScheme::SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& priva
             //privateKeys[i].error(this->dl);
             //dl.addRandomNoise(privateKeys[i],scale);
             //privateKeys[i].AddRandomNoise(privateKeys[i].GetModulus());
+            //privateKeys[i] = DCRTPoly(aggregationKey.GetParams());
             dl.addRandomNoise(privateKeys[i],3,UNIFORM);
+            //dl.uniform(privateKeys[i]);
         }
         else{
             privateKeys[i].SetValuesToZero();

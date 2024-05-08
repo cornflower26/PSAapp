@@ -4,6 +4,8 @@
 
 #include "PSA-cryptocontext.h"
 
+#include "temp.cpp"
+
 
 
     int main() {
@@ -17,6 +19,8 @@
         unsigned int N = 1;
 
         unsigned int MAX_CTEXTS_DEFAULT = 20;
+
+        //temp();
 
         PSACryptocontext p = PSACryptocontext(plain_bits, packing_size, num_users, iters, MS);
         std::vector<double> noise_times;

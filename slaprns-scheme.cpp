@@ -45,7 +45,7 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext) {
     DCRTPoly retValue = ciphertext.CloneEmpty();
 
     // converts to coefficient representation before rounding
-    ciphertext.SetFormat(Format::COEFFICIENT);
+    ciphertext.SetFormat(Format::EVALUATION);
         // Performs the scaling by t/Q followed by rounding; the result is in the
         // CRT basis P
         ciphertext =
@@ -124,7 +124,8 @@ DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateK
 
 DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
                  double & dec_time, unsigned int num_additions){
-    DCRTPoly publicKey = PublicKey(ts);
+    DCRTPoly publicKey;
+    PublicKey(publicKey, ts);
     DCRTPoly ret = (scheme == NS) ?
             NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
     return ret;
@@ -249,7 +250,8 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(std::vector<DCRTPoly> cipherte
                                      double & dec_time, unsigned int num_additions){
     //high_resolution_clock::time_point start, end;
     //start = high_resolution_clock::now();
-    DCRTPoly pk = PublicKey(ts);
+    DCRTPoly pk;
+    PublicKey(pk,ts);
     //end = high_resolution_clock::now();
     //double tmp = duration_cast<chrono::nanoseconds>(end-start).count();
     std::vector<double> ret = PolynomialDecrypt(ciphertexts, aggregationKey, pk, dec_time, num_additions);

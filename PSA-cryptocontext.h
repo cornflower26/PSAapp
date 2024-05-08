@@ -32,6 +32,7 @@ private:
     unsigned int maxCtexts = 20;
     unsigned int kPrime;
     unsigned int N;
+    uint64_t ts = 0;
 
 public:
     SLAPScheme aggregator;
