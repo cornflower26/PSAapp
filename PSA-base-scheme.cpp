@@ -11,12 +11,13 @@ PSAScheme::PSAScheme(Scheme scheme, double scale) {
 
 void PSAScheme::PublicKey(DCRTPoly& pk, const uint64_t ts, bool dummy){
     pk = ciphertextParams.CloneParametersOnly();
-    //pk.SetValuesToZero();
+    pk.SetValuesToZero();
     //make a new noise vector and add it? direct access?
     //dl.refresh(ts);
+    //DCRTPoly jk = DCRTPoly(ciphertextParams.GetParams(),EVALUATION,true);
     if(!dummy){
-        //pk.AddRandomNoise(pk.GetModulus());
-        dl.uniform(pk);
+        dl.addRandomNoise(pk,pk.GetModulus().ConvertToInt(),UNIFORM);
+        //dl.uniform(jk);
     }
     else{
         pk.SetValuesToZero();

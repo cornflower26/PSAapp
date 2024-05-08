@@ -24,16 +24,18 @@ public:
         return sample_uniform(scale, rng);
     }
 
+    /**
     void uniform(DCRTPoly &input){
     std::vector<int64_t> value;
         for(size_t j = 0; j < input.GetNumOfElements(); j++){
             uint64_t qi = input.GetElementAtIndex(j).GetModulus().ConvertToInt();
+            input[j] += u(qi);
             //auto element = input.GetElementAtIndex(j).GetValues();
-            value.push_back(u(qi));
+            //value.push_back(u(qi));
         }
         PlaintextModulus mod = input.GetModulus().ConvertToInt();
-        encodeVec(input, mod, 0, 32768,value, INVALID_SCHEME);
-    }
+        //encodeVec(input, mod, 0, 32768,value, INVALID_SCHEME);
+    }**/
 
 
 // Sample from a Bernoulli(p) distribution

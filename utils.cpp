@@ -126,6 +126,8 @@ inline static void encodeVec(P& poly, const PlaintextModulus& mod, int64_t lb, i
                 entry = poly.GetModulus() - typename P::Integer(static_cast<uint64_t>(llabs(value[i])));
             }
         }
+        auto test = poly[i];
+        std::cout << poly[i] << std::endl;
         poly[i] = entry;
     }
 }
