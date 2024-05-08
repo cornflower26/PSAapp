@@ -1,10 +1,9 @@
-#include <iostream>
+//#include <iostream>
 //#include <core/lattice/lat-hal.h>
-#include <pke/openfhe.h>
+//#include <pke/openfhe.h>
 
 #include "PSA-cryptocontext.h"
-
-#include "temp.cpp"
+#include "openfhe.h"
 
 
 

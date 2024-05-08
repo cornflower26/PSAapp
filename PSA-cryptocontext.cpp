@@ -67,6 +67,7 @@ void PSACryptocontext::genSlapScheme() {
     std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(plainBits)),
             numTowers(plainBits),plainBits);
     aggregator.plaintextParams = DCRTPoly(parms,EVALUATION);
+    aggregator.plaintextParams.SetValuesToZero();
 
     BigInteger t = aggregator.plaintextParams.GetModulus();
 
@@ -98,7 +99,7 @@ void PSACryptocontext::genSlapScheme() {
 }
 
 PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
-                                 unsigned int n, unsigned int i, Scheme scheme1) : aggregator(scheme, scale) {
+                                 unsigned int n, unsigned int i, Scheme scheme1) : aggregator(scheme1, scale) {
     plainBits = t;
     packingSize = w;
     numUsers = n;
@@ -125,6 +126,7 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
     std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(ceil(log_q / log(2)))),
                                                                                      numTowers(log_q/plainBits),log_q/plainBits);
     aggregator.ciphertextParams = DCRTPoly(parms,EVALUATION);
+    aggregator.ciphertextParams.SetValuesToZero();
     genSlapScheme();
     calculateParams();
 
@@ -139,12 +141,15 @@ void PSACryptocontext::TestEncryption(const bool do_noise, const unsigned int nu
     enc_times.clear();
     //auto params_pair = aggregator.parms_ptrs();
     DCRTPoly input = aggregator.plaintextParams.CloneParametersOnly();
+    input.SetValuesToZero();
     aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
+    aggregationKey.SetValuesToZero();
     aggregator.PublicKey(publicKey, ts);
 
     ciphertexts.reserve(numUsers);
     aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
+    result.SetValuesToZero();
     for(unsigned int i = 0; i < numUsers; i++){
         //First, get some random vector for user input
         dl.addRandomNoise(input, scale, UNIFORM);
@@ -183,6 +188,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
     //Polynomial result(params_pair.first);
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
+    result.SetValuesToZero();
     for(unsigned int i = 0; i < numUsers; i++){
         //First, get some random vector for user input
         dl.addRandomNoise(input, scale, UNIFORM);
@@ -207,6 +213,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
 
 void PSACryptocontext::TestDecryption(){
     DCRTPoly res = aggregator.ciphertextParams.CloneParametersOnly();
+    res.SetValuesToZero();
     std::vector<double> dec_times;
     for(unsigned int i = 0; i < iters; i++){
         double dec_time;
