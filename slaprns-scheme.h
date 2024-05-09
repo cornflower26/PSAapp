@@ -34,11 +34,12 @@ public:
     DCRTPoly NSEncrypt(const DCRTPoly &plaintext, const DCRTPoly& privateKey, const DCRTPoly &publicKey);
     DCRTPoly MSEncrypt(const DCRTPoly& plaintext, const DCRTPoly& privateKey, const DCRTPoly& publicKey);
 
-    DCRTPoly Decrypt(const std::vector<DCRTPoly> &ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
+    DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
                              double & dec_time, unsigned int num_additions=0) override;
 
     DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
                      double & dec_time, unsigned int num_additions=0) override;
+
 
     DCRTPoly NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly &publicKey,
                        unsigned int num_additions=0);

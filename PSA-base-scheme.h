@@ -28,17 +28,18 @@ public:
 
     void PublicKey(DCRTPoly& pk, const uint64_t ts, bool dummy=false);
 
-    virtual DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
-                           const bool do_noise,
-                           double & noise_time, double & enc_time) = 0;
+    virtual DCRTPoly Encrypt(const DCRTPoly& plaintext, const DCRTPoly &privateKey, const DCRTPoly &publicKey,
+                             const bool do_noise,
+                             double & noise_time, double & enc_time) = 0;
 
      DCRTPoly NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey) {return DCRTPoly();};
      DCRTPoly MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey) {return DCRTPoly();};
 
-    virtual DCRTPoly Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
-                           double & dec_time, unsigned int num_additions=0) = 0;
+    virtual DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
+                    double & dec_time, unsigned int num_additions=0) = 0;
 
-    virtual DCRTPoly Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
+
+    virtual DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
                              double & dec_time, unsigned int num_additions=0) = 0;
 
     DCRTPoly NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,

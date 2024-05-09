@@ -151,8 +151,8 @@ DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly &plaintext, const DCRTPoly& privat
     return ret;
 }
 
-DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly> &ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
-                 double & dec_time, unsigned int num_additions){
+DCRTPoly SLAPScheme::Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
+                             double & dec_time, unsigned int num_additions){
     auto begin = std::chrono::steady_clock::now();
     DCRTPoly publicKey;
     PublicKey(publicKey, ts);
@@ -168,8 +168,8 @@ DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly> &ciphertexts, const DCRTPoly&
     return ret;
 }
 
-DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly>& ciphertexts, const DCRTPoly& aggregationKey, const DCRTPoly& publicKey,
-                 double & dec_time, unsigned int num_additions){
+DCRTPoly SLAPScheme::Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
+                             double & dec_time, unsigned int num_additions){
     auto begin = std::chrono::steady_clock::now();
     DCRTPoly ret = (scheme == NS) ?
                    NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
@@ -230,8 +230,8 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double>& plaintext,
     if(do_noise){
         //noisy_input.add_dpg_noise(this->dl, num, den);
         //dl.addRandomNoise(noisy_input,scale,);
-        auto begin = std::chrono::steady_clock::now();
         ppow(noisy_input,e);
+        auto begin = std::chrono::steady_clock::now();
         dl.addRandomNoise(noisy_input,scale, LAPLACIAN);
         auto end = std::chrono::steady_clock::now();
         noise_time = std::chrono::duration_cast<time_typ>(end - begin).count();
@@ -298,8 +298,8 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& c
 
 }
 
-std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly> ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
-                                     double & dec_time, unsigned int num_additions){
+std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly> &ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
+                                                  double & dec_time, unsigned int num_additions){
     //high_resolution_clock::time_point start, end;
     //start = high_resolution_clock::now();
     DCRTPoly pk;

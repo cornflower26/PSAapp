@@ -213,9 +213,9 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
         result = aggregator.PolynomialEncrypt(inputvec, privateKeys[i], publicKey,
                               do_noise,
                               noise_time, enc_time, 1);
-        if(i < num_to_generate){
+        //if(i < num_to_generate){
             ciphertexts.push_back(result); //Hope this copies it
-        }
+        //}
 
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
@@ -242,18 +242,24 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
     dec_times.reserve(iters);
 
     //Get some random inputs and keys
-    DiscreteGaussianSampler dl;
     //TODO check the scale argument to addRandomNoise
-    vector<DCRTPoly> ciphertexts(numUsers);
+    DCRTPoly reserve = aggregator.ciphertextParams.CloneParametersOnly();
+    reserve.SetValuesToZero();
+    std::vector<DCRTPoly> ciphertexts(numUsers,reserve);
+
     for(DCRTPoly & poly : ciphertexts){
         dl.addRandomNoise(poly, this->scale, UNIFORM);
     }
-    DCRTPoly aggregationKey;
+    DCRTPoly aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
+    aggregationKey.SetValuesToZero();
     dl.addRandomNoise(aggregationKey, this->scale, UNIFORM);
 
+    std::vector<double> result;
+
     for(unsigned int i = 0; i < iters; i++){
+        double dec_time;
         auto begin = std::chrono::steady_clock::now();
-        res = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, ts, dec_time, numUsers);
+        result = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, ts, dec_time, numUsers);
         auto end = std::chrono::steady_clock::now();
         //No clue what this was supposed to do.
         /*
@@ -265,7 +271,8 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
         else {mult_res = res;}
         */
         //os << res << '\n';
-        dec_times.push_back(std::chrono::duration_cast<time_typ>(end - begin).count());
+        dec_times.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count());
+
     }
     return;
 }
