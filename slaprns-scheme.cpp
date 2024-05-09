@@ -3,6 +3,7 @@
 //
 #include "slaprns-scheme.h"
 #include <math/dftransform.h>
+#include <omp.h>
 
 using namespace lbcrypto;
 using namespace std::chrono;
@@ -66,8 +67,14 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
         //std::cout << ciphertext.GetModulus().ConvertToLongDouble() << " is the ciphertext modulus" << std::endl;
         //std::cout << plaintext.GetModulus().ConvertToLongDouble() << " is the plaintext modulus" << std::endl;
 
-        auto index = plaintext.GetNumOfElements()-1;
-        ciphertext =
+    if(plaintext.GetNumOfElements() <= 0){
+        throw std::logic_error("Not enough elements to get a meaningful index");
+    }
+    size_t index = plaintext.GetNumOfElements()-1;
+#ifdef _OPENMP
+    omp_set_nested(false);
+#endif
+    ciphertext =
                 //SwitchCRTBasis1(plaintext.GetParams(), cryptoParams->GetRlHatInvModr(index),
                 //                 cryptoParams->GetRlHatInvModrPrecon(index), cryptoParams->GetRlHatModq(index),
                 //                 cryptoParams->GetalphaRlModq(index), cryptoParams->GetModqBarrettMu(),
@@ -80,7 +87,9 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
 
         //ciphertext.SetFormat(Format::EVALUATION);
     //retValue.SetElements(std::move(ciphertexts));
-
+#ifdef _OPENMP
+    omp_set_nested(true);
+#endif
 }
 
 DCRTPoly SLAPScheme::Encrypt(const DCRTPoly & plaintext, const DCRTPoly & privateKey, const DCRTPoly& publicKey,

@@ -81,12 +81,14 @@ void PSACryptocontext::genSlapScheme() {
     aggregator.t_mod_q.resize(kPrime);
 
 
-    BigInteger tmp;
-    BigInteger delta = q/t;
+    //BigInteger tmp;
+    BigInteger delta = q;
+    delta %= t;
     ///BigInteger tmp_mod;
     //Fill delta mod q for later scaling
     for(size_t i = 0; i < kPrime; i++){
         BigInteger qi = aggregator.ciphertextParams.GetElementAtIndex(i).GetModulus();
+        /**
         BigInteger tmp_delta, tmp_t;
         //TODO fix - don't write directly to array
         //tmp_mod = qi.ConvertToLongDouble();
@@ -96,6 +98,11 @@ void PSACryptocontext::genSlapScheme() {
         tmp = t % qi;
         tmp_t = tmp;
         aggregator.t_mod_q[i] = tmp_t;
+         **/
+        aggregator.delta_mod_q.at(i) = delta;
+        aggregator.delta_mod_q.at(i) %= qi;
+        aggregator.t_mod_q.at(i) = t;
+        aggregator.t_mod_q.at(i) %= qi;
     }
 
 }
