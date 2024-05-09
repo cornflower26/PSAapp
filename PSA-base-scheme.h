@@ -14,10 +14,9 @@
 using namespace lbcrypto;
 
 class PSAScheme {
-protected:
+public:
     Scheme scheme = NS;
     double scale;
-public:
     DCRTPoly ciphertextParams;
     DCRTPoly plaintextParams;
     DiscreteGaussianGeneratorImpl<DCRTPoly> * agg_dgg;
