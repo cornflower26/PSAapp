@@ -66,15 +66,15 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
 
         auto index = plaintext.GetNumOfElements()-1;
         ciphertext =
-                SwitchCRTBasis1(plaintext.GetParams(), cryptoParams->GetRlHatInvModr(index),
-                                 cryptoParams->GetRlHatInvModrPrecon(index), cryptoParams->GetRlHatModq(index),
-                                 cryptoParams->GetalphaRlModq(index), cryptoParams->GetModqBarrettMu(),
-                                 cryptoParams->GetrInv(),ciphertext);
+                //SwitchCRTBasis1(plaintext.GetParams(), cryptoParams->GetRlHatInvModr(index),
+                //                 cryptoParams->GetRlHatInvModrPrecon(index), cryptoParams->GetRlHatModq(index),
+                //                 cryptoParams->GetalphaRlModq(index), cryptoParams->GetModqBarrettMu(),
+                //                 cryptoParams->GetrInv(),ciphertext);
 
-                //ciphertext.SwitchCRTBasis(plaintext.GetParams(), cryptoParams->GetRlHatInvModr(),
-                //                             cryptoParams->GetRlHatInvModrPrecon(), cryptoParams->GetRlHatModq(),
-                //                             cryptoParams->GetalphaRlModq(), cryptoParams->GetModqBarrettMu(),
-                //                             cryptoParams->GetrInv());
+                ciphertext.SwitchCRTBasis(plaintext.GetParams(), cryptoParams->GetRlHatInvModr(index),
+                                             cryptoParams->GetRlHatInvModrPrecon(index), cryptoParams->GetRlHatModq(index),
+                                             cryptoParams->GetalphaRlModq(index), cryptoParams->GetModqBarrettMu(),
+                                             cryptoParams->GetrInv());
 
         //ciphertext.SetFormat(Format::EVALUATION);
     //retValue.SetElements(std::move(ciphertexts));
@@ -264,11 +264,11 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(std::vector<DCRTPoly> cipherte
 
     //const auto cryptoParamsCKKS = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(CKKSContext->GetCryptoParameters());
 
-    Decode(*decryptedCKKS.get(),1, 40,
-                          NORESCALE, EXEC_EVALUATION);
+    //Decode(*decryptedCKKS.get(),1, 40,
+    //                      NORESCALE, EXEC_EVALUATION);
 
     //CKKSPackedEncoding float_result = CKKSPackedEncoding(cvec,0);
-    //float_result.Decode();
+    decryptedCKKS->Decode(1,40,NORESCALE,EXEC_EVALUATION);
     std::vector<double> intermediate1 = decryptedCKKS->GetRealPackedValue();
 
 
