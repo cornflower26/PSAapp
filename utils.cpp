@@ -483,5 +483,48 @@ void static Test(DCRTPoly & ciphertext,
     *plaintext = ciphertext.GetElementAtIndex(0);
 }
 
+/**
+ * Generate an ILDCRTParams with a given number of parms, with cyphertext moduli
+ * of at least a given size
+ * @param m - order
+ * @param numOfTower - # of polynomials
+ * @param pbits - number of bits in the prime, to start with
+ * @return
+ */
+template <typename I>
+static std::shared_ptr<ILDCRTParams<I>> GenerateDCRTParams(usint m, usint numOfTower, usint pbits) {
+    OPENFHE_DEBUG_FLAG(false);
+    OPENFHE_DEBUG("in GenerateDCRTParams");
+    OPENFHE_DEBUGEXP(m);
+    OPENFHE_DEBUGEXP(numOfTower);
+    OPENFHE_DEBUGEXP(pbits);
+    if (numOfTower == 0) {
+        OPENFHE_THROW(math_error, "Can't make parms with numOfTower == 0");
+    }
+
+    std::vector<NativeInteger> moduli(numOfTower);
+    std::vector<NativeInteger> rootsOfUnity(numOfTower);
+
+    NativeInteger q = FirstPrime<NativeInteger>(pbits, m);
+    I modulus(1);
+
+    usint j = 0;
+    OPENFHE_DEBUGEXP(q);
+
+    for (;;) {
+        moduli[j]       = q;
+        rootsOfUnity[j] = RootOfUnity(m, q);
+        modulus         = modulus * I(q.ConvertToInt());
+        OPENFHE_DEBUG("j " << j << " modulus " << q << " rou " << rootsOfUnity[j]);
+        if (++j == numOfTower)
+            break;
+
+        q = NextPrime(q, m);
+    }
+
+    auto params = std::make_shared<ILDCRTParams<I>>(m, moduli, rootsOfUnity);
+
+    return params;
+}
 
 #endif

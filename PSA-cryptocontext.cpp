@@ -2,7 +2,6 @@
 // Created by Antonia Januszewicz on 4/1/24.
 //
 #include "PSA-cryptocontext.h"
-#include <utils/parmfactory.h>
 #define LOG2_3 2
 
 using namespace lbcrypto;
