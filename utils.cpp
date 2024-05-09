@@ -110,7 +110,7 @@ static size_t choose_parameters(unsigned int required_q) {
         return 0;
     }
 }
-
+/**
 template <typename P>
 inline static void encodeVec(P& poly, const PlaintextModulus& mod, int64_t lb, int64_t ub,
                              const std::vector<int64_t>& value, SCHEME schemeID) {
@@ -480,7 +480,7 @@ bool static Decode(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double s
 
     return false;
 }
-
+**/
 void static Test(DCRTPoly & ciphertext,
         NativePoly* plaintext){
     *plaintext = ciphertext.GetElementAtIndex(0);

@@ -202,7 +202,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     //Polynomial result(params_pair.first);
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
     result.SetValuesToZero();
-    std::cout << "Scale is " << scale << std::endl;
+    //std::cout << "Scale is " << scale << std::endl;
     for(unsigned int i = 0; i < iters; i++){
         //First, get some random vector for user input
         //TODO: why are we using both? I don't see where "input" is being used, just "inputvec"
