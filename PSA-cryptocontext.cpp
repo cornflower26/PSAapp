@@ -200,10 +200,11 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     //Polynomial result(params_pair.first);
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
     result.SetValuesToZero();
+    std::cout << "Scale is " << scale << std::endl;
     for(unsigned int i = 0; i < numUsers; i++){
         //First, get some random vector for user input
         dl.addRandomNoise(input, scale, UNIFORM);
-        //dl.addRandomNoise(inputvec, scale, UNIFORM);
+        dl.addRandomNoise(inputvec, scale, UNIFORM);
         //Then, do the encryption
         double noise_time, enc_time;
         result = aggregator.PolynomialEncrypt(inputvec, privateKeys[i], publicKey,

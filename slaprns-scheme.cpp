@@ -219,6 +219,7 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double> plaintext,
     if(do_noise){
         //noisy_input.add_dpg_noise(this->dl, num, den);
         //dl.addRandomNoise(noisy_input,scale,);
+        ppow(noisy_input,e);
         dl.addRandomNoise(noisy_input,scale, LAPLACIAN);
     }
     else{

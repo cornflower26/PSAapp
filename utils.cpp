@@ -66,7 +66,11 @@ static void ppow(DCRTPoly & rop, const  DCRTPoly& a, const uint64_t exp) {
     }
 }
 
-
+static void ppow(std::vector<double> & noisy_input,const uint64_t e) {
+    for(size_t mod_idx = 0; mod_idx < noisy_input.size(); mod_idx++) {
+        noisy_input.at(mod_idx) = pow(noisy_input.at(mod_idx),e);
+    }
+}
 
 static size_t choose_parameters(unsigned int required_q) {
     size_t n;
