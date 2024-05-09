@@ -2,7 +2,7 @@
 // Created by Antonia Januszewicz on 4/1/24.
 //
 #include "PSA-cryptocontext.h"
-#include <utils/parmfactory.h>
+//#include <utils/parmfactory.h>
 #define LOG2_3 2
 
 using namespace lbcrypto;
@@ -38,15 +38,15 @@ void PSACryptocontext::calculateParams() {
     }
 
     a = 1/gamma;
-    if (!isfinite(a)) throw std::invalid_argument("Infinite a");
+    if (!std::isfinite(a)) throw std::invalid_argument("Infinite a");
     a *= log(1/delta);
-    if (!isfinite(a)) throw std::invalid_argument("Infinite a");
+    if (!std::isfinite(a)) throw std::invalid_argument("Infinite a");
     a *= log(2/b);
-    if (!isfinite(a)) throw std::invalid_argument("Infinite a");
+    if (!std::isfinite(a)) throw std::invalid_argument("Infinite a");
     a = sqrt(a);
-    if (!isfinite(a)) throw std::invalid_argument("Infinite a");
+    if (!std::isfinite(a)) throw std::invalid_argument("Infinite a");
     a *= (4*del_interval)/(long double)epsilon;
-    if (!isfinite(a)) throw std::invalid_argument("Infinite a");
+    if (!std::isfinite(a)) throw std::invalid_argument("Infinite a");
 
     aggregator.scale = scale;
     return;
