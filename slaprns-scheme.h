@@ -27,34 +27,34 @@ public:
 
     void Init();
 
-    DCRTPoly Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
+    DCRTPoly Encrypt(const DCRTPoly& plaintext, const DCRTPoly &privateKey, const DCRTPoly &publicKey,
                              const bool do_noise,
                              double & noise_time, double & enc_time) override;
 
-    DCRTPoly NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey);
-    DCRTPoly MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey);
+    DCRTPoly NSEncrypt(const DCRTPoly &plaintext, const DCRTPoly& privateKey, const DCRTPoly &publicKey);
+    DCRTPoly MSEncrypt(const DCRTPoly& plaintext, const DCRTPoly& privateKey, const DCRTPoly& publicKey);
 
-    DCRTPoly Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
+    DCRTPoly Decrypt(const std::vector<DCRTPoly> &ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
                              double & dec_time, unsigned int num_additions=0) override;
 
-    DCRTPoly Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+    DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
                      double & dec_time, unsigned int num_additions=0) override;
 
-    DCRTPoly NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+    DCRTPoly NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly &publicKey,
                        unsigned int num_additions=0);
-    DCRTPoly MSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+    DCRTPoly MSDecrypt(const std::vector<DCRTPoly> &ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly &publicKey,
                        unsigned int num_additions=0);
 
     void SwitchBasis(DCRTPoly & ciphertext);
 
-    DCRTPoly PolynomialEncrypt(const std::vector<double> plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
+    DCRTPoly PolynomialEncrypt(const std::vector<double>& plaintext, const DCRTPoly &privateKey, const DCRTPoly& publicKey,
                                bool do_noise, double & noise_time,
                                double & enc_time, const uint64_t e);
 
-    std::vector<double> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+    std::vector<double> PolynomialDecrypt(const std::vector<DCRTPoly> &ciphertexts, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
                                          double & dec_time, unsigned int num_additions=0);
 
-    std::vector<double> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
+    std::vector<double> PolynomialDecrypt(const std::vector<DCRTPoly> &ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
                                          double & dec_time, unsigned int num_additions=0);
 
 
