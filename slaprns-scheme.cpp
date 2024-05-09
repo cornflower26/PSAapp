@@ -1,11 +1,14 @@
 //
 // Created by Antonia Januszewicz on 3/27/24.
 //
-
+#include <chrono>
 #include <openfhe.h>
 #include "slaprns-scheme.h"
 
 using namespace lbcrypto;
+using namespace std::chrono;
+
+using time_typ = std::chrono::nanoseconds;
 
 SLAPScheme::SLAPScheme(Scheme scheme, double scale) : PSAScheme(scheme, scale) {
 }
@@ -81,7 +84,7 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
 
 }
 
-DCRTPoly SLAPScheme::Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
+DCRTPoly SLAPScheme::Encrypt(const DCRTPoly & plaintext, const DCRTPoly & privateKey, const DCRTPoly& publicKey,
         const bool do_noise,
         double & noise_time, double & enc_time){
     DCRTPoly noisy_input = plaintext;
@@ -104,7 +107,7 @@ DCRTPoly SLAPScheme::Encrypt(const DCRTPoly plaintext, const DCRTPoly privateKey
     return enc_result;
 }
 
-DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey){
+DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly &plaintext, const DCRTPoly &privateKey, const DCRTPoly& publicKey){
     //Multiply secret and public keys
     DCRTPoly ret = privateKey*publicKey;
     //Get the error, and scale it by the plaintext modulus
@@ -126,7 +129,7 @@ DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateK
     return ret;
 }
 
-DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey){
+DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly &plaintext, const DCRTPoly& privateKey, const DCRTPoly& publicKey){
     //Multiply secret and public keys
     DCRTPoly ret = privateKey*publicKey;
     //Get the error, and scale it by the plaintext modulus
@@ -148,26 +151,34 @@ DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateK
     return ret;
 }
 
-DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
+DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly> &ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
                  double & dec_time, unsigned int num_additions){
+    auto begin = std::chrono::steady_clock::now();
     DCRTPoly publicKey;
     PublicKey(publicKey, ts);
     DCRTPoly ret = (scheme == NS) ?
             NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
+    auto end = std::chrono::steady_clock::now();
+    dec_time = std::chrono::duration_cast<time_typ>(end - begin).count();
+
     std::cout << "Plaintext 2, M: " << ret.GetCyclotomicOrder();
     std::cout << ", Num of towers: " << ret.GetNumOfElements();
     std::cout << ", Log_t: " << ret.GetModulus() << std::endl;
+
     return ret;
 }
 
-DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+DCRTPoly SLAPScheme::Decrypt(std::vector<DCRTPoly>& ciphertexts, const DCRTPoly& aggregationKey, const DCRTPoly& publicKey,
                  double & dec_time, unsigned int num_additions){
+    auto begin = std::chrono::steady_clock::now();
     DCRTPoly ret = (scheme == NS) ?
                    NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
+    auto end = std::chrono::steady_clock::now();
+    dec_time = std::chrono::duration_cast<time_typ>(end - begin).count();
     return ret;
 }
 
-DCRTPoly SLAPScheme::NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+DCRTPoly SLAPScheme::NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DCRTPoly &aggregationKey, const DCRTPoly &publicKey,
                    unsigned int num_additions){
 
     DCRTPoly ret = aggregationKey*publicKey;
@@ -187,7 +198,7 @@ DCRTPoly SLAPScheme::NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCR
     return ret;
 }
 
-DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly& publicKey,
                    unsigned int num_additions){
     DCRTPoly ret = aggregationKey*publicKey;
     //Add all the ciphertexts (mod q)
@@ -209,8 +220,8 @@ DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCR
     return ret;
 }
 
-DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double> plaintext,
-                                       const DCRTPoly privateKey, const DCRTPoly publicKey,
+DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double>& plaintext,
+                                       const DCRTPoly& privateKey, const DCRTPoly& publicKey,
                            bool do_noise, double & noise_time, double & enc_time, const uint64_t e){
 
     //First, add differentially private noise to x
@@ -219,17 +230,18 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double> plaintext,
     if(do_noise){
         //noisy_input.add_dpg_noise(this->dl, num, den);
         //dl.addRandomNoise(noisy_input,scale,);
+        auto begin = std::chrono::steady_clock::now();
         ppow(noisy_input,e);
         dl.addRandomNoise(noisy_input,scale, LAPLACIAN);
+        auto end = std::chrono::steady_clock::now();
+        noise_time = std::chrono::duration_cast<time_typ>(end - begin).count();
     }
     else{
         noise_time = 0.0;
     }
     //Now get key and do encryption
     //Now get key and do encryption
-#if CHRONO_TIME
-    start = high_resolution_clock::now();
-#endif
+    auto begin = std::chrono::steady_clock::now();
     for (int i = 0; i < noisy_input.size(); i++){
         noisy_input.at(i) = log(noisy_input.at(i));
     }
@@ -240,13 +252,16 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double> plaintext,
 
     DCRTPoly enc_result = (scheme==NS)? NSEncrypt(poly_result, privateKey, publicKey) :
                           MSEncrypt(poly_result, privateKey, publicKey);
+    auto end = std::chrono::steady_clock::now();
+    enc_time = std::chrono::duration_cast<time_typ>(end - begin).count();
     return enc_result;
 
 };
 
-std::vector<double> SLAPScheme::PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
+std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly& aggregationKey, const DCRTPoly& publicKey,
                                      double & dec_time, unsigned int num_additions){
 
+    auto begin = std::chrono::steady_clock::now();
     DCRTPoly ret = (scheme == NS) ?
                    NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
 
@@ -272,16 +287,18 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(std::vector<DCRTPoly> cipherte
     decryptedCKKS->Decode(1,40,NORESCALE,EXEC_EVALUATION);
     std::vector<double> intermediate1 = decryptedCKKS->GetRealPackedValue();
 
-
     for (int i = 0; i < intermediate1.size(); i++){
         intermediate1.at(i) = exp(intermediate1.at(i));
     }
+
+    auto end = std::chrono::steady_clock::now();
+    dec_time = std::chrono::duration_cast<time_typ>(end - begin).count();
 
     return intermediate1;
 
 }
 
-std::vector<double> SLAPScheme::PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
+std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly> ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
                                      double & dec_time, unsigned int num_additions){
     //high_resolution_clock::time_point start, end;
     //start = high_resolution_clock::now();

@@ -179,7 +179,7 @@ void PSACryptocontext::TestEncryption(const bool do_noise, const unsigned int nu
 
 }
 
-void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
+void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsigned int iters, std::vector<double>& noise_times,
                               std::vector<double>& enc_times){
     ciphertexts.clear();
     noise_times.clear();
@@ -192,6 +192,8 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     aggregationKey.SetValuesToZero();
     aggregator.PublicKey(publicKey, ts);
     std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,1);
+    noise_times.reserve(iters);
+    enc_times.reserve(iters);
     //TODO Change
 
     //unsigned int users = aggregator.user_count();
@@ -201,26 +203,26 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
     result.SetValuesToZero();
     std::cout << "Scale is " << scale << std::endl;
-    for(unsigned int i = 0; i < numUsers; i++){
+    for(unsigned int i = 0; i < iters; i++){
         //First, get some random vector for user input
-        dl.addRandomNoise(input, scale, UNIFORM);
+        //TODO: why are we using both? I don't see where "input" is being used, just "inputvec"
+        //dl.addRandomNoise(input, scale, UNIFORM);
         dl.addRandomNoise(inputvec, scale, UNIFORM);
         //Then, do the encryption
         double noise_time, enc_time;
         result = aggregator.PolynomialEncrypt(inputvec, privateKeys[i], publicKey,
                               do_noise,
-                              noise_time, enc_time,1);
+                              noise_time, enc_time, 1);
         if(i < num_to_generate){
             ciphertexts.push_back(result); //Hope this copies it
         }
 
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
-
         input.SetValuesToZero();
         std::fill(inputvec.begin(),inputvec.end(),1);
     }
-
+    return;
 }
 
 void PSACryptocontext::TestDecryption(){
@@ -234,16 +236,36 @@ void PSACryptocontext::TestDecryption(){
     }
 }
 
-void PSACryptocontext::TestPolynomialDecryption(){
-    std::vector<double> res;
-    std::vector<double> mult_res;
-    std::vector<double> dec_times;
-    for(unsigned int i = 0; i < iters; i++){
-        double dec_time;
-        res = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, ts, dec_time, numUsers);
-        if (i == 0) for (int j = 0; j < mult_res.size(); j++) mult_res.at(j) *= res.at(j);
-        else mult_res = res;
-        //os << res << '\n';
-        dec_times.push_back(dec_time);
+//NB this is only testing one vector's decryption.
+void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::vector<double> & dec_times){
+    dec_times.clear();
+    dec_times.reserve(iters);
+
+    //Get some random inputs and keys
+    DiscreteGaussianSampler dl;
+    //TODO check the scale argument to addRandomNoise
+    vector<DCRTPoly> ciphertexts(numUsers);
+    for(DCRTPoly & poly : ciphertexts){
+        dl.addRandomNoise(poly, this->scale, UNIFORM);
     }
+    DCRTPoly aggregationKey;
+    dl.addRandomNoise(aggregationKey, this->scale, UNIFORM);
+
+    for(unsigned int i = 0; i < iters; i++){
+        auto begin = std::chrono::steady_clock::now();
+        res = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, ts, dec_time, numUsers);
+        auto end = std::chrono::steady_clock::now();
+        //No clue what this was supposed to do.
+        /*
+        if (i == 0){
+            for (int j = 0; j < mult_res.size(); j++){
+                mult_res.at(j) *= res.at(j);
+            } 
+        } 
+        else {mult_res = res;}
+        */
+        //os << res << '\n';
+        dec_times.push_back(std::chrono::duration_cast<time_typ>(end - begin).count());
+    }
+    return;
 }
