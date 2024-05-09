@@ -77,8 +77,8 @@ void PSACryptocontext::genSlapScheme() {
     kPrime = aggregator.ciphertextParams.GetParams()->GetParams().size();
     //mod_count
 
-    aggregator.delta_mod_q.reserve(kPrime);
-    aggregator.t_mod_q.reserve(kPrime);
+    aggregator.delta_mod_q.resize(kPrime);
+    aggregator.t_mod_q.resize(kPrime);
 
 
     BigInteger tmp;

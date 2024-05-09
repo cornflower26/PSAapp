@@ -2,6 +2,3 @@
 -- Configuring done (0.1s)
 -- Generating done (0.0s)
 -- Build files have been written to: /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local
-
-Problems were encountered while collecting compiler information:
-	clang: error: unsupported option '-fopenmp'
