@@ -5,7 +5,6 @@
 #ifndef OPENFHE_PSA_CRYPTOCONTEXT_H
 #define OPENFHE_PSA_CRYPTOCONTEXT_H
 
-#include "PSA-constants.h"
 #include "slaprns-scheme.h"
 
 using namespace lbcrypto;

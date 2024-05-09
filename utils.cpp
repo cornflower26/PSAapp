@@ -4,9 +4,7 @@
 #ifndef OPENFHE_UTILS_H
 #define OPENFHE_UTILS_H
 
-#include <encoding/plaintext.h>
-#include <utils/utilities-int.h>
-#include <math/dftransform.h>
+#include "PSA-base-scheme.h"
 
 using namespace lbcrypto;
 
