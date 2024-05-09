@@ -14,7 +14,7 @@ using namespace lbcrypto;
 
 class SLAPScheme : public PSAScheme {
 private:
-    CryptoParametersBFVRNS cryptoParams;
+    std::shared_ptr<CryptoParametersBFVRNS> cryptoParams;
     CCParams<CryptoContextCKKSRNS> CKKSparameters;
     CryptoContext<DCRTPoly> CKKSContext;
 
@@ -45,7 +45,7 @@ public:
     DCRTPoly MSDecrypt(const std::vector<DCRTPoly> &ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly &publicKey,
                        unsigned int num_additions=0);
 
-    void SwitchBasis(DCRTPoly & ciphertext);
+    void SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext);
 
     DCRTPoly PolynomialEncrypt(const std::vector<double>& plaintext, const DCRTPoly &privateKey, const DCRTPoly& publicKey,
                                bool do_noise, double & noise_time,

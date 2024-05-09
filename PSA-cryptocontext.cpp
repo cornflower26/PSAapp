@@ -49,13 +49,15 @@ void PSACryptocontext::calculateParams() {
     if (!isfinite(a)) throw std::invalid_argument("Infinite a");
     a *= (4*del_interval)/(long double)epsilon;
     if (!isfinite(a)) throw std::invalid_argument("Infinite a");
+
+    aggregator.scale = scale;
     return;
 }
 
 void PSACryptocontext::genSlapScheme() {
 
     auto q = aggregator.ciphertextParams.GetModulus();
-    N = aggregator.ciphertextParams.GetNumOfElements();
+    N = aggregator.ciphertextParams.GetCyclotomicOrder();
             //ctext_parms->poly_mod_degree();
 
     unsigned int plain_mod_size = plainBits < PLAIN_MOD_SIZE_MAX ? plainBits : PLAIN_MOD_SIZE_MAX;
@@ -64,9 +66,13 @@ void PSACryptocontext::genSlapScheme() {
         num_plain_moduli += 1;
     }
 
-    std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(plainBits)),
-            numTowers(plainBits),plainBits);
+    std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(aggregator.ciphertextParams.GetCyclotomicOrder(),
+            num_plain_moduli,plainBits);
     aggregator.plaintextParams = DCRTPoly(parms,EVALUATION);
+    aggregator.plaintextParams.SetValuesToZero();
+    std::cout << "Plaintext, M: " << aggregator.ciphertextParams.GetCyclotomicOrder();
+    std::cout << ", Num of towers: " << num_plain_moduli;
+    std::cout << ", Log_t: " << plainBits << std::endl;
 
     BigInteger t = aggregator.plaintextParams.GetModulus();
 
@@ -98,7 +104,7 @@ void PSACryptocontext::genSlapScheme() {
 }
 
 PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
-                                 unsigned int n, unsigned int i, Scheme scheme1) : aggregator(scheme, scale) {
+                                 unsigned int n, unsigned int i, Scheme scheme1) : aggregator(scheme1, scale) {
     plainBits = t;
     packingSize = w;
     numUsers = n;
@@ -122,9 +128,13 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
         log_q = 2*(plainBits+1) + log_num_users + LOG2_3;
     }
 
-    std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(StdLatticeParm::FindRingDim(HEStd_ternary, HEStd_128_classic, static_cast<usint>(ceil(log_q / log(2)))),
-                                                                                     numTowers(log_q/plainBits),log_q/plainBits);
+    std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(choose_parameters(log_q),
+                                                                                     numTowers(log_q),log_q);
     aggregator.ciphertextParams = DCRTPoly(parms,EVALUATION);
+    aggregator.ciphertextParams.SetValuesToZero();
+    std::cout << "Ciphertext, M: " << choose_parameters(log_q);
+    std::cout << ", Num of towers: " << numTowers(log_q);
+    std::cout << ", Log_q: " << log_q << std::endl;
     genSlapScheme();
     calculateParams();
 
@@ -139,18 +149,22 @@ void PSACryptocontext::TestEncryption(const bool do_noise, const unsigned int nu
     enc_times.clear();
     //auto params_pair = aggregator.parms_ptrs();
     DCRTPoly input = aggregator.plaintextParams.CloneParametersOnly();
+    input.SetValuesToZero();
     aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
+    aggregationKey.SetValuesToZero();
     aggregator.PublicKey(publicKey, ts);
 
     ciphertexts.reserve(numUsers);
     aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
+    result.SetValuesToZero();
     for(unsigned int i = 0; i < numUsers; i++){
         //First, get some random vector for user input
         dl.addRandomNoise(input, scale, UNIFORM);
         //input.AddRandomNoise(input.GetModulus());
         //Then, do the encryption
         double noise_time, enc_time;
+        plaintexts.push_back(input);
         result = aggregator.Encrypt(input, privateKeys[i], publicKey,
                          do_noise,
                          noise_time, enc_time);
@@ -173,17 +187,22 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     //auto params_pair = agg.parms_ptrs();
     //DCRTPoly input(params_pair.first);
     DCRTPoly input = aggregator.plaintextParams.CloneParametersOnly();
+    input.SetValuesToZero();
     aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
-    std::vector<double> inputvec;
-    inputvec.reserve(input.GetNumOfElements());
+    aggregationKey.SetValuesToZero();
+    aggregator.PublicKey(publicKey, ts);
+    std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,1);
     noise_times.reserve(iters);
     enc_times.reserve(iters);
+    //TODO Change
 
     //unsigned int users = aggregator.user_count();
     ciphertexts.reserve(numUsers);
     aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
     //Polynomial result(params_pair.first);
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
+    result.SetValuesToZero();
+    std::cout << "Scale is " << scale << std::endl;
     for(unsigned int i = 0; i < iters; i++){
         //First, get some random vector for user input
         //TODO: why are we using both? I don't see where "input" is being used, just "inputvec"
@@ -200,16 +219,15 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
 
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
-        /*
         input.SetValuesToZero();
-        inputvec.clear();
-        */
+        std::fill(inputvec.begin(),inputvec.end(),1);
     }
     return;
 }
 
 void PSACryptocontext::TestDecryption(){
     DCRTPoly res = aggregator.ciphertextParams.CloneParametersOnly();
+    res.SetValuesToZero();
     std::vector<double> dec_times;
     for(unsigned int i = 0; i < iters; i++){
         double dec_time;

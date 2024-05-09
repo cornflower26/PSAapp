@@ -30,6 +30,7 @@ void PSAScheme::SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& priva
     privateKeys.reserve(num_users);
 
     DCRTPoly result_template = aggregationKey.CloneParametersOnly();
+    result_template.SetValuesToZero();
     privateKeys.resize(num_users, result_template);
     for(unsigned int i = 0; i < num_users; i++){
 #ifdef DEBUG
