@@ -70,9 +70,9 @@ void PSACryptocontext::genSlapScheme() {
             num_plain_moduli,plainBits);
     aggregator.plaintextParams = DCRTPoly(parms,EVALUATION);
     aggregator.plaintextParams.SetValuesToZero();
-    std::cout << "Plaintext, M: " << aggregator.ciphertextParams.GetCyclotomicOrder();
-    std::cout << ", Num of towers: " << num_plain_moduli;
-    std::cout << ", Log_t: " << plainBits << std::endl;
+    //std::cout << "Plaintext, M: " << aggregator.ciphertextParams.GetCyclotomicOrder();
+    //std::cout << ", Num of towers: " << num_plain_moduli;
+    //std::cout << ", Log_t: " << plainBits << std::endl;
 
     BigInteger t = aggregator.plaintextParams.GetModulus();
 
