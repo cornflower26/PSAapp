@@ -7,8 +7,6 @@
 
 #include "PSA-constants.h"
 #include "slaprns-scheme.h"
-#include <core/lattice/lat-hal.h>
-#include <scheme/bfvrns/bfvrns-cryptoparameters.h>
 
 using namespace lbcrypto;
 

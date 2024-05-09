@@ -6,9 +6,6 @@
 #define OPENFHE_SLAPRNS_H
 
 #include "PSA-base-scheme.h"
-#include <core/lattice/lat-hal.h>
-#include <scheme/bfvrns/bfvrns-cryptoparameters.h>
-#include <scheme/ckksrns/cryptocontextparams-ckksrns.h>
 
 using namespace lbcrypto;
 

@@ -5,7 +5,6 @@
 #define OPENFHE_UTILS_H
 
 #include <encoding/plaintext.h>
-#include <scheme/cryptocontextparams-base.h>
 #include <utils/utilities-int.h>
 #include <math/dftransform.h>
 

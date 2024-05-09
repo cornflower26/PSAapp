@@ -237,6 +237,9 @@ HAVE_STD_REGEX:UNINITIALIZED=ON
 //No help, variable specified on the command line.
 HAVE_STEADY_CLOCK:UNINITIALIZED=ON
 
+//The directory containing a CMake configuration file for OpenFHE.
+OpenFHE_DIR:PATH=/usr/local/lib/OpenFHE
+
 //Value Computed by CMake
 SLAP_BINARY_DIR:STATIC=/Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local
 

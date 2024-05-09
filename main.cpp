@@ -2,9 +2,7 @@
 //#include <pke/openfhe.h>
 #include <iostream>
 #include <getopt.h>
-
 #include "PSA-cryptocontext.h"
-#include "openfhe.h"
 
 
 

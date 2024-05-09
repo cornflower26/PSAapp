@@ -1,8 +1,6 @@
 //
 // Created by Antonia Januszewicz on 3/27/24.
 //
-#include <chrono>
-#include <openfhe.h>
 #include "slaprns-scheme.h"
 
 using namespace lbcrypto;
