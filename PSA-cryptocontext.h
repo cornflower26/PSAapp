@@ -58,7 +58,7 @@ public:
     void TestPolynomialEncryption(const bool do_noise, const unsigned int iters, std::vector<double>& noise_times,
                         std::vector<double>& enc_times);
 
-    void TestPolynomialDecryption(const unsigned int iters, std::vector<double> & agg_times, std::vector<double> & dec_times);
+    void TestPolynomialDecryption(const unsigned int iters, std::vector<double> & dec_times);
 
 
 };

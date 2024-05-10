@@ -184,6 +184,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     ciphertexts.clear();
     noise_times.clear();
     enc_times.clear();
+    //std::cout <<  "Getting ciphertext num bits: " << std::numeric_limits<decltype(aggregator.ciphertextParams.GetModulus().ConvertToLongDouble())>::digits << std::endl;
     //auto params_pair = agg.parms_ptrs();
     //DCRTPoly input(params_pair.first);
     DCRTPoly input = aggregator.plaintextParams.CloneParametersOnly();
@@ -232,7 +233,7 @@ void PSACryptocontext::TestDecryption(){
     for(unsigned int i = 0; i < iters; i++){
         double dec_time;
         double agg_time;
-        res = aggregator.Decrypt(ciphertexts, aggregationKey, ts, agg_time, dec_time, numUsers);
+        res = aggregator.Decrypt(ciphertexts, aggregationKey, ts, dec_time, numUsers);
         dec_times.push_back(dec_time);
         agg_times.push_back(agg_time);
     }
@@ -240,11 +241,9 @@ void PSACryptocontext::TestDecryption(){
 
 //NB this is only testing one vector's decryption.
 
-void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::vector<double> & agg_times,  std::vector<double> & dec_times){
+void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::vector<double> & dec_times){
     dec_times.clear();
     dec_times.reserve(iters);
-    agg_times.clear();
-    agg_times.reserve(iters);
 
     //Get some random inputs and keys
     //TODO check the scale argument to addRandomNoise
@@ -265,7 +264,7 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
         double dec_time;
         double agg_time;
         auto begin = std::chrono::steady_clock::now();
-        result = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, ts, agg_time, dec_time, numUsers);
+        result = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, ts, dec_time, numUsers);
         auto end = std::chrono::steady_clock::now();
         //No clue what this was supposed to do.
         /*
@@ -278,7 +277,6 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
         */
         //os << res << '\n';
         dec_times.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count());
-        agg_times.push_back(agg_time);
 
     }
     return;

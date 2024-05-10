@@ -32,16 +32,16 @@ public:
     DCRTPoly MSEncrypt(const DCRTPoly& plaintext, const DCRTPoly& privateKey, const DCRTPoly& publicKey);
 
     DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
-                     double & agg_time, double & dec_time, unsigned int num_additions=0) override;
+                     double & dec_time, unsigned int num_additions=0) override;
 
     DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
-                     double & agg_time, double & dec_time, unsigned int num_additions=0) override;
+                      double & dec_time, unsigned int num_additions=0) override;
 
 
     DCRTPoly NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly &publicKey,
-                       double & agg_time, unsigned int num_additions=0);
+                       unsigned int num_additions=0);
     DCRTPoly MSDecrypt(const std::vector<DCRTPoly> &ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly &publicKey,
-                       double & agg_time, unsigned int num_additions=0);
+                       unsigned int num_additions=0);
 
     void SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext);
 
@@ -50,10 +50,10 @@ public:
                                double & enc_time, const uint64_t e);
 
     std::vector<double> PolynomialDecrypt(const std::vector<DCRTPoly> &ciphertexts, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
-                                          double & agg_time, double & dec_time, unsigned int num_additions=0);
+                                          double & dec_time, unsigned int num_additions=0);
 
     std::vector<double> PolynomialDecrypt(const std::vector<DCRTPoly> &ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
-                                          double & agg_time, double & dec_time, unsigned int num_additions=0);
+                                          double & dec_time, unsigned int num_additions=0);
 
 
     ~SLAPScheme() {};

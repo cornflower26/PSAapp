@@ -38,16 +38,16 @@ public:
      DCRTPoly MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey) {return DCRTPoly();};
 
     virtual DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
-                             double & agg_time, double & dec_time, unsigned int num_additions=0) = 0;
+                             double & dec_time, unsigned int num_additions=0) = 0;
 
 
     virtual DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
-                             double & agg_time, double & dec_time, unsigned int num_additions=0) = 0;
+                             double & dec_time, unsigned int num_additions=0) = 0;
 
     DCRTPoly NSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
-                       double & agg_time, unsigned int num_additions=0) {return DCRTPoly();};
+                       unsigned int num_additions=0) {return DCRTPoly();};
     DCRTPoly MSDecrypt(const std::vector<DCRTPoly> ciphertexts,const DCRTPoly aggregationKey, const DCRTPoly publicKey,
-                       double & agg_time, unsigned int num_additions=0) {return DCRTPoly();};
+                       unsigned int num_additions=0) {return DCRTPoly();};
 
 
     DCRTPoly PolynomialEncrypt(const std::vector<double> plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
@@ -55,10 +55,10 @@ public:
                                         double & enc_time, const uint64_t e){ return DCRTPoly();};
 
     std::vector<double> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
-                                 double & agg_time, double & dec_time, unsigned int num_additions=0){ return std::vector<double>();}
+                                 double & dec_time, unsigned int num_additions=0){ return std::vector<double>();}
 
     std::vector<double> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
-                                         double & agg_time, double & dec_time, unsigned int num_additions=0){ return std::vector<double>();}
+                                         double & dec_time, unsigned int num_additions=0){ return std::vector<double>();}
 
     virtual ~PSAScheme() {};
 };
