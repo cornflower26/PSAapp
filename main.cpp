@@ -84,7 +84,7 @@
         */
 
 
-        PSACryptocontext pp = PSACryptocontext(plain_bits, packing_size, MAX_CTEXTS_DEFAULT, iters, MS);
+        PSACryptocontext pp = PSACryptocontext(plain_bits, packing_size, num_users, iters, MS);
 
         std::vector<double> poly_noise_times;
         std::vector<double> poly_enc_times;

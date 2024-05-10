@@ -137,6 +137,7 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
                                                                                      numTowers(log_q),log_q);
     aggregator.ciphertextParams = DCRTPoly(parms,EVALUATION);
     aggregator.ciphertextParams.SetValuesToZero();
+
     //std::cout << "Ciphertext, M: " << choose_parameters(log_q);
     //std::cout << ", Num of towers: " << numTowers(log_q);
     //std::cout << ", Log_q: " << log_q << std::endl;
