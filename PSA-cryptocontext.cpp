@@ -88,17 +88,18 @@ void PSACryptocontext::genSlapScheme() {
     //Fill delta mod q for later scaling
     for(size_t i = 0; i < kPrime; i++){
         BigInteger qi = aggregator.ciphertextParams.GetElementAtIndex(i).GetModulus();
-        //BigInteger tmp_delta, tmp_t;
-        //TODO fix - don't write directly to array
-        //tmp_mod = qi.ConvertToLongDouble();
-        /*
+
+        /**
+        BigInteger tmp_delta, tmp_t;
+        TODO fix - don't write directly to array
+        tmp_mod = qi.ConvertToLongDouble();
         tmp = delta % qi;
         tmp_delta = tmp;
         aggregator.delta_mod_q[i] = tmp_delta;
         tmp = t % qi;
         tmp_t = tmp;
         aggregator.t_mod_q[i] = tmp_t;
-        */
+         **/
         aggregator.delta_mod_q.at(i) = delta;
         aggregator.delta_mod_q.at(i) %= qi;
         aggregator.t_mod_q.at(i) = t;
@@ -136,9 +137,9 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
                                                                                      numTowers(log_q),log_q);
     aggregator.ciphertextParams = DCRTPoly(parms,EVALUATION);
     aggregator.ciphertextParams.SetValuesToZero();
-    std::cout << "Ciphertext, M: " << choose_parameters(log_q);
-    std::cout << ", Num of towers: " << numTowers(log_q);
-    std::cout << ", Log_q: " << log_q << std::endl;
+    //std::cout << "Ciphertext, M: " << choose_parameters(log_q);
+    //std::cout << ", Num of towers: " << numTowers(log_q);
+    //std::cout << ", Log_q: " << log_q << std::endl;
     genSlapScheme();
     calculateParams();
 
@@ -227,20 +228,23 @@ void PSACryptocontext::TestDecryption(){
     DCRTPoly res = aggregator.ciphertextParams.CloneParametersOnly();
     res.SetValuesToZero();
     std::vector<double> dec_times;
+    std::vector<double> agg_times;
     for(unsigned int i = 0; i < iters; i++){
         double dec_time;
-        res = aggregator.Decrypt(ciphertexts, aggregationKey, ts, dec_time, numUsers);
+        double agg_time;
+        res = aggregator.Decrypt(ciphertexts, aggregationKey, ts, agg_time, dec_time, numUsers);
         dec_times.push_back(dec_time);
+        agg_times.push_back(agg_time);
     }
 }
 
 //NB this is only testing one vector's decryption.
-void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::vector<double> & dec_times, const unsigned int num_ciphertexts){
-    if(num_ciphertexts <= 1){
-        throw std::logic_error("Must have at least 2 ciphertexts");
-    }
+
+void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::vector<double> & agg_times,  std::vector<double> & dec_times){
     dec_times.clear();
     dec_times.reserve(iters);
+    agg_times.clear();
+    agg_times.reserve(iters);
 
     //Get some random inputs and keys
     //TODO check the scale argument to addRandomNoise
@@ -259,8 +263,9 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
 
     for(unsigned int i = 0; i < iters; i++){
         double dec_time;
+        double agg_time;
         auto begin = std::chrono::steady_clock::now();
-        result = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, ts, dec_time, numUsers);
+        result = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, ts, agg_time, dec_time, numUsers);
         auto end = std::chrono::steady_clock::now();
         //No clue what this was supposed to do.
         /*
@@ -273,6 +278,7 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
         */
         //os << res << '\n';
         dec_times.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count());
+        agg_times.push_back(agg_time);
 
     }
     return;
