@@ -275,7 +275,7 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
         else {mult_res = res;}
         */
         //os << res << '\n';
-        dec_times.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count());
+        dec_times.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count());
 
     }
     return;
