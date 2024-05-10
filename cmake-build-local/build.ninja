@@ -51,35 +51,35 @@ build cmake_object_order_depends_target_SLAP: phony || CMakeFiles/SLAP.dir
 
 build CMakeFiles/SLAP.dir/main.cpp.o: CXX_COMPILER__SLAP_unscanned_Debug /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/main.cpp || cmake_object_order_depends_target_SLAP
   DEP_FILE = CMakeFiles/SLAP.dir/main.cpp.o.d
-  FLAGS = -Xclang -fopenmp -L/usr/local/Cellar/libomp/18.1.2/lib -I/usr/local/Cellar/libomp/18.1.2/include -g -std=gnu++17 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -fcolor-diagnostics
+  FLAGS = -fopenmp -g -std=gnu++17 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -fcolor-diagnostics
   INCLUDES = -I/usr/local/include/openfhe -I/usr/local/include/openfhe/core -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/binfhe
   OBJECT_DIR = CMakeFiles/SLAP.dir
   OBJECT_FILE_DIR = CMakeFiles/SLAP.dir
 
 build CMakeFiles/SLAP.dir/slaprns-scheme.cpp.o: CXX_COMPILER__SLAP_unscanned_Debug /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/slaprns-scheme.cpp || cmake_object_order_depends_target_SLAP
   DEP_FILE = CMakeFiles/SLAP.dir/slaprns-scheme.cpp.o.d
-  FLAGS = -Xclang -fopenmp -L/usr/local/Cellar/libomp/18.1.2/lib -I/usr/local/Cellar/libomp/18.1.2/include -g -std=gnu++17 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -fcolor-diagnostics
+  FLAGS = -fopenmp -g -std=gnu++17 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -fcolor-diagnostics
   INCLUDES = -I/usr/local/include/openfhe -I/usr/local/include/openfhe/core -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/binfhe
   OBJECT_DIR = CMakeFiles/SLAP.dir
   OBJECT_FILE_DIR = CMakeFiles/SLAP.dir
 
 build CMakeFiles/SLAP.dir/PSA-cryptocontext.cpp.o: CXX_COMPILER__SLAP_unscanned_Debug /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/PSA-cryptocontext.cpp || cmake_object_order_depends_target_SLAP
   DEP_FILE = CMakeFiles/SLAP.dir/PSA-cryptocontext.cpp.o.d
-  FLAGS = -Xclang -fopenmp -L/usr/local/Cellar/libomp/18.1.2/lib -I/usr/local/Cellar/libomp/18.1.2/include -g -std=gnu++17 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -fcolor-diagnostics
+  FLAGS = -fopenmp -g -std=gnu++17 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -fcolor-diagnostics
   INCLUDES = -I/usr/local/include/openfhe -I/usr/local/include/openfhe/core -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/binfhe
   OBJECT_DIR = CMakeFiles/SLAP.dir
   OBJECT_FILE_DIR = CMakeFiles/SLAP.dir
 
 build CMakeFiles/SLAP.dir/PSA-base-scheme.cpp.o: CXX_COMPILER__SLAP_unscanned_Debug /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/PSA-base-scheme.cpp || cmake_object_order_depends_target_SLAP
   DEP_FILE = CMakeFiles/SLAP.dir/PSA-base-scheme.cpp.o.d
-  FLAGS = -Xclang -fopenmp -L/usr/local/Cellar/libomp/18.1.2/lib -I/usr/local/Cellar/libomp/18.1.2/include -g -std=gnu++17 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -fcolor-diagnostics
+  FLAGS = -fopenmp -g -std=gnu++17 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -fcolor-diagnostics
   INCLUDES = -I/usr/local/include/openfhe -I/usr/local/include/openfhe/core -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/binfhe
   OBJECT_DIR = CMakeFiles/SLAP.dir
   OBJECT_FILE_DIR = CMakeFiles/SLAP.dir
 
 build CMakeFiles/SLAP.dir/utils.cpp.o: CXX_COMPILER__SLAP_unscanned_Debug /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/utils.cpp || cmake_object_order_depends_target_SLAP
   DEP_FILE = CMakeFiles/SLAP.dir/utils.cpp.o.d
-  FLAGS = -Xclang -fopenmp -L/usr/local/Cellar/libomp/18.1.2/lib -I/usr/local/Cellar/libomp/18.1.2/include -g -std=gnu++17 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -fcolor-diagnostics
+  FLAGS = -fopenmp -g -std=gnu++17 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -fcolor-diagnostics
   INCLUDES = -I/usr/local/include/openfhe -I/usr/local/include/openfhe/core -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/binfhe
   OBJECT_DIR = CMakeFiles/SLAP.dir
   OBJECT_FILE_DIR = CMakeFiles/SLAP.dir
@@ -93,7 +93,7 @@ build CMakeFiles/SLAP.dir/utils.cpp.o: CXX_COMPILER__SLAP_unscanned_Debug /Users
 # Link the executable SLAP
 
 build SLAP: CXX_EXECUTABLE_LINKER__SLAP_Debug CMakeFiles/SLAP.dir/main.cpp.o CMakeFiles/SLAP.dir/slaprns-scheme.cpp.o CMakeFiles/SLAP.dir/PSA-cryptocontext.cpp.o CMakeFiles/SLAP.dir/PSA-base-scheme.cpp.o CMakeFiles/SLAP.dir/utils.cpp.o | /usr/local/lib/libOPENFHEpke.1.1.1.dylib /usr/local/lib/libOPENFHEbinfhe.1.1.1.dylib /usr/local/lib/libOPENFHEcore.1.1.1.dylib
-  FLAGS = -Xclang -fopenmp -L/usr/local/Cellar/libomp/18.1.2/lib -I/usr/local/Cellar/libomp/18.1.2/include -g -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk
+  FLAGS = -fopenmp -g -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk
   LINK_LIBRARIES = -Wl,-rpath,/usr/local/lib  /usr/local/lib/libOPENFHEpke.1.1.1.dylib  /usr/local/lib/libOPENFHEbinfhe.1.1.1.dylib  /usr/local/lib/libOPENFHEcore.1.1.1.dylib  -Xpreprocessor -fopenmp -lomp -Wno-unused-command-line-argument
   OBJECT_DIR = CMakeFiles/SLAP.dir
   POST_BUILD = :
