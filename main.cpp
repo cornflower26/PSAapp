@@ -93,8 +93,9 @@
         // pp.TestPolynomialEncryption(1, MAX_CTEXTS_DEFAULT, poly_noise_times, poly_enc_times);
 
         std::vector<double> decrypt_times;
+        std::vector<double> agg_times;
 
-        pp.TestPolynomialDecryption(iters, decrypt_times);
+        pp.TestPolynomialDecryption(iters, agg_times, decrypt_times);
 
 
         for(const double d : poly_noise_times){
@@ -102,6 +103,9 @@
         }
         for(const double d : poly_enc_times){
             std::cout << "poly_enc_times " << d << '\n';
+        }
+        for(const double d : agg_times){
+            std::cout << "poly_agg_times " << d << '\n';
         }
         for(const double d : decrypt_times){
             std::cout << "decrypt_times " << d << '\n';
