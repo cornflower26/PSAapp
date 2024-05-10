@@ -18,7 +18,7 @@ void SLAPScheme::Init(){
     CCParams<CryptoContextBFVRNS> parameters;
     parameters.SetPlaintextModulus(163603457);
     //536903681
-    std::cout << plaintextParams.GetModulus().ConvertToLongDouble() << std::endl;
+    //std::cout << plaintextParams.GetModulus().ConvertToLongDouble() << std::endl;
     parameters.SetMultiplicativeDepth(2);
     parameters.SetMaxRelinSkDeg(3);
 

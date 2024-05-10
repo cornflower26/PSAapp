@@ -7,7 +7,7 @@
 
 
     int main(int argc, char ** argv) {
-        std::cout << "Hello, World!" << std::endl;
+        //std::cout << "Hello, World!" << std::endl;
         //DCRTPoly a = DCRTPoly();
         unsigned int plain_bits = 5; //log t
         unsigned int packing_size = 16; //p
