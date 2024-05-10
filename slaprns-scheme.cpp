@@ -1,6 +1,11 @@
 //
 // Created by Antonia Januszewicz on 3/27/24.
 //
+
+#include <chrono>
+
+#include <omp.h>
+
 #include "slaprns-scheme.h"
 #include <math/dftransform.h>
 #include <omp.h>
@@ -67,14 +72,14 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
         //std::cout << ciphertext.GetModulus().ConvertToLongDouble() << " is the ciphertext modulus" << std::endl;
         //std::cout << plaintext.GetModulus().ConvertToLongDouble() << " is the plaintext modulus" << std::endl;
 
-    if(plaintext.GetNumOfElements() <= 0){
-        throw std::logic_error("Not enough elements to get a meaningful index");
-    }
-    size_t index = plaintext.GetNumOfElements()-1;
-#ifdef _OPENMP
-    omp_set_nested(false);
-#endif
-    ciphertext =
+        if(plaintext.GetNumOfElements() <= 0){
+            throw std::logic_error("Not enough elements to get a meaningful index");
+        }
+        size_t index = plaintext.GetNumOfElements()-1;
+#ifdef _OPENMP        
+        omp_set_nested(false);
+#endif        
+        ciphertext =
                 //SwitchCRTBasis1(plaintext.GetParams(), cryptoParams->GetRlHatInvModr(index),
                 //                 cryptoParams->GetRlHatInvModrPrecon(index), cryptoParams->GetRlHatModq(index),
                 //                 cryptoParams->GetalphaRlModq(index), cryptoParams->GetModqBarrettMu(),
@@ -84,6 +89,10 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
                                              cryptoParams->GetRlHatInvModrPrecon(index), cryptoParams->GetRlHatModq(index),
                                              cryptoParams->GetalphaRlModq(index), cryptoParams->GetModqBarrettMu(),
                                              cryptoParams->GetrInv());
+#ifdef _OPENMP        
+        omp_set_nested(true);
+#endif    
+
 
         //ciphertext.SetFormat(Format::EVALUATION);
     //retValue.SetElements(std::move(ciphertexts));
@@ -193,14 +202,9 @@ DCRTPoly SLAPScheme::NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
     if(!num_additions){
         num_additions = ciphertexts.size();
     }
-    size_t num_ctexts = ciphertexts.size();
-    size_t idx = 0;
-    auto begin = std::chrono::steady_clock::now();
-    for(unsigned int i = 0; i < num_additions; i++,idx++){
-        if(idx == num_ctexts){
-            idx = 0;
-        }
-        ret += ciphertexts[idx];
+
+    for(unsigned int i = 0; i < num_additions; i++){
+        ret += ciphertexts.at(i % ciphertexts.size());
     }
     auto end = std::chrono::steady_clock::now();
     //return ret.base_conv(plain_parms, *q_to_t);
@@ -209,6 +213,8 @@ DCRTPoly SLAPScheme::NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
     return ret;
 }
 
+
+//Set num_additions nonzero to control whether the size of ciphertexts is used to determine the number of iterations, or if a smaller array can be used
 DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly& publicKey,
                                double & agg_time, unsigned int num_additions){
     DCRTPoly ret = aggregationKey*publicKey;
@@ -216,14 +222,9 @@ DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
     if(!num_additions){
         num_additions = ciphertexts.size();
     }
-    size_t num_ctexts = ciphertexts.size();
-    size_t idx = 0;
-    auto begin = std::chrono::steady_clock::now();
-    for(unsigned int i = 0; i < num_additions; i++,idx++){
-        if(idx == num_ctexts){
-            idx = 0;
-        }
-        ret += ciphertexts[idx];
+
+    for(unsigned int i = 0; i < num_additions; i++){
+        ret += ciphertexts.at(i % ciphertexts.size());
     }
     auto end = std::chrono::steady_clock::now();
     agg_time = std::chrono::duration_cast<time_typ>(end - begin).count();
@@ -257,6 +258,10 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double>& plaintext,
     auto begin = std::chrono::steady_clock::now();
     for (int i = 0; i < noisy_input.size(); i++){
         noisy_input.at(i) = log(noisy_input.at(i));
+        //Ugly fix to prevent bad values from going into MakeCKKSPackedPlaintext
+        if(!std::isfinite(noisy_input.at(i)) || std::isnan(noisy_input.at(i))){
+            noisy_input.at(i) = 0;
+        }
     }
     DiscreteFourierTransform::Initialize(plaintextParams.GetRingDimension() * 2, plaintextParams.GetRingDimension() / 2);
     Plaintext ckks_result = CKKSContext->MakeCKKSPackedPlaintext(noisy_input, 2,1,plaintextParams.GetParams(),plaintextParams.GetRingDimension()/2);
