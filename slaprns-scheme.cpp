@@ -1,6 +1,11 @@
 //
 // Created by Antonia Januszewicz on 3/27/24.
 //
+
+#include <chrono>
+
+#include <omp.h>
+
 #include "slaprns-scheme.h"
 #include <math/dftransform.h>
 
@@ -65,8 +70,13 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
         // Converts from the CRT basis P to Q
         //std::cout << ciphertext.GetModulus().ConvertToLongDouble() << " is the ciphertext modulus" << std::endl;
         //std::cout << plaintext.GetModulus().ConvertToLongDouble() << " is the plaintext modulus" << std::endl;
-
-        auto index = plaintext.GetNumOfElements()-1;
+        if(plaintext.GetNumOfElements() <= 0){
+            throw std::logic_error("Not enough elements to get a meaningful index");
+        }
+        size_t index = plaintext.GetNumOfElements()-1;
+#ifdef _OPENMP        
+        omp_set_nested(false);
+#endif        
         ciphertext =
                 //SwitchCRTBasis1(plaintext.GetParams(), cryptoParams->GetRlHatInvModr(index),
                 //                 cryptoParams->GetRlHatInvModrPrecon(index), cryptoParams->GetRlHatModq(index),
@@ -77,6 +87,10 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
                                              cryptoParams->GetRlHatInvModrPrecon(index), cryptoParams->GetRlHatModq(index),
                                              cryptoParams->GetalphaRlModq(index), cryptoParams->GetModqBarrettMu(),
                                              cryptoParams->GetrInv());
+#ifdef _OPENMP        
+        omp_set_nested(true);
+#endif    
+
 
         //ciphertext.SetFormat(Format::EVALUATION);
     //retValue.SetElements(std::move(ciphertexts));
@@ -184,19 +198,16 @@ DCRTPoly SLAPScheme::NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
     if(!num_additions){
         num_additions = ciphertexts.size();
     }
-    size_t num_ctexts = ciphertexts.size();
-    size_t idx = 0;
-    for(unsigned int i = 0; i < num_additions; i++,idx++){
-        if(idx == num_ctexts){
-            idx = 0;
-        }
-        ret += ciphertexts[idx];
+    for(unsigned int i = 0; i < num_additions; i++){
+        ret += ciphertexts.at(i % ciphertexts.size());
     }
     //return ret.base_conv(plain_parms, *q_to_t);
     SwitchBasis(ret, plaintextParams);
     return ret;
 }
 
+
+//Set num_additions nonzero to control whether the size of ciphertexts is used to determine the number of iterations, or if a smaller array can be used
 DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly& publicKey,
                    unsigned int num_additions){
     DCRTPoly ret = aggregationKey*publicKey;
@@ -204,13 +215,8 @@ DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
     if(!num_additions){
         num_additions = ciphertexts.size();
     }
-    size_t num_ctexts = ciphertexts.size();
-    size_t idx = 0;
-    for(unsigned int i = 0; i < num_additions; i++,idx++){
-        if(idx == num_ctexts){
-            idx = 0;
-        }
-        ret += ciphertexts[idx];
+    for(unsigned int i = 0; i < num_additions; i++){
+        ret += ciphertexts.at(i % ciphertexts.size());
     }
     //Now scale and reduce
     //return ret.scale_down(plain_parms, *q_to_t);

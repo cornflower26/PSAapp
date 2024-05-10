@@ -50,15 +50,15 @@ public:
 
     void genSlapScheme();
 
-    void TestEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
-                        std::vector<double>& enc_times);
+    void TestEncryption(const unsigned int iters, const bool do_noise, std::vector<double>& noise_times,
+                    std::vector<double>& enc_times);
 
     void TestDecryption();
 
     void TestPolynomialEncryption(const bool do_noise, const unsigned int iters, std::vector<double>& noise_times,
                         std::vector<double>& enc_times);
 
-    void TestPolynomialDecryption(const unsigned int iters, std::vector<double> & dec_times);
+    void TestPolynomialDecryption(const unsigned int iters, std::vector<double> & dec_times, const unsigned int num_ciphertexts);
 
 
 };

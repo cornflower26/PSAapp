@@ -77,25 +77,32 @@ void PSACryptocontext::genSlapScheme() {
     kPrime = aggregator.ciphertextParams.GetParams()->GetParams().size();
     //mod_count
 
-    aggregator.delta_mod_q.reserve(kPrime);
-    aggregator.t_mod_q.reserve(kPrime);
+    aggregator.delta_mod_q.resize(kPrime);
+    aggregator.t_mod_q.resize(kPrime);
 
 
-    BigInteger tmp;
-    BigInteger delta = q/t;
+    //BigInteger tmp;
+    BigInteger delta = q;
+    delta %= t;
     ///BigInteger tmp_mod;
     //Fill delta mod q for later scaling
     for(size_t i = 0; i < kPrime; i++){
         BigInteger qi = aggregator.ciphertextParams.GetElementAtIndex(i).GetModulus();
-        BigInteger tmp_delta, tmp_t;
+        //BigInteger tmp_delta, tmp_t;
         //TODO fix - don't write directly to array
         //tmp_mod = qi.ConvertToLongDouble();
+        /*
         tmp = delta % qi;
         tmp_delta = tmp;
         aggregator.delta_mod_q[i] = tmp_delta;
         tmp = t % qi;
         tmp_t = tmp;
         aggregator.t_mod_q[i] = tmp_t;
+        */
+        aggregator.delta_mod_q.at(i) = delta;
+        aggregator.delta_mod_q.at(i) %= qi;
+        aggregator.t_mod_q.at(i) = t;
+        aggregator.t_mod_q.at(i) %= qi;
     }
 
 }
@@ -139,9 +146,9 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
 
 }
 
-void PSACryptocontext::TestEncryption(const bool do_noise, const unsigned int num_to_generate, std::vector<double>& noise_times,
+void PSACryptocontext::TestEncryption(const unsigned int iters, const bool do_noise, std::vector<double>& noise_times,
                     std::vector<double>& enc_times){
-    ciphertexts.clear();
+    //ciphertexts.clear();
     noise_times.clear();
     enc_times.clear();
     //auto params_pair = aggregator.parms_ptrs();
@@ -151,25 +158,20 @@ void PSACryptocontext::TestEncryption(const bool do_noise, const unsigned int nu
     aggregationKey.SetValuesToZero();
     aggregator.PublicKey(publicKey, ts);
 
-    ciphertexts.reserve(numUsers);
+    //ciphertexts.reserve(numUsers);
     aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
     result.SetValuesToZero();
-    for(unsigned int i = 0; i < numUsers; i++){
+    for(unsigned int i = 0; i < iters; i++){
         //First, get some random vector for user input
         dl.addRandomNoise(input, scale, UNIFORM);
         //input.AddRandomNoise(input.GetModulus());
         //Then, do the encryption
         double noise_time, enc_time;
-        plaintexts.push_back(input);
+        //plaintexts.push_back(input);
         result = aggregator.Encrypt(input, privateKeys[i], publicKey,
                          do_noise,
                          noise_time, enc_time);
-        if(i < num_to_generate){
-            //WARNING: don't push_back a temporary Polynomial. Just don't.
-            ciphertexts.push_back(result); //Hope this copies it
-        }
-
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
     }
@@ -194,7 +196,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     //TODO Change
 
     //unsigned int users = aggregator.user_count();
-    ciphertexts.reserve(numUsers);
+    //ciphertexts.reserve(numUsers);
     aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
     //Polynomial result(params_pair.first);
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
@@ -211,13 +213,12 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
                               do_noise,
                               noise_time, enc_time, 1);
         //if(i < num_to_generate){
-            ciphertexts.push_back(result); //Hope this copies it
+            //ciphertexts.push_back(result); //Hope this copies it
         //}
-
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
         input.SetValuesToZero();
-        std::fill(inputvec.begin(),inputvec.end(),1);
+        std::fill(inputvec.begin(),inputvec.end(),0);
     }
     return;
 }
@@ -234,7 +235,10 @@ void PSACryptocontext::TestDecryption(){
 }
 
 //NB this is only testing one vector's decryption.
-void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::vector<double> & dec_times){
+void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::vector<double> & dec_times, const unsigned int num_ciphertexts){
+    if(num_ciphertexts <= 1){
+        throw std::logic_error("Must have at least 2 ciphertexts");
+    }
     dec_times.clear();
     dec_times.reserve(iters);
 
@@ -242,12 +246,12 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
     //TODO check the scale argument to addRandomNoise
     DCRTPoly reserve = aggregator.ciphertextParams.CloneParametersOnly();
     reserve.SetValuesToZero();
-    std::vector<DCRTPoly> ciphertexts(numUsers,reserve);
+    this->ciphertexts = std::vector<DCRTPoly>(numUsers,reserve);
 
-    for(DCRTPoly & poly : ciphertexts){
+    for(DCRTPoly & poly : this->ciphertexts){
         dl.addRandomNoise(poly, this->scale, UNIFORM);
     }
-    DCRTPoly aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
+    this->aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
     aggregationKey.SetValuesToZero();
     dl.addRandomNoise(aggregationKey, this->scale, UNIFORM);
 

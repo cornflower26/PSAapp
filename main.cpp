@@ -84,7 +84,7 @@
         */
 
 
-        PSACryptocontext pp = PSACryptocontext(plain_bits, packing_size, num_users, iters, MS);
+        PSACryptocontext pp = PSACryptocontext(plain_bits, packing_size, MAX_CTEXTS_DEFAULT, iters, MS);
 
         std::vector<double> poly_noise_times;
         std::vector<double> poly_enc_times;
@@ -94,7 +94,7 @@
 
         std::vector<double> decrypt_times;
 
-        pp.TestPolynomialDecryption(iters, decrypt_times);
+        pp.TestPolynomialDecryption(iters, decrypt_times, MAX_CTEXTS_DEFAULT);
 
 
         for(const double d : poly_noise_times){
