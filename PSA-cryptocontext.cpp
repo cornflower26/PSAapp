@@ -198,6 +198,9 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     //unsigned int users = aggregator.user_count();
     //ciphertexts.reserve(numUsers);
     aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
+    if(privateKeys.empty()){
+        throw std::logic_error("Must have at least one private key! (Probably at least 2...)");
+    }
     //Polynomial result(params_pair.first);
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
     result.SetValuesToZero();
@@ -205,11 +208,9 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     for(unsigned int i = 0; i < iters; i++){
         //First, get some random vector for user input
         //TODO: why are we using both? I don't see where "input" is being used, just "inputvec"
-        //dl.addRandomNoise(input, scale, UNIFORM);
-        dl.addRandomNoise(inputvec, scale, UNIFORM);
         //Then, do the encryption
         double noise_time, enc_time;
-        result = aggregator.PolynomialEncrypt(inputvec, privateKeys[i], publicKey,
+        result = aggregator.PolynomialEncrypt(inputvec, privateKeys.at(i % privateKeys.size()), publicKey,
                               do_noise,
                               noise_time, enc_time, 1);
         //if(i < num_to_generate){
@@ -218,7 +219,6 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
         input.SetValuesToZero();
-        std::fill(inputvec.begin(),inputvec.end(),0);
     }
     return;
 }
@@ -272,7 +272,7 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
         else {mult_res = res;}
         */
         //os << res << '\n';
-        dec_times.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count());
+        dec_times.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count());
 
     }
     return;

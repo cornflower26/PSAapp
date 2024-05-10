@@ -249,6 +249,10 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double>& plaintext,
     auto begin = std::chrono::steady_clock::now();
     for (int i = 0; i < noisy_input.size(); i++){
         noisy_input.at(i) = log(noisy_input.at(i));
+        //Ugly fix to prevent bad values from going into MakeCKKSPackedPlaintext
+        if(!std::isfinite(noisy_input.at(i)) || std::isnan(noisy_input.at(i))){
+            noisy_input.at(i) = 0;
+        }
     }
     DiscreteFourierTransform::Initialize(plaintextParams.GetRingDimension() * 2, plaintextParams.GetRingDimension() / 2);
     Plaintext ckks_result = CKKSContext->MakeCKKSPackedPlaintext(noisy_input, 2,1,plaintextParams.GetParams(),plaintextParams.GetRingDimension()/2);
