@@ -21,10 +21,10 @@ SLAPScheme::SLAPScheme(Scheme scheme, double scale) : PSAScheme(scheme, scale) {
 void SLAPScheme::Init(){
     // Sample Program: Step 1 - Set CryptoContext
     CCParams<CryptoContextBFVRNS> parameters;
-    parameters.SetPlaintextModulus(163603457);
+    parameters.SetPlaintextModulus(plaintextParams.GetModulus().ConvertToInt());
     //536903681
     //std::cout << plaintextParams.GetModulus().ConvertToLongDouble() << std::endl;
-    parameters.SetMultiplicativeDepth(2);
+    parameters.SetMultiplicativeDepth(1);
     parameters.SetMaxRelinSkDeg(3);
 
     CryptoContext<DCRTPoly> cryptoContext = GenCryptoContext(parameters);
@@ -76,9 +76,9 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
             throw std::logic_error("Not enough elements to get a meaningful index");
         }
         size_t index = plaintext.GetNumOfElements()-1;
-#ifdef _OPENMP        
+#ifdef _OPENMP
         omp_set_nested(false);
-#endif        
+#endif
         ciphertext =
                 //SwitchCRTBasis1(plaintext.GetParams(), cryptoParams->GetRlHatInvModr(index),
                 //                 cryptoParams->GetRlHatInvModrPrecon(index), cryptoParams->GetRlHatModq(index),
@@ -89,25 +89,22 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
                                              cryptoParams->GetRlHatInvModrPrecon(index), cryptoParams->GetRlHatModq(index),
                                              cryptoParams->GetalphaRlModq(index), cryptoParams->GetModqBarrettMu(),
                                              cryptoParams->GetrInv());
-#ifdef _OPENMP        
+#ifdef _OPENMP
         omp_set_nested(true);
-#endif    
+#endif
 
 
         //ciphertext.SetFormat(Format::EVALUATION);
     //retValue.SetElements(std::move(ciphertexts));
-#ifdef _OPENMP
-    omp_set_nested(true);
-#endif
+//#ifdef _OPENMP
+//    omp_set_nested(true);
+//#endif
 }
 
 DCRTPoly SLAPScheme::Encrypt(const DCRTPoly & plaintext, const DCRTPoly & privateKey, const DCRTPoly& publicKey,
         const bool do_noise,
         double & noise_time, double & enc_time){
     DCRTPoly noisy_input = plaintext;
-    std::cout << "Plaintext, M: " << noisy_input.GetCyclotomicOrder();
-    std::cout << ", Num of towers: " << noisy_input.GetNumOfElements();
-    std::cout << ", Log_t: " << noisy_input.GetModulus() << std::endl;
     if(do_noise){
         //noisy_input.add_dp_noise(this->dl, num, den);
         dl.addRandomNoise(noisy_input,scale, LAPLACIAN);
@@ -118,9 +115,6 @@ DCRTPoly SLAPScheme::Encrypt(const DCRTPoly & plaintext, const DCRTPoly & privat
     //Now get key and do encryption
     DCRTPoly enc_result = (scheme==NS)? NSEncrypt(noisy_input, privateKey, publicKey) :
             MSEncrypt(noisy_input, privateKey, publicKey);
-    std::cout << "Ciphertext, M: " << enc_result.GetCyclotomicOrder();
-    std::cout << ", Num of towers: " << enc_result.GetNumOfElements();
-    std::cout << ", Log_t: " << enc_result.GetModulus() << std::endl;
     return enc_result;
 }
 
@@ -177,10 +171,6 @@ DCRTPoly SLAPScheme::Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCR
             NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
     auto end = std::chrono::steady_clock::now();
     dec_time = std::chrono::duration_cast<time_typ>(end - begin).count();
-
-    std::cout << "Plaintext 2, M: " << ret.GetCyclotomicOrder();
-    std::cout << ", Num of towers: " << ret.GetNumOfElements();
-    std::cout << ", Log_t: " << ret.GetModulus() << std::endl;
 
     return ret;
 }

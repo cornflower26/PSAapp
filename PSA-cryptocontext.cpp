@@ -150,7 +150,7 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
 
 void PSACryptocontext::TestEncryption(const unsigned int iters, const bool do_noise, std::vector<double>& noise_times,
                     std::vector<double>& enc_times){
-    //ciphertexts.clear();
+    ciphertexts.clear();
     noise_times.clear();
     enc_times.clear();
     //auto params_pair = aggregator.parms_ptrs();
@@ -170,26 +170,24 @@ void PSACryptocontext::TestEncryption(const unsigned int iters, const bool do_no
         //input.AddRandomNoise(input.GetModulus());
         //Then, do the encryption
         double noise_time, enc_time;
-        //plaintexts.push_back(input);
+        plaintexts.push_back(input);
         result = aggregator.Encrypt(input, privateKeys[i], publicKey,
                          do_noise,
                          noise_time, enc_time);
+        ciphertexts.push_back(result);
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
+        input.SetValuesToZero();
     }
 
 }
 
 void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsigned int iters, std::vector<double>& noise_times,
                               std::vector<double>& enc_times){
-    ciphertexts.clear();
+    //ciphertexts.clear();
+    //plaintexts.clear();
     noise_times.clear();
     enc_times.clear();
-    //std::cout <<  "Getting ciphertext num bits: " << std::numeric_limits<decltype(aggregator.ciphertextParams.GetModulus().ConvertToLongDouble())>::digits << std::endl;
-    //auto params_pair = agg.parms_ptrs();
-    //DCRTPoly input(params_pair.first);
-    DCRTPoly input = aggregator.plaintextParams.CloneParametersOnly();
-    input.SetValuesToZero();
     aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
     aggregationKey.SetValuesToZero();
     aggregator.PublicKey(publicKey, ts);
@@ -210,7 +208,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     //std::cout << "Scale is " << scale << std::endl;
     for(unsigned int i = 0; i < iters; i++){
         //First, get some random vector for user input
-        //TODO: why are we using both? I don't see where "input" is being used, just "inputvec"
+        //dl.addRandomNoise(inputvec, scale, UNIFORM);
         //Then, do the encryption
         double noise_time, enc_time;
         result = aggregator.PolynomialEncrypt(inputvec, privateKeys.at(i % privateKeys.size()), publicKey,
@@ -221,7 +219,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
         //}
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
-        input.SetValuesToZero();
+        //std::fill_n(inputvec.begin(), inputvec.size(), 1);
     }
     return;
 }
