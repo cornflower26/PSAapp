@@ -25,7 +25,7 @@ void SLAPScheme::Init(){
     //536903681
     //std::cout << plaintextParams.GetModulus().ConvertToLongDouble() << std::endl;
     parameters.SetMultiplicativeDepth(1);
-    parameters.SetMaxRelinSkDeg(3);
+    parameters.SetMaxRelinSkDeg(2);
 
     CryptoContext<DCRTPoly> cryptoContext = GenCryptoContext(parameters);
     // enable features that you wish to use
@@ -274,6 +274,8 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& c
     Plaintext decrypted = CKKSContext->GetPlaintextForDecrypt(CKKS_PACKED_ENCODING,
                                                  ret.GetParams(), CKKSContext->GetEncodingParams());
 
+    //decrypted->GetElement<DCRTPoly>() = ret;
+    //Test(ret, &decrypted->GetElement<NativePoly>());
     Test(ret, &decrypted->GetElement<NativePoly>());
     //*decrypted = ret.GetElementAtIndex(0);
     //*decrypted = Poly(ret.GetElementAtIndex(0), Format::EVALUATION);

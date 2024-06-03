@@ -2,17 +2,32 @@
 //#include <pke/openfhe.h>
 #include <iostream>
 #include <getopt.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <unistd.h>
 #include "PSA-cryptocontext.h"
 
+void handler(int sig) {
+    void *array[10];
+    size_t size;
 
+    // get void*'s for all entries on the stack
+    size = backtrace(array, 10);
+
+    // print out all the frames to stderr
+    fprintf(stderr, "Error: signal %d:\n", sig);
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+    exit(1);
+}
 
     int main(int argc, char ** argv) {
+        signal(SIGSEGV, handler);
         //std::cout << "Hello, World!" << std::endl;
         //DCRTPoly a = DCRTPoly();
-        unsigned int plain_bits = 5; //log t
+        unsigned int plain_bits = 64; //log t
         unsigned int packing_size = 16; //p
-        unsigned int num_users = 10; //n
-        unsigned int iters = 1; //i
+        unsigned int num_users = 1000; //n
+        unsigned int iters = 50; //i
         unsigned int k_prime = 1; //k
         unsigned int N = 1; //N
 

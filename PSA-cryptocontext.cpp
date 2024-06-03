@@ -63,8 +63,12 @@ void PSACryptocontext::genSlapScheme() {
         num_plain_moduli += 1;
     }
 
-    std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(aggregator.ciphertextParams.GetCyclotomicOrder(),
-            num_plain_moduli,plainBits);
+    std::cout << "Plain bits is " << plainBits << std::endl;
+    std::cout << "Plain_mod_size is " << plain_mod_size << std::endl;
+    std::cout << "Num_plain_moduli is " << num_plain_moduli << std::endl;
+    std::cout << "N is " << N << std::endl;
+    std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(N,
+            num_plain_moduli,plain_mod_size);
     aggregator.plaintextParams = DCRTPoly(parms,EVALUATION);
     aggregator.plaintextParams.SetValuesToZero();
     //std::cout << "Plaintext, M: " << aggregator.ciphertextParams.GetCyclotomicOrder();
@@ -117,9 +121,16 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
     scheme = scheme1;
     ts = 0xDEADBEEF;
 
+    NativeInteger PlainBits = NativeInteger(plainBits);
+    plainBits = PlainBits.GetLengthForBase(2);
+    NativeInteger PackingSize = NativeInteger(packingSize);
+    packingSize = PackingSize.GetLengthForBase(2);
+
 
     NativeInteger NumUsers = NativeInteger(numUsers);
     unsigned int log_num_users = NumUsers.GetLengthForBase(2);
+    std::cout << "log_num_users " << log_num_users << std::endl;
+
     //ceil of log or self make
     if(hammingWeight(numUsers) != 1){
         log_num_users++;
@@ -133,6 +144,9 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
         log_q = 2*(plainBits+1) + log_num_users + LOG2_3;
     }
 
+    std::cout << "log_q " << log_q << std::endl;
+    std::cout << "m for cyphertext " << choose_parameters(log_q) << std::endl;
+    std::cout << "num of towers for cyphertext " << numTowers(log_q) << std::endl;
     std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(choose_parameters(log_q),
                                                                                      numTowers(log_q),log_q);
     aggregator.ciphertextParams = DCRTPoly(parms,EVALUATION);
