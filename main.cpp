@@ -25,21 +25,17 @@ void handler(int sig) {
         //std::cout << "Hello, World!" << std::endl;
         //DCRTPoly a = DCRTPoly();
         unsigned int plain_bits = 32; //log t
-        unsigned int packing_size = 16; //p
-        unsigned int num_users = 1000; //n
+        unsigned int num_users = 100000; //n
         unsigned int iters = 50; //i
         unsigned int k_prime = 1; //k
+
         unsigned int N = 1; //N
 
         int c;
-          while((c = getopt(argc, argv, "t:p:n:i:k:N:")) != -1){
+          while((c = getopt(argc, argv, "t:n:i:k:N:")) != -1){
             switch(c){
             case 't':{
                 plain_bits = atoi(optarg);
-                break;
-            }
-            case 'p':{
-                packing_size = atoi(optarg);
                 break;
             }
         case 'n':{
@@ -99,7 +95,7 @@ void handler(int sig) {
         */
 
 
-        PSACryptocontext pp = PSACryptocontext(plain_bits, packing_size, num_users, iters, MS);
+        PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, NS);
 
         std::vector<double> poly_noise_times;
         std::vector<double> poly_enc_times;

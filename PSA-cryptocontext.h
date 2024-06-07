@@ -20,9 +20,8 @@ private:
     long double gamma = 0.0f;
     long double a = 0.0f;
     long double delta = 0.1f;
-    long double epsilon = 1.0f;
+    long double epsilon = 4.0f;
     BasicInteger plainBits;
-    unsigned int packingSize;
     unsigned int numUsers;
     unsigned int iters;
     long double scale = 0.5f;
@@ -43,7 +42,7 @@ public:
 
     DiscreteLaplacianGenerator dl;
 
-    PSACryptocontext(unsigned int t, unsigned int w, unsigned int n,
+    PSACryptocontext(unsigned int t, unsigned int n,
                     unsigned int i, Scheme scheme1);
 
     void calculateParams();

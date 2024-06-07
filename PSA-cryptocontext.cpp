@@ -7,7 +7,8 @@
 using namespace lbcrypto;
 
 void PSACryptocontext::calculateParams() {
-    unsigned int del_interval = packingSize ? packingSize : log2(plainBits);
+    unsigned int del_interval = log2(plainBits);
+    //unsigned int del_interval = packingSize ? packingSize : log2(plainBits);
     if(del_interval < (epsilon/3)){
         return;
     }
@@ -48,6 +49,7 @@ void PSACryptocontext::calculateParams() {
     if (!std::isfinite(a)) throw std::invalid_argument("Infinite a");
 
     aggregator.scale = scale;
+    std::cout << "SCALE: " << aggregator.scale << std::endl;
     return;
 }
 
@@ -58,17 +60,17 @@ void PSACryptocontext::genSlapScheme() {
             //ctext_parms->poly_mod_degree();
 
     unsigned int plain_mod_size = plainBits < PLAIN_MOD_SIZE_MAX ? plainBits : PLAIN_MOD_SIZE_MAX;
-    unsigned int num_plain_moduli = plainBits / packingSize;
-    if(!num_plain_moduli){
-        num_plain_moduli += 1;
-    }
+    //unsigned int num_plain_moduli = plainBits / packingSize;
+    //if(!num_plain_moduli){
+    //    num_plain_moduli += 1;
+    //}
 
     std::cout << "Plain bits is " << plainBits << std::endl;
     std::cout << "Plain_mod_size is " << plain_mod_size << std::endl;
-    std::cout << "Num_plain_moduli is " << num_plain_moduli << std::endl;
+   // std::cout << "Num_plain_moduli is " << num_plain_moduli << std::endl;
     std::cout << "N is " << N << std::endl;
     std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(N,
-            num_plain_moduli,plain_mod_size);
+                numTowers(plain_mod_size),plain_mod_size);
     aggregator.plaintextParams = DCRTPoly(parms,EVALUATION);
     aggregator.plaintextParams.SetValuesToZero();
     //std::cout << "Plaintext, M: " << aggregator.ciphertextParams.GetCyclotomicOrder();
@@ -112,10 +114,10 @@ void PSACryptocontext::genSlapScheme() {
 
 }
 
-PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
+PSACryptocontext::PSACryptocontext(unsigned int t,
                                  unsigned int n, unsigned int i, Scheme scheme1) : aggregator(scheme1, scale) {
     plainBits = t;
-    packingSize = w;
+    //packingSize = w;
     numUsers = n;
     iters = i;
     scheme = scheme1;
@@ -129,7 +131,7 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
     if(hammingWeight(numUsers) != 1){
         log_num_users++;
     }
-    packingSize = packingSize + log_num_users;
+    //packingSize = packingSize + log_num_users;
     unsigned int log_q;
     if(scheme == NS){
         log_q = (plainBits+1) + log_num_users + LOG2_3;
