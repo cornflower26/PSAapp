@@ -124,7 +124,6 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
 
     NativeInteger NumUsers = NativeInteger(numUsers);
     unsigned int log_num_users = NumUsers.GetLengthForBase(2);
-    std::cout << "log_num_users " << log_num_users << std::endl;
 
     //ceil of log or self make
     if(hammingWeight(numUsers) != 1){
@@ -139,9 +138,6 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
         log_q = 2*(plainBits+1) + log_num_users + LOG2_3;
     }
 
-    std::cout << "log_q " << log_q << std::endl;
-    std::cout << "m for cyphertext " << choose_parameters(log_q) << std::endl;
-    std::cout << "num of towers for cyphertext " << numTowers(log_q) << std::endl;
     std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(choose_parameters(log_q),
                                                                                      numTowers(log_q),log_q);
     aggregator.ciphertextParams = DCRTPoly(parms,EVALUATION);
