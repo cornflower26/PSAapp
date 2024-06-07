@@ -121,11 +121,6 @@ PSACryptocontext::PSACryptocontext(unsigned int t, unsigned int w,
     scheme = scheme1;
     ts = 0xDEADBEEF;
 
-    NativeInteger PlainBits = NativeInteger(plainBits);
-    plainBits = PlainBits.GetLengthForBase(2);
-    NativeInteger PackingSize = NativeInteger(packingSize);
-    packingSize = PackingSize.GetLengthForBase(2);
-
 
     NativeInteger NumUsers = NativeInteger(numUsers);
     unsigned int log_num_users = NumUsers.GetLengthForBase(2);

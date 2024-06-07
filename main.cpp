@@ -24,7 +24,7 @@ void handler(int sig) {
         signal(SIGSEGV, handler);
         //std::cout << "Hello, World!" << std::endl;
         //DCRTPoly a = DCRTPoly();
-        unsigned int plain_bits = 64; //log t
+        unsigned int plain_bits = 32; //log t
         unsigned int packing_size = 16; //p
         unsigned int num_users = 1000; //n
         unsigned int iters = 50; //i
