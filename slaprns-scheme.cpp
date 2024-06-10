@@ -54,6 +54,20 @@ void SLAPScheme::Init(){
     CKKSContext = GenCryptoContext(CKKSparameters);
 }
 
+void SLAPScheme::ScaleDown(DCRTPoly & ciphertext, DCRTPoly & plaintext){
+    //const auto t = plaintext.GetWorkingModulus();
+    if(plaintext.GetNumOfElements() <= 0){
+        throw std::logic_error("Not enough elements to get a meaningful index");
+    }
+    //size_t index = plaintext.GetNumOfElements()-1;
+    //ciphertext.ModReduce(t, cryptoParams->GettModqPrecon(), cryptoParams->GetNegtInvModq(index),
+    //            cryptoParams->GetNegtInvModqPrecon(index), cryptoParams->GetqlInvModq(index),
+    //            cryptoParams->GetqlInvModqPrecon(index));
+
+    ciphertext.ScaleAndRound(plaintext.GetParams(), cryptoParams->GettRSHatInvModsDivsModr(),
+                                    cryptoParams->GettRSHatInvModsDivsFrac(), cryptoParams->GetModrBarrettMu());
+}
+
 void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
     //cryptoParams->SetElementParams(ciphertextParams.GetParams());
     //const auto cryptoParams   = std::dynamic_pointer_cast<CryptoParametersBFVRNS>(ciphertext.GetCryptoParameters());
@@ -71,7 +85,7 @@ void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
         // Converts from the CRT basis P to Q
         //std::cout << ciphertext.GetModulus().ConvertToLongDouble() << " is the ciphertext modulus" << std::endl;
         //std::cout << plaintext.GetModulus().ConvertToLongDouble() << " is the plaintext modulus" << std::endl;
-
+        cryptoParams->SetPlaintextModulus(plaintext.GetModulus().ConvertToInt());
         if(plaintext.GetNumOfElements() <= 0){
             throw std::logic_error("Not enough elements to get a meaningful index");
         }
@@ -218,7 +232,8 @@ DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
     auto end = std::chrono::steady_clock::now();
     //Now scale and reduce
     //return ret.scale_down(plain_parms, *q_to_t);
-    SwitchBasis(ret, plaintextParams);
+    //SwitchBasis(ret, plaintextParams);
+    ScaleDown(ret,plaintextParams);
     return ret;
 }
 

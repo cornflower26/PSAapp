@@ -45,6 +45,8 @@ public:
 
     void SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext);
 
+    void ScaleDown(DCRTPoly & ciphertext, DCRTPoly & plaintext);
+
     DCRTPoly PolynomialEncrypt(const std::vector<double>& plaintext, const DCRTPoly &privateKey, const DCRTPoly& publicKey,
                                bool do_noise, double & noise_time,
                                double & enc_time, const uint64_t e);
