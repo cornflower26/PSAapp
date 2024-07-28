@@ -24,10 +24,11 @@ void handler(int sig) {
         signal(SIGSEGV, handler);
         //std::cout << "Hello, World!" << std::endl;
         //DCRTPoly a = DCRTPoly();
-        unsigned int plain_bits = 32; //log t
-        unsigned int num_users = 100000; //n
-        unsigned int iters = 50; //i
+        unsigned int plain_bits = 16; //log t
+        unsigned int num_users = 2; //n
+        unsigned int iters = 1; //i
         unsigned int k_prime = 1; //k
+        Scheme scheme1 = NS;
 
         unsigned int N = 1; //N
 
@@ -80,22 +81,27 @@ void handler(int sig) {
         //temp();
 
         //Code for testing SLAP, which isn't what this paper is about
-        /*
-        PSACryptocontext p = PSACryptocontext(plain_bits, packing_size, num_users, iters, MS);
+
+        PSACryptocontext p = PSACryptocontext(plain_bits, num_users, iters, scheme1);
         std::vector<double> noise_times;
         std::vector<double> enc_times;
-        p.TestEncryption(true, MAX_CTEXTS_DEFAULT, noise_times, enc_times);
+        std::vector<double> dec_times;
+        p.TestEncryption(iters, false, noise_times, enc_times);
 
-        p.TestDecryption();
-        
-        p.TestEncryption(1, MAX_CTEXTS_DEFAULT, noise_times, enc_times);
+        p.TestDecryption(iters,dec_times);
+
+        for(const double d : noise_times){
+            std::cout << "noise_times " << d << '\n';
+        }
+        for(const double d : enc_times){
+            std::cout << "enc_times " << d << '\n';
+        }
+        for(const double d : dec_times){
+            std::cout << "dec_times " << d << '\n';
+        }
 
 
-        p.TestDecryption();
-        */
-
-
-        PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, NS);
+        PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
 
         std::vector<double> poly_noise_times;
         std::vector<double> poly_enc_times;

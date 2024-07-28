@@ -20,7 +20,7 @@ private:
     long double gamma = 0.0f;
     long double a = 0.0f;
     long double delta = 0.1f;
-    long double epsilon = 4.0f;
+    long double epsilon = 2.0f;
     BasicInteger plainBits;
     unsigned int numUsers;
     unsigned int iters;
@@ -52,7 +52,7 @@ public:
     void TestEncryption(const unsigned int iters, const bool do_noise, std::vector<double>& noise_times,
                     std::vector<double>& enc_times);
 
-    void TestDecryption();
+    void TestDecryption(const unsigned int iters, std::vector<double> & dec_times);
 
     void TestPolynomialEncryption(const bool do_noise, const unsigned int iters, std::vector<double>& noise_times,
                         std::vector<double>& enc_times);

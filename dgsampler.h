@@ -217,6 +217,26 @@ public:
         return ans;
     }
 
+    std::vector<double> GenerateIntVector(usint size, const int scale, const Distribution dist) {
+        std::vector<double> ans(size, 0);
+        for (usint i = 0; i < size; ++i) {
+            int64_t val;
+            if (dist == LAPLACIAN){
+                val = dl(scale);
+            }
+            else if (dist == GAUSS){
+                val = dg(scale);
+            }
+            else if (dist == UNIFORM){
+                val = u(scale);
+            }
+            if (val > 0 || val == 0)
+            ans[i] = val;
+            else ans[i] = scale+val;
+        }
+        return ans;
+    }
+
 
 };
 

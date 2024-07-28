@@ -18,6 +18,7 @@ private:
 public:
     std::vector<BigInteger> delta_mod_q;
     std::vector<BigInteger> t_mod_q;
+    std::vector<DoubleNativeInt> ComputeShit(DCRTPoly & plaintext);
 
 
     SLAPScheme(Scheme scheme, double scale);

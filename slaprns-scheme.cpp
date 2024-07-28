@@ -47,25 +47,52 @@ void SLAPScheme::Init(){
 
 
     CKKSparameters.SetMultiplicativeDepth(1);
-    CKKSparameters.SetScalingModSize(scale);
+    CKKSparameters.SetScalingModSize(25);
+    //plaintextParams.GetModulus().GetLengthForBase(2)
     CKKSparameters.SetBatchSize(plaintextParams.GetRingDimension()/2);
 
 
     CKKSContext = GenCryptoContext(CKKSparameters);
 }
 
+std::vector<DoubleNativeInt> SLAPScheme::ComputeShit(DCRTPoly & plaintext){
+    std::vector<DoubleNativeInt> m_modqBarrettMu;
+    const BigInteger BarrettBase128Bit("340282366920938463463374607431768211456");  // 2^128
+    const BigInteger TwoPower64("18446744073709551616");                            // 2^64
+    m_modqBarrettMu.resize(plaintext.GetNumOfElements());
+    for (uint32_t i = 0; i < plaintext.GetNumOfElements(); i++) {
+        BigInteger mu = BarrettBase128Bit / BigInteger(plaintext.GetParams()->GetParams()[i]->GetModulus());
+        uint64_t val[2];
+        val[0] = (mu % TwoPower64).ConvertToInt();
+        val[1] = mu.RShift(64).ConvertToInt();
+        memcpy(&m_modqBarrettMu[i], val, sizeof(DoubleNativeInt));
+    }
+    return m_modqBarrettMu;
+}
+
 void SLAPScheme::ScaleDown(DCRTPoly & ciphertext, DCRTPoly & plaintext){
     //const auto t = plaintext.GetWorkingModulus();
+    cryptoParams->SetPlaintextModulus(ciphertext.GetModulus().ConvertToInt());
     if(plaintext.GetNumOfElements() <= 0){
         throw std::logic_error("Not enough elements to get a meaningful index");
     }
+    size_t index = plaintext.GetNumOfElements()-1;
     //size_t index = plaintext.GetNumOfElements()-1;
     //ciphertext.ModReduce(t, cryptoParams->GettModqPrecon(), cryptoParams->GetNegtInvModq(index),
     //            cryptoParams->GetNegtInvModqPrecon(index), cryptoParams->GetqlInvModq(index),
     //            cryptoParams->GetqlInvModqPrecon(index));
-
+#ifdef _OPENMP
+    omp_set_nested(false);
+#endif
     ciphertext.ScaleAndRound(plaintext.GetParams(), cryptoParams->GettRSHatInvModsDivsModr(),
-                                    cryptoParams->GettRSHatInvModsDivsFrac(), cryptoParams->GetModrBarrettMu());
+                                    cryptoParams->GettRSHatInvModsDivsFrac(), ComputeShit(plaintext));
+
+    //ciphertext = ScaleAndRound(ciphertext, plaintext.GetParams(), cryptoParams->GettRSHatInvModsDivsModr(),
+    //                           cryptoParams->GettRSHatInvModsDivsFrac(), ComputeShit(plaintext));
+#ifdef _OPENMP
+    omp_set_nested(true);
+#endif
+
 }
 
 void SLAPScheme::SwitchBasis(DCRTPoly & ciphertext, DCRTPoly & plaintext) {
@@ -135,6 +162,7 @@ DCRTPoly SLAPScheme::Encrypt(const DCRTPoly & plaintext, const DCRTPoly & privat
 DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly &plaintext, const DCRTPoly &privateKey, const DCRTPoly& publicKey){
     //Multiply secret and public keys
     DCRTPoly ret = privateKey*publicKey;
+    std::cout << "Encrypt key " << ret << std::endl;
     //Get the error, and scale it by the plaintext modulus
     DCRTPoly e = ciphertextParams.CloneParametersOnly();
     e.SetValuesToZero();
@@ -143,13 +171,17 @@ DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly &plaintext, const DCRTPoly &privat
     dl.addRandomNoise(e,3, UNIFORM);
     //e.zero();
     e.Times(t_mod_q); //Per-modulus scaling
+    std::cout << "Error is " << e << std::endl;
     //Add in the error to make a RLWE term
     ret += e;
     //Raise x to base q
     DCRTPoly x_raised = plaintext.Clone();
     SwitchBasis(x_raised, ciphertextParams);
             //x.base_conv(ctext_parms, *t_to_q);
-    //Now add the message
+            DCRTPoly test = x_raised.Clone();
+    SwitchBasis(test,plaintextParams);
+    std::cout << " Basis result " << test << std::endl;
+            //Now add the message
     ret += x_raised;
     return ret;
 }
@@ -162,6 +194,8 @@ DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly &plaintext, const DCRTPoly& privat
     e.SetValuesToZero();
     //e.error(this->dl);
     dl.addRandomNoise(e,3, UNIFORM);
+
+    std::cout << "Error is " << e << std::endl;
     //Add in the error to make a RLWE term
     ret += e;
     //Raise x to base q
@@ -203,6 +237,7 @@ DCRTPoly SLAPScheme::NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
                                unsigned int num_additions){
 
     DCRTPoly ret = aggregationKey*publicKey;
+    std::cout << "Decryption key result " << ret << std::endl;
     if(!num_additions){
         num_additions = ciphertexts.size();
     }
@@ -256,6 +291,7 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double>& plaintext,
     else{
         noise_time = 0.0;
     }
+    std::cout << "Noisy Input before log " << noisy_input << std::endl;
     //Now get key and do encryption
     //Now get key and do encryption
     auto begin = std::chrono::steady_clock::now();
@@ -266,6 +302,7 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double>& plaintext,
             noisy_input.at(i) = 0;
         }
     }
+    std::cout << "Noisy Input " << noisy_input << std::endl;
     DiscreteFourierTransform::Initialize(plaintextParams.GetRingDimension() * 2, plaintextParams.GetRingDimension() / 2);
     Plaintext ckks_result = CKKSContext->MakeCKKSPackedPlaintext(noisy_input, 2,1,plaintextParams.GetParams(),plaintextParams.GetRingDimension()/2);
     ckks_result->Encode();
@@ -285,21 +322,36 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& c
     auto begin = std::chrono::steady_clock::now();
     DCRTPoly ret = (scheme == NS) ?
                    NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
-
+    std::cout << "Here's the decrypted cyphertext from PSA " <<  ret << std::endl;
     Plaintext decrypted = CKKSContext->GetPlaintextForDecrypt(CKKS_PACKED_ENCODING,
                                                  ret.GetParams(), CKKSContext->GetEncodingParams());
 
     //decrypted->GetElement<DCRTPoly>() = ret;
     //Test(ret, &decrypted->GetElement<NativePoly>());
-    Test(ret, &decrypted->GetElement<NativePoly>());
+    //Test(ret, &decrypted->GetElement<NativePoly>());
+    ret.SetFormat(COEFFICIENT);
+    decrypted->GetElement<NativePoly>() = ret.ToNativePoly();
+    //std::cout << decrypted->GetElement<NativePoly>() << std::endl;
     //*decrypted = ret.GetElementAtIndex(0);
     //*decrypted = Poly(ret.GetElementAtIndex(0), Format::EVALUATION);
+
+
+    ///std::vector<std::complex<double>> complexValues;
+    ////for (size_t i = 0; i < ret.GetLength(); ++i) {
+    ////    complexValues.emplace_back(static_cast<double>(ret.GetElementAtIndex(0)[i].ConvertToDouble()), 0.0);
+    ////}
+    ////complexValues.resize(ret.GetNumOfElements());
+    //std::cout << "poly.GetModulus().ConvertToInt() after ptxt: " << poly.GetModulus().ConvertToInt() << std::endl;
+
+    ////Plaintext decrypted = CKKSContext->MakeCKKSPackedPlaintext(complexValues);
 
     auto decryptedCKKS = std::dynamic_pointer_cast<CKKSPackedEncoding>(decrypted);
     decryptedCKKS->SetNoiseScaleDeg(2); //2
     decryptedCKKS->SetLevel(1); // 1
     decryptedCKKS->SetScalingFactor(40); // 40
     decryptedCKKS->SetSlots(ret.GetRingDimension()/2); //which is the N/2
+    //decryptedCKKS->GetEncodingParams()->SetPlaintextModulus(plaintextParams.GetModulus().ConvertToInt());
+
 
     //const auto cryptoParamsCKKS = std::dynamic_pointer_cast<CryptoParametersCKKSRNS>(CKKSContext->GetCryptoParameters());
 
@@ -307,8 +359,15 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& c
     //                      NORESCALE, EXEC_EVALUATION);
 
     //CKKSPackedEncoding float_result = CKKSPackedEncoding(cvec,0);
-    decryptedCKKS->Decode(1,40,NORESCALE,EXEC_EVALUATION);
+    decryptedCKKS->Decode(1,40,FIXEDAUTO,CKKSparameters.GetExecutionMode());
+
+    //Plaintext plaintext;
+    //plaintext = std::move(decrypted);
+    //std::cout << "PLAINTEXT " << plaintext << std::endl;
+
     std::vector<double> intermediate1 = decryptedCKKS->GetRealPackedValue();
+
+    std::cout << "Decrypted without exponentiation " << intermediate1 << std::endl;
 
     for (int i = 0; i < intermediate1.size(); i++){
         intermediate1.at(i) = exp(intermediate1.at(i));
@@ -316,7 +375,6 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& c
 
     auto end = std::chrono::steady_clock::now();
     dec_time = std::chrono::duration_cast<time_typ>(end - begin).count();
-
     return intermediate1;
 
 }

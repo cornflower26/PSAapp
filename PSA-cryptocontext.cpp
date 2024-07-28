@@ -171,9 +171,10 @@ void PSACryptocontext::TestEncryption(const unsigned int iters, const bool do_no
     aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
     result.SetValuesToZero();
-    for(unsigned int i = 0; i < iters; i++){
+    for(unsigned int i = 0; i < numUsers; i++){
         //First, get some random vector for user input
         dl.addRandomNoise(input, scale, UNIFORM);
+        std::cout << "Input for aggregation " << input << std::endl;
         //input.AddRandomNoise(input.GetModulus());
         //Then, do the encryption
         double noise_time, enc_time;
@@ -181,6 +182,7 @@ void PSACryptocontext::TestEncryption(const unsigned int iters, const bool do_no
         result = aggregator.Encrypt(input, privateKeys[i], publicKey,
                          do_noise,
                          noise_time, enc_time);
+        std::cout << "Ciphertext for aggregation " << result << std::endl;
         ciphertexts.push_back(result);
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
@@ -198,7 +200,8 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
     aggregationKey.SetValuesToZero();
     aggregator.PublicKey(publicKey, ts);
-    std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,1);
+    std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,20000);
+    //std::vector<double> inputvec = dl.GenerateIntVector(aggregator.plaintextParams.GetRingDimension()/2, 1, GAUSS);
     noise_times.reserve(iters);
     enc_times.reserve(iters);
     //TODO Change
@@ -213,17 +216,19 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
     result.SetValuesToZero();
     //std::cout << "Scale is " << scale << std::endl;
-    for(unsigned int i = 0; i < iters; i++){
+    for(unsigned int i = 0; i < numUsers; i++){
         //First, get some random vector for user input
         //dl.addRandomNoise(inputvec, scale, UNIFORM);
         //Then, do the encryption
         double noise_time, enc_time;
+        std::cout << inputvec << std::endl;
         result = aggregator.PolynomialEncrypt(inputvec, privateKeys.at(i % privateKeys.size()), publicKey,
                               do_noise,
                               noise_time, enc_time, 1);
-        //if(i < num_to_generate){
-            //ciphertexts.push_back(result); //Hope this copies it
-        //}
+        if(i < numUsers){
+            ciphertexts.push_back(result); //Hope this copies it
+            std::cout << result << std::endl;
+        }
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
         //std::fill_n(inputvec.begin(), inputvec.size(), 1);
@@ -231,17 +236,14 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     return;
 }
 
-void PSACryptocontext::TestDecryption(){
+void PSACryptocontext::TestDecryption(const unsigned int iters, std::vector<double> & dec_times){
     DCRTPoly res = aggregator.ciphertextParams.CloneParametersOnly();
     res.SetValuesToZero();
-    std::vector<double> dec_times;
-    std::vector<double> agg_times;
     for(unsigned int i = 0; i < iters; i++){
         double dec_time;
-        double agg_time;
-        res = aggregator.Decrypt(ciphertexts, aggregationKey, ts, dec_time, numUsers);
+        res = aggregator.Decrypt(ciphertexts, aggregationKey, publicKey, dec_time, numUsers);
         dec_times.push_back(dec_time);
-        agg_times.push_back(agg_time);
+        std::cout << "Result of Aggregation: " << res << std::endl;
     }
 }
 
@@ -253,16 +255,16 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
 
     //Get some random inputs and keys
     //TODO check the scale argument to addRandomNoise
-    DCRTPoly reserve = aggregator.ciphertextParams.CloneParametersOnly();
-    reserve.SetValuesToZero();
-    this->ciphertexts = std::vector<DCRTPoly>(numUsers,reserve);
+    //DCRTPoly reserve = aggregator.ciphertextParams.CloneParametersOnly();
+    //reserve.SetValuesToZero();
+    //this->ciphertexts = std::vector<DCRTPoly>(numUsers,reserve);
 
-    for(DCRTPoly & poly : this->ciphertexts){
-        dl.addRandomNoise(poly, this->scale, UNIFORM);
-    }
-    this->aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
-    aggregationKey.SetValuesToZero();
-    dl.addRandomNoise(aggregationKey, this->scale, UNIFORM);
+//    for(DCRTPoly & poly : this->ciphertexts){
+//        dl.addRandomNoise(poly, this->scale, UNIFORM);
+//    }
+//    this->aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
+//    aggregationKey.SetValuesToZero();
+//    dl.addRandomNoise(aggregationKey, this->scale, UNIFORM);
 
     std::vector<double> result;
 
@@ -270,8 +272,9 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
         double dec_time;
         double agg_time;
         auto begin = std::chrono::steady_clock::now();
-        result = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, ts, dec_time, numUsers);
+        result = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, publicKey, dec_time, numUsers);
         auto end = std::chrono::steady_clock::now();
+        std::cout << "Decryption result for PPSA " << result << std::endl;
         //No clue what this was supposed to do.
         /*
         if (i == 0){
