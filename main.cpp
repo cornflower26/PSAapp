@@ -24,11 +24,11 @@ void handler(int sig) {
         signal(SIGSEGV, handler);
         //std::cout << "Hello, World!" << std::endl;
         //DCRTPoly a = DCRTPoly();
-        unsigned int plain_bits = 16; //log t
+        unsigned int plain_bits = 8; //log t
         unsigned int num_users = 2; //n
-        unsigned int iters = 1; //i
+        unsigned int iters = 2; //i
         unsigned int k_prime = 1; //k
-        Scheme scheme1 = NS;
+        Scheme scheme1 = MS;
 
         unsigned int N = 1; //N
 
@@ -82,6 +82,7 @@ void handler(int sig) {
 
         //Code for testing SLAP, which isn't what this paper is about
 
+        /**
         PSACryptocontext p = PSACryptocontext(plain_bits, num_users, iters, scheme1);
         std::vector<double> noise_times;
         std::vector<double> enc_times;
@@ -99,6 +100,8 @@ void handler(int sig) {
         for(const double d : dec_times){
             std::cout << "dec_times " << d << '\n';
         }
+         **/
+
 
 
         PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);

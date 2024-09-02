@@ -306,7 +306,14 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double>& plaintext,
     DiscreteFourierTransform::Initialize(plaintextParams.GetRingDimension() * 2, plaintextParams.GetRingDimension() / 2);
     Plaintext ckks_result = CKKSContext->MakeCKKSPackedPlaintext(noisy_input, 2,1,plaintextParams.GetParams(),plaintextParams.GetRingDimension()/2);
     ckks_result->Encode();
+
     DCRTPoly poly_result = ckks_result->GetElement<DCRTPoly>();
+
+    std::cout << "CCE Result:  " <<  poly_result << std::endl;
+    //std::dynamic_pointer_cast<CKKSPackedEncoding>(ckks_result)->Decode(1,40,FIXEDAUTO,CKKSparameters.GetExecutionMode());
+    std::vector<double> intermediate1 = ckks_result->GetRealPackedValue();
+    std::cout << "CCE Decoding Result:  " << ckks_result->GetElement<DCRTPoly>() << std::endl;
+    std::cout << "CCE Decoding Float Result:  " << intermediate1 << std::endl;
 
     DCRTPoly enc_result = (scheme==NS)? NSEncrypt(poly_result, privateKey, publicKey) :
                           MSEncrypt(poly_result, privateKey, publicKey);

@@ -200,7 +200,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
     aggregationKey.SetValuesToZero();
     aggregator.PublicKey(publicKey, ts);
-    std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,20000);
+    std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,5);
     //std::vector<double> inputvec = dl.GenerateIntVector(aggregator.plaintextParams.GetRingDimension()/2, 1, GAUSS);
     noise_times.reserve(iters);
     enc_times.reserve(iters);
