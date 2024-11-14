@@ -1,0 +1,1 @@
+/usr/bin/c++   -fopenmp -g   CMakeFiles/SLAP.dir/main.cpp.o CMakeFiles/SLAP.dir/slaprns-scheme.cpp.o CMakeFiles/SLAP.dir/PSA-cryptocontext.cpp.o CMakeFiles/SLAP.dir/PSA-base-scheme.cpp.o CMakeFiles/SLAP.dir/utils.cpp.o  -o SLAP  -Wl,-rpath,/usr/local/lib /usr/local/lib/libOPENFHEpke.so.1.0.3 /usr/local/lib/libOPENFHEbinfhe.so.1.0.3 /usr/local/lib/libOPENFHEcore.so.1.0.3 -fopenmp 

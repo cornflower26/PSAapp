@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="SLAP"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\usr\;CMake Files\..\..\..\usr\local\;CMake Files\..\..\..\usr\local\lib\;CMake Files\..\..\..\usr\local\lib\OpenFHE\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/ajanusze/SLAP/cmake-build-debug-remote-second"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="SLAP">
+				<Option output="/home/ajanusze/SLAP/cmake-build-debug-remote-second/SLAP" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/ajanusze/SLAP/cmake-build-debug-remote-second"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/local/include/openfhe"/>
+					<Add directory="/usr/local/include/openfhe/core"/>
+					<Add directory="/usr/local/include/openfhe/pke"/>
+					<Add directory="/usr/local/include/openfhe/binfhe"/>
+					<Add directory="/usr/include/c++/11"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/11"/>
+					<Add directory="/usr/include/c++/11/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/11/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 SLAP"/>
+					<CompileFile command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="SLAP/fast">
+				<Option output="/home/ajanusze/SLAP/cmake-build-debug-remote-second/SLAP" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/ajanusze/SLAP/cmake-build-debug-remote-second"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/local/include/openfhe"/>
+					<Add directory="/usr/local/include/openfhe/core"/>
+					<Add directory="/usr/local/include/openfhe/pke"/>
+					<Add directory="/usr/local/include/openfhe/binfhe"/>
+					<Add directory="/usr/include/c++/11"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/11"/>
+					<Add directory="/usr/include/c++/11/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/11/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 SLAP/fast"/>
+					<CompileFile command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/ajanusze/SLAP/cmake-build-debug-remote-second"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/ajanusze/SLAP/cmake-build-debug-remote-second"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j20 -f &quot;/home/ajanusze/SLAP/cmake-build-debug-remote-second/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/ajanusze/SLAP/PSA-base-scheme.cpp">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/PSA-base-scheme.h">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/PSA-constants.h">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/PSA-cryptocontext.cpp">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/PSA-cryptocontext.h">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/dgsampler.h">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/main.cpp">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/slaprns-scheme.cpp">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/slaprns-scheme.h">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/utils.cpp">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/../../../usr/local/lib/OpenFHE/OpenFHEConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\usr\local\lib\OpenFHE\"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/../../../usr/local/lib/OpenFHE/OpenFHEConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\usr\local\lib\OpenFHE\"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/../../../usr/local/lib/OpenFHE/OpenFHETargets-release.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\usr\local\lib\OpenFHE\"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/../../../usr/local/lib/OpenFHE/OpenFHETargets.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\usr\local\lib\OpenFHE\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
