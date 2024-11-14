@@ -7,7 +7,6 @@
 #include <omp.h>
 
 #include "slaprns-scheme.h"
-#include <math/dftransform.h>
 #include <omp.h>
 
 using namespace lbcrypto;
@@ -50,9 +49,17 @@ void SLAPScheme::Init(){
     CKKSparameters.SetScalingModSize(25);
     //plaintextParams.GetModulus().GetLengthForBase(2)
     CKKSparameters.SetBatchSize(plaintextParams.GetRingDimension()/2);
-
-
+    //CKKSparameters.SetPlaintextModulus(plaintextParams.GetModulus().ConvertToInt());
     CKKSContext = GenCryptoContext(CKKSparameters);
+    CKKSContext->GetCryptoParameters()->SetElementParams(plaintextParams.GetParams());
+
+    //std::cerr << std::endl;
+    //std::cerr << "CKKS parameters :::::::: " << CKKSparameters << std::endl;
+    //std::cerr << std::endl;
+
+    //std::cerr << std::endl;
+    //std::cerr << "Element parameters :::::::: " << *plaintextParams.GetParams() << std::endl;
+    //std::cerr << std::endl;
 }
 
 std::vector<DoubleNativeInt> SLAPScheme::ComputeShit(DCRTPoly & plaintext){
@@ -162,7 +169,7 @@ DCRTPoly SLAPScheme::Encrypt(const DCRTPoly & plaintext, const DCRTPoly & privat
 DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly &plaintext, const DCRTPoly &privateKey, const DCRTPoly& publicKey){
     //Multiply secret and public keys
     DCRTPoly ret = privateKey*publicKey;
-    std::cout << "Encrypt key " << ret << std::endl;
+    //std::cout << "Encrypt key " << ret << std::endl;
     //Get the error, and scale it by the plaintext modulus
     DCRTPoly e = ciphertextParams.CloneParametersOnly();
     e.SetValuesToZero();
@@ -171,7 +178,7 @@ DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly &plaintext, const DCRTPoly &privat
     dl.addRandomNoise(e,3, UNIFORM);
     //e.zero();
     e.Times(t_mod_q); //Per-modulus scaling
-    std::cout << "Error is " << e << std::endl;
+    //std::cout << "Error is " << e << std::endl;
     //Add in the error to make a RLWE term
     ret += e;
     //Raise x to base q
@@ -180,7 +187,7 @@ DCRTPoly SLAPScheme::NSEncrypt(const DCRTPoly &plaintext, const DCRTPoly &privat
             //x.base_conv(ctext_parms, *t_to_q);
             DCRTPoly test = x_raised.Clone();
     SwitchBasis(test,plaintextParams);
-    std::cout << " Basis result " << test << std::endl;
+    //std::cout << " Basis result " << test << std::endl;
             //Now add the message
     ret += x_raised;
     return ret;
@@ -195,7 +202,7 @@ DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly &plaintext, const DCRTPoly& privat
     //e.error(this->dl);
     dl.addRandomNoise(e,3, UNIFORM);
 
-    std::cout << "Error is " << e << std::endl;
+    //std::cout << "Error is " << e << std::endl;
     //Add in the error to make a RLWE term
     ret += e;
     //Raise x to base q
@@ -237,7 +244,7 @@ DCRTPoly SLAPScheme::NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
                                unsigned int num_additions){
 
     DCRTPoly ret = aggregationKey*publicKey;
-    std::cout << "Decryption key result " << ret << std::endl;
+    //std::cout << "Decryption key result " << ret << std::endl;
     if(!num_additions){
         num_additions = ciphertexts.size();
     }
@@ -269,6 +276,7 @@ DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
     //return ret.scale_down(plain_parms, *q_to_t);
     //SwitchBasis(ret, plaintextParams);
     ScaleDown(ret,plaintextParams);
+    //std::cout << "Return modulus is " << ret.GetModulus().ConvertToInt() << std::endl;
     return ret;
 }
 
@@ -291,7 +299,7 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double>& plaintext,
     else{
         noise_time = 0.0;
     }
-    std::cout << "Noisy Input before log " << noisy_input << std::endl;
+    //std::cout << "Noisy Input before log " << noisy_input << std::endl;
     //Now get key and do encryption
     //Now get key and do encryption
     auto begin = std::chrono::steady_clock::now();
@@ -302,19 +310,21 @@ DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double>& plaintext,
             noisy_input.at(i) = 0;
         }
     }
-    std::cout << "Noisy Input " << noisy_input << std::endl;
+    //std::cout << "Noisy Input " << noisy_input << std::endl;
+
+    //CKKSContext->GetEncodingParams()->SetPlaintextModulus(plaintextParams.GetModulus().ConvertToInt());
+    //CKKSContext->GetElementParams()->SetOriginalModulus(plaintextParams.GetModulus());
+    //CKKSContext->GetEncodingParams()->SetPlaintextRootOfUnity(plaintextParams.GetRootOfUnity());
+    //CKKSContext->GetEncodingParams()->SetPlaintextModulus(plaintextParams.GetModulus().ConvertToInt());
+    //CKKSContext->GetCryptoParameters()->SetPlaintextModulus(plaintextParams.GetModulus().ConvertToInt());
+    //CKKSContext->GetCryptoParameters()->SetElementParams(plaintextParams.GetParams());
     DiscreteFourierTransform::Initialize(plaintextParams.GetRingDimension() * 2, plaintextParams.GetRingDimension() / 2);
-    Plaintext ckks_result = CKKSContext->MakeCKKSPackedPlaintext(noisy_input, 2,1,plaintextParams.GetParams(),plaintextParams.GetRingDimension()/2);
-    ckks_result->Encode();
+    Plaintext ckks_result = CKKSContext->MakeCKKSPackedPlaintext(noisy_input);
+
+    //ckks_result->Encode();
 
     DCRTPoly poly_result = ckks_result->GetElement<DCRTPoly>();
-
-    std::cout << "CCE Result:  " <<  poly_result << std::endl;
-    //std::dynamic_pointer_cast<CKKSPackedEncoding>(ckks_result)->Decode(1,40,FIXEDAUTO,CKKSparameters.GetExecutionMode());
-    std::vector<double> intermediate1 = ckks_result->GetRealPackedValue();
-    std::cout << "CCE Decoding Result:  " << ckks_result->GetElement<DCRTPoly>() << std::endl;
-    std::cout << "CCE Decoding Float Result:  " << intermediate1 << std::endl;
-
+    //std::cout << "CCE Result:  " <<  poly_result2 << std::endl;
     DCRTPoly enc_result = (scheme==NS)? NSEncrypt(poly_result, privateKey, publicKey) :
                           MSEncrypt(poly_result, privateKey, publicKey);
     auto end = std::chrono::steady_clock::now();
@@ -329,7 +339,11 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& c
     auto begin = std::chrono::steady_clock::now();
     DCRTPoly ret = (scheme == NS) ?
                    NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
-    std::cout << "Here's the decrypted cyphertext from PSA " <<  ret << std::endl;
+    //std::cout << "Here's the decrypted cyphertext from PSA " <<  ret << std::endl;
+    DCRTPoly e = plaintextParams.CloneParametersOnly();
+    e.SetValuesToZero();
+    dl.addRandomNoise(e,3, LAPLACIAN);
+    ret += e;
     Plaintext decrypted = CKKSContext->GetPlaintextForDecrypt(CKKS_PACKED_ENCODING,
                                                  ret.GetParams(), CKKSContext->GetEncodingParams());
 
@@ -337,7 +351,9 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& c
     //Test(ret, &decrypted->GetElement<NativePoly>());
     //Test(ret, &decrypted->GetElement<NativePoly>());
     ret.SetFormat(COEFFICIENT);
-    decrypted->GetElement<NativePoly>() = ret.ToNativePoly();
+    decrypted->GetElement<NativePoly>() = ret.GetElementAtIndex(0);
+    decrypted->GetElement<Poly>() = ret.CRTInterpolate();
+    //decrypted->GetElement<NativePoly>() = ret.ToNativePoly();
     //std::cout << decrypted->GetElement<NativePoly>() << std::endl;
     //*decrypted = ret.GetElementAtIndex(0);
     //*decrypted = Poly(ret.GetElementAtIndex(0), Format::EVALUATION);
@@ -355,7 +371,7 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& c
     auto decryptedCKKS = std::dynamic_pointer_cast<CKKSPackedEncoding>(decrypted);
     decryptedCKKS->SetNoiseScaleDeg(2); //2
     decryptedCKKS->SetLevel(1); // 1
-    decryptedCKKS->SetScalingFactor(40); // 40
+    decryptedCKKS->SetScalingFactor(1); // 40
     decryptedCKKS->SetSlots(ret.GetRingDimension()/2); //which is the N/2
     //decryptedCKKS->GetEncodingParams()->SetPlaintextModulus(plaintextParams.GetModulus().ConvertToInt());
 
@@ -374,7 +390,7 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& c
 
     std::vector<double> intermediate1 = decryptedCKKS->GetRealPackedValue();
 
-    std::cout << "Decrypted without exponentiation " << intermediate1 << std::endl;
+    //std::cout << "Decrypted without exponentiation " << intermediate1 << std::endl;
 
     for (int i = 0; i < intermediate1.size(); i++){
         intermediate1.at(i) = exp(intermediate1.at(i));

@@ -6,6 +6,7 @@
 
 #include "PSA-base-scheme.h"
 #include <utils/utilities-int.h>
+#include <math/dftransform.h>
 
 using namespace lbcrypto;
 
@@ -260,7 +261,7 @@ DCRTPolyImpl<BigVector> static SwitchCRTBasis1(const DCRTPoly & paramsP,
     return ans;
 }
 #endif
-
+**/
 std::vector<std::complex<double>> static Conjugate2(const std::vector<std::complex<double>>& vec) {
     uint32_t n = vec.size();
     std::vector<std::complex<double>> result(n);
@@ -320,7 +321,7 @@ double static StdDev2(const std::vector<std::complex<double>>& vec, const std::v
     return stddev;
 }
 
-bool static Decode(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double scalingFactor, ScalingTechnique scalTech,
+std::vector<std::complex<double>> static Decode(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double scalingFactor, ScalingTechnique scalTech,
                                 ExecutionMode executionMode) {
     double p       = encoding.GetEncodingParams()->GetPlaintextModulus();
     double powP    = 0.0;
@@ -384,6 +385,7 @@ bool static Decode(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double s
             curValues[i] = cur;
         }
     }
+
 
     // the code below adds a Gaussian noise to the decrypted result
     // to prevent key recovery attacks.
@@ -454,7 +456,7 @@ bool static Decode(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double s
         for (size_t i = 0; i < slots; ++i) {
             double real = scale * (curValues[i].real() + conjugate[i].real());
             // real += powP * dgg.GenerateIntegerKarney(0.0, stddev);
-            real += powP * d(g);
+            //real += powP * d(g);
             double imag = scale * (curValues[i].imag() + conjugate[i].imag());
             // imag += powP * dgg.GenerateIntegerKarney(0.0, stddev);
             imag += powP * d(g);
@@ -476,12 +478,13 @@ bool static Decode(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double s
         //m_logError = std::round(std::log2(stddev * std::sqrt(2 * slots)));
 
         //TODO
-        //return realValues;
+        return realValues;
     }
 
-    return false;
+    return curValues;
+    //return false;
 }
-**/
+
 
 
 

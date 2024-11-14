@@ -49,7 +49,7 @@ void PSACryptocontext::calculateParams() {
     if (!std::isfinite(a)) throw std::invalid_argument("Infinite a");
 
     aggregator.scale = scale;
-    std::cout << "SCALE: " << aggregator.scale << std::endl;
+    //std::cout << "SCALE: " << aggregator.scale << std::endl;
     return;
 }
 
@@ -65,17 +65,19 @@ void PSACryptocontext::genSlapScheme() {
     //    num_plain_moduli += 1;
     //}
 
-    std::cout << "Plain bits is " << plainBits << std::endl;
-    std::cout << "Plain_mod_size is " << plain_mod_size << std::endl;
+    //std::cout << "Plain bits is " << plainBits << std::endl;
+    //std::cout << "Plain_mod_size is " << plain_mod_size << std::endl;
    // std::cout << "Num_plain_moduli is " << num_plain_moduli << std::endl;
-    std::cout << "N is " << N << std::endl;
+    //std::cout << "N is " << N << std::endl;
     std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(N,
                 numTowers(plain_mod_size),plain_mod_size);
     aggregator.plaintextParams = DCRTPoly(parms,EVALUATION);
     aggregator.plaintextParams.SetValuesToZero();
-    //std::cout << "Plaintext, M: " << aggregator.ciphertextParams.GetCyclotomicOrder();
-    //std::cout << ", Num of towers: " << num_plain_moduli;
-    //std::cout << ", Log_t: " << plainBits << std::endl;
+
+    //std::cout << "Plaintext modulus " << aggregator.plaintextParams.GetModulus() << std::endl;
+    //std::cout << "Plaintext, M: " << N;
+    //std::cout << ", Num of towers: " << numTowers(plain_mod_size);
+    //std::cout << ", Pbits : " << plain_mod_size << std::endl;
 
     BigInteger t = aggregator.plaintextParams.GetModulus();
 
@@ -174,7 +176,7 @@ void PSACryptocontext::TestEncryption(const unsigned int iters, const bool do_no
     for(unsigned int i = 0; i < numUsers; i++){
         //First, get some random vector for user input
         dl.addRandomNoise(input, scale, UNIFORM);
-        std::cout << "Input for aggregation " << input << std::endl;
+        //std::cout << "Input for aggregation " << input << std::endl;
         //input.AddRandomNoise(input.GetModulus());
         //Then, do the encryption
         double noise_time, enc_time;
@@ -182,7 +184,7 @@ void PSACryptocontext::TestEncryption(const unsigned int iters, const bool do_no
         result = aggregator.Encrypt(input, privateKeys[i], publicKey,
                          do_noise,
                          noise_time, enc_time);
-        std::cout << "Ciphertext for aggregation " << result << std::endl;
+        //std::cout << "Ciphertext for aggregation " << result << std::endl;
         ciphertexts.push_back(result);
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
@@ -200,7 +202,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
     aggregationKey.SetValuesToZero();
     aggregator.PublicKey(publicKey, ts);
-    std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,5);
+    std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,500);
     //std::vector<double> inputvec = dl.GenerateIntVector(aggregator.plaintextParams.GetRingDimension()/2, 1, GAUSS);
     noise_times.reserve(iters);
     enc_times.reserve(iters);
@@ -221,13 +223,13 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
         //dl.addRandomNoise(inputvec, scale, UNIFORM);
         //Then, do the encryption
         double noise_time, enc_time;
-        std::cout << inputvec << std::endl;
+        //std::cout << inputvec << std::endl;
         result = aggregator.PolynomialEncrypt(inputvec, privateKeys.at(i % privateKeys.size()), publicKey,
                               do_noise,
                               noise_time, enc_time, 1);
         if(i < numUsers){
             ciphertexts.push_back(result); //Hope this copies it
-            std::cout << result << std::endl;
+            //std::cout << result << std::endl;
         }
         noise_times.push_back(noise_time);
         enc_times.push_back(enc_time);
@@ -243,7 +245,7 @@ void PSACryptocontext::TestDecryption(const unsigned int iters, std::vector<doub
         double dec_time;
         res = aggregator.Decrypt(ciphertexts, aggregationKey, publicKey, dec_time, numUsers);
         dec_times.push_back(dec_time);
-        std::cout << "Result of Aggregation: " << res << std::endl;
+        //std::cout << "Result of Aggregation: " << res << std::endl;
     }
 }
 
@@ -274,7 +276,7 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
         auto begin = std::chrono::steady_clock::now();
         result = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, publicKey, dec_time, numUsers);
         auto end = std::chrono::steady_clock::now();
-        std::cout << "Decryption result for PPSA " << result << std::endl;
+        //std::cout << "Decryption result for PPSA " << result << std::endl;
         //No clue what this was supposed to do.
         /*
         if (i == 0){

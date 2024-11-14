@@ -5,6 +5,7 @@
 #include <execinfo.h>
 #include <signal.h>
 #include <unistd.h>
+#include <math/dftransform.h>
 #include "PSA-cryptocontext.h"
 
 void handler(int sig) {
@@ -25,10 +26,10 @@ void handler(int sig) {
         //std::cout << "Hello, World!" << std::endl;
         //DCRTPoly a = DCRTPoly();
         unsigned int plain_bits = 8; //log t
-        unsigned int num_users = 2; //n
-        unsigned int iters = 2; //i
+        unsigned int num_users = 1; //n
+        unsigned int iters = 1; //i
         unsigned int k_prime = 1; //k
-        Scheme scheme1 = MS;
+        Scheme scheme1 = NS;
 
         unsigned int N = 1; //N
 
@@ -103,7 +104,6 @@ void handler(int sig) {
          **/
 
 
-
         PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
 
         std::vector<double> poly_noise_times;
@@ -119,13 +119,13 @@ void handler(int sig) {
 
 
         for(const double d : poly_noise_times){
-            std::cout << "poly_noise_times " << d << '\n';
+            //std::cout << "poly_noise_times " << d << '\n';
         }
         for(const double d : poly_enc_times){
-            std::cout << "poly_enc_times " << d << '\n';
+            //std::cout << "poly_enc_times " << d << '\n';
         }
         for(const double d : decrypt_times){
-            std::cout << "decrypt_times " << d << '\n';
+            //std::cout << "decrypt_times " << d << '\n';
         }
 
         return 0;

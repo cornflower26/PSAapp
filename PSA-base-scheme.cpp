@@ -42,7 +42,7 @@ void PSAScheme::SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& priva
             //privateKeys[i].AddRandomNoise(privateKeys[i].GetModulus());
             //privateKeys[i] = DCRTPoly(aggregationKey.GetParams());
             dl.addRandomNoise(privateKeys[i],3,UNIFORM);
-            std::cout << "Private key number " << i << " is " << privateKeys[i] << std::endl;
+            //std::cout << "Private key number " << i << " is " << privateKeys[i] << std::endl;
             //dl.uniform(privateKeys[i]);
         }
         else{
@@ -51,6 +51,6 @@ void PSAScheme::SecretKey(DCRTPoly& aggregationKey, std::vector<DCRTPoly>& priva
 
         aggregationKey -= privateKeys[i];
     }
-    std::cout << "Agg key is " << aggregationKey << std::endl;
+    //std::cout << "Agg key is " << aggregationKey << std::endl;
     return;
 }
