@@ -109,13 +109,22 @@ void handler(int sig) {
         std::vector<double> poly_noise_times;
         std::vector<double> poly_enc_times;
 
-        pp.TestPolynomialEncryption(true, iters, poly_noise_times, poly_enc_times);
+        //pp.TestPolynomialEncryption(true, iters, poly_noise_times, poly_enc_times);
         // pp.TestPolynomialEncryption(1, MAX_CTEXTS_DEFAULT, poly_noise_times, poly_enc_times);
+
+        pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
+
+        std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension()/2,500);
+
+        std::cout << inputvec << std::endl;
+
+        pp.PolynomialEncryption(inputvec, 1, poly_noise_times, poly_enc_times);
 
         std::vector<double> decrypt_times;
 
+        std::vector<double> outputvec = pp.PolynomialDecryption(1, decrypt_times);
 
-        pp.TestPolynomialDecryption(iters, decrypt_times);
+        std::cout << outputvec << std::endl;
 
 
         for(const double d : poly_noise_times){

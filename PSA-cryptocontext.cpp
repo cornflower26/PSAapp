@@ -292,3 +292,50 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
     }
     return;
 }
+
+std::vector<double> PSACryptocontext::PolynomialDecryption(const unsigned int iters, std::vector<double> & dec_times){
+    dec_times.clear();
+    dec_times.reserve(iters);
+    std::vector<double> result;
+
+    for(unsigned int i = 0; i < iters; i++){
+        double dec_time;
+        auto begin = std::chrono::steady_clock::now();
+        result = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, publicKey, dec_time, numUsers);
+        auto end = std::chrono::steady_clock::now();
+        dec_times.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count());
+
+    }
+    return result;
+}
+
+
+void PSACryptocontext::PolynomialEncryption(std::vector<double> inputvec, const unsigned int iter, std::vector<double>& noise_times,
+                                            std::vector<double>& enc_times){
+    DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
+    result.SetValuesToZero();
+    double noise_time, enc_time;
+    result = aggregator.PolynomialEncrypt(inputvec, privateKeys.at(iter % privateKeys.size()), publicKey,
+                                              true,
+                                              noise_time, enc_time, 1);
+    ciphertexts.push_back(result); //Hope this copies it
+    noise_times.push_back(noise_time);
+    enc_times.push_back(enc_time);
+    return;
+}
+
+void PSACryptocontext::PolynomialEnvSetup(std::vector<double>& noise_times, std::vector<double>& enc_times){
+    noise_times.clear();
+    enc_times.clear();
+    aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
+    aggregationKey.SetValuesToZero();
+    aggregator.PublicKey(publicKey, ts);
+    //std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,500);
+    noise_times.reserve(iters);
+    enc_times.reserve(iters);
+    aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
+    if(privateKeys.empty()){
+        throw std::logic_error("Must have at least one private key! (Probably at least 2...)");
+    }
+    return;
+}
