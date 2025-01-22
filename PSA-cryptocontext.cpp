@@ -87,6 +87,7 @@ void PSACryptocontext::genSlapScheme() {
 
     aggregator.delta_mod_q.resize(kPrime);
     aggregator.t_mod_q.resize(kPrime);
+    aggregator.scale_mod_t.resize(kPrime);
 
 
     //BigInteger tmp;
@@ -112,6 +113,7 @@ void PSACryptocontext::genSlapScheme() {
         aggregator.delta_mod_q.at(i) %= qi;
         aggregator.t_mod_q.at(i) = t;
         aggregator.t_mod_q.at(i) %= qi;
+        aggregator.scale_mod_t.at(i) = t/qi;
     }
 
 }

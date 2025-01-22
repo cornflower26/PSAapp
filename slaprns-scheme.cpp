@@ -258,24 +258,31 @@ DCRTPoly SLAPScheme::MSEncrypt(const DCRTPoly &plaintext, const DCRTPoly& privat
     DCRTPoly ret = privateKey*publicKey;
     //Get the error, and scale it by the plaintext modulus
     DCRTPoly e = ciphertextParams.CloneParametersOnly();
+    e.OverrideFormat(COEFFICIENT);
     e.SetValuesToZero();
     //e.error(this->dl);
     dl.addRandomNoise(e,3, UNIFORM);
 
     //std::cout << "Error is " << e << std::endl;
     //Add in the error to make a RLWE term
+    ret.SwitchFormat();
+    ret.OverrideFormat(COEFFICIENT);
     ret += e;
     //Raise x to base q
-    DCRTPoly x_raised = plaintext.Clone();
-    SwitchBasis(x_raised, ciphertextParams);
+    DCRTPoly clone = plaintext.Clone();
+    clone.SwitchFormat();
+    DCRTPoly x_raised = SwitchMod(clone,ciphertextParams);
+    x_raised.OverrideFormat(COEFFICIENT);
     //x_raised.SwitchFormat();
     //DCRTPoly x_raised = ret.SwitchCRTBasis(something);
             //x.base_conv(ctext_parms, *t_to_q);
     //Scale x by delta
-    x_raised.Times(delta_mod_q);
+
+    std::cout << "Before switch " << clone.GetFormat() << " " << clone << std::endl;
+    std::cout << " Basis result " << x_raised.GetFormat() << " " << x_raised << std::endl;
     //Now add the message
     ret += x_raised;
-    ret.SwitchFormat();
+    //ret.SwitchFormat();
     return ret;
 }
 
@@ -334,6 +341,8 @@ DCRTPoly SLAPScheme::NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
 DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly& publicKey,
                                unsigned int num_additions){
     DCRTPoly ret = aggregationKey*publicKey;
+    ret.SwitchFormat();
+    ret.OverrideFormat(COEFFICIENT);
     //Add all the ciphertexts (mod q)
     if(!num_additions){
         num_additions = ciphertexts.size();
@@ -346,9 +355,13 @@ DCRTPoly SLAPScheme::MSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DC
     //Now scale and reduce
     //return ret.scale_down(plain_parms, *q_to_t);
     //SwitchBasis(ret, plaintextParams);
-    ScaleDown(ret,plaintextParams);
+    std::cout << "Before second switch " << ret.GetFormat() << " " << ret << std::endl;
+    //ScaleDown(ret,plaintextParams);
+    ret.Times(scale_mod_t);
+    DCRTPoly ret2 = SwitchMod(ret,plaintextParams);
+    std::cout << "After second switch " << ret2.GetFormat() << " " << ret2 << std::endl;
     //std::cout << "Return modulus is " << ret.GetModulus().ConvertToInt() << std::endl;
-    return ret;
+    return ret2;
 }
 
 DCRTPoly SLAPScheme::PolynomialEncrypt(const std::vector<double>& plaintext,
@@ -411,11 +424,11 @@ std::vector<double> SLAPScheme::PolynomialDecrypt(const std::vector<DCRTPoly>& c
     DCRTPoly ret = (scheme == NS) ?
                    NSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions) : MSDecrypt(ciphertexts, aggregationKey, publicKey, num_additions);
     std::cout << "Here's the decrypted cyphertext from PSA " << ret.GetFormat() << " " <<  ret << std::endl;
-    DCRTPoly e = plaintextParams.CloneParametersOnly();
-    e.SetValuesToZero();
-    e.OverrideFormat(COEFFICIENT);
-    dl.addRandomNoise(e,3, LAPLACIAN);
-    ret += e;
+    //DCRTPoly e = plaintextParams.CloneParametersOnly();
+    //e.SetValuesToZero();
+    //e.OverrideFormat(COEFFICIENT);
+    //dl.addRandomNoise(e,3, LAPLACIAN);
+    //ret += e;
     //TO-DO PUT THIS BACK
     Plaintext decrypted = CKKSContext->GetPlaintextForDecrypt(CKKS_PACKED_ENCODING,
                                                  ret.GetParams(), CKKSContext->GetEncodingParams());

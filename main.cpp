@@ -25,8 +25,8 @@ void handler(int sig) {
         signal(SIGSEGV, handler);
         std::cout << "Hello, World! " << std::endl;
         //DCRTPoly a = DCRTPoly();
-        unsigned int plain_bits = 40; //log t
-        unsigned int num_users = 2; //n
+        unsigned int plain_bits = 15; //log t
+        unsigned int num_users = 1; //n
         unsigned int iters = 1; //i
         unsigned int k_prime = 1; //k
         Scheme scheme1 = NS;
@@ -114,21 +114,16 @@ void handler(int sig) {
 
         pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
 
-        std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension()/2,6);
-        inputvec[2] = 5;
-        std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension()/2,2);
+        for (int i = 0; i < num_users; i++) {
+            std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 3);
+            inputvec[2] = 5;
+            std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 2);
 
-        std::cout << "First input: " << inputvec << std::endl;
+            std::cout << i << " input: " << inputvec << std::endl;
 
-        pp.PolynomialEncryption(inputvec, expvec, 1, poly_noise_times, poly_enc_times);
+            pp.PolynomialEncryption(inputvec, expvec, i, poly_noise_times, poly_enc_times);
+        }
 
-        std::vector<double> inputvec2(pp.aggregator.plaintextParams.GetRingDimension()/2,6);
-        inputvec2[2] = 5;
-        std::vector<double> expvec2(pp.aggregator.plaintextParams.GetRingDimension()/2,2);
-
-        pp.PolynomialEncryption(inputvec2, expvec2, 2, poly_noise_times, poly_enc_times);
-
-        std::cout << "Second Input: " << inputvec2 << std::endl;
 
         std::vector<double> decrypt_times;
 
