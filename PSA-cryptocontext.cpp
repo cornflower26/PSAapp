@@ -75,9 +75,9 @@ void PSACryptocontext::genSlapScheme() {
     aggregator.plaintextParams.SetValuesToZero();
 
     //std::cout << "Plaintext modulus " << aggregator.plaintextParams.GetModulus() << std::endl;
-    std::cout << "Plaintext, M: " << N;
-    std::cout << ", Num of towers: " << numTowers(plain_mod_size);
-    std::cout << ", Pbits : " << plain_mod_size << std::endl;
+    //std::cout << "Plaintext, M: " << N;
+    //std::cout << ", Num of towers: " << numTowers(plain_mod_size);
+    //std::cout << ", Pbits : " << plain_mod_size << std::endl;
 
     BigInteger t = aggregator.plaintextParams.GetModulus();
 
@@ -149,9 +149,9 @@ PSACryptocontext::PSACryptocontext(unsigned int t,
     aggregator.ciphertextParams = DCRTPoly(parms,EVALUATION);
     aggregator.ciphertextParams.SetValuesToZero();
 
-    std::cout << "Ciphertext, M: " << choose_parameters(log_q);
-    std::cout << ", Num of towers: " << numTowers(log_q);
-    std::cout << ", Log_q: " << log_q << std::endl;
+    //std::cout << "Ciphertext, M: " << choose_parameters(log_q);
+    //std::cout << ", Num of towers: " << numTowers(log_q);
+    //std::cout << ", Log_q: " << log_q << std::endl;
     genSlapScheme();
     calculateParams();
 
@@ -276,7 +276,7 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
 
     for(unsigned int i = 0; i < iters; i++){
         double dec_time;
-        double agg_time;
+        //double agg_time;
         auto begin = std::chrono::steady_clock::now();
         result = aggregator.PolynomialDecrypt(ciphertexts, constants, aggregationKey, publicKey, dec_time, numUsers);
         auto end = std::chrono::steady_clock::now();
@@ -298,6 +298,8 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
 }
 
 std::vector<double> PSACryptocontext::PolynomialDecryption(std::vector<double> &constants, const unsigned int iters, std::vector<double> & dec_times){
+    //agg_times.clear();
+    //agg_times.reserve(iters);
     dec_times.clear();
     dec_times.reserve(iters);
     std::vector<double> result;
@@ -307,6 +309,7 @@ std::vector<double> PSACryptocontext::PolynomialDecryption(std::vector<double> &
         auto begin = std::chrono::steady_clock::now();
         result = aggregator.PolynomialDecrypt(ciphertexts, constants, aggregationKey, publicKey, dec_time, numUsers);
         auto end = std::chrono::steady_clock::now();
+        //dec_times.push_back(dec_time);
         dec_times.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count());
 
     }

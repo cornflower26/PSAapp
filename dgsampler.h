@@ -202,7 +202,7 @@ public:
     std::shared_ptr<int64_t> GenerateIntVector(usint size, const double scale, const Distribution dist) {
         std::shared_ptr<int64_t> ans(new int64_t[size], std::default_delete<int64_t[]>());
         for (usint i = 0; i < size; ++i) {
-            int64_t val;
+            int64_t val = 0;
             if (dist == LAPLACIAN){
                 val = dl(scale);
             }

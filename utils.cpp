@@ -10,6 +10,7 @@
 
 using namespace lbcrypto;
 
+
 // Function to calculate the Hamming weight
 static unsigned int hammingWeight(unsigned int n) {
     unsigned int count = 0;
@@ -20,7 +21,7 @@ static unsigned int hammingWeight(unsigned int n) {
     return count;
 }
 
-
+/**
 static std::vector<double> Polynomial_to_double_encoding(const DCRTPoly & p){
     std::vector<double> ret;
     ret.resize(p.GetModulus().ConvertToInt());
@@ -28,8 +29,8 @@ static std::vector<double> Polynomial_to_double_encoding(const DCRTPoly & p){
         ret[i] = p[i].ConvertToDouble();
     }
     return ret;
-}
-
+}**/
+/**
 static DCRTPoly encoding_to_Polynomial(const Plaintext & vals, const DCRTPoly parms){
     DCRTPoly ret = parms.CloneParametersOnly();
     auto intermediate1 = vals->GetPackedValue();
@@ -40,8 +41,8 @@ static DCRTPoly encoding_to_Polynomial(const Plaintext & vals, const DCRTPoly pa
     }
     ret.SetValues(intermediate2, EVALUATION);
     return ret;
-}
-
+}**/
+/**
 static void ppow(DCRTPoly & rop, const  DCRTPoly& a, const uint64_t exp) {
     auto values = a.GetAllElements();
     BigVector ans(values.size(), 5);
@@ -63,13 +64,13 @@ static void ppow(DCRTPoly & rop, const  DCRTPoly& a, const uint64_t exp) {
         rop.SetElementAtIndex(mod_idx, values[mod_idx]);
 
     }
-}
-
+}**/
+/**
 static void ppow(std::vector<double> & noisy_input,const uint64_t e) {
     for(size_t mod_idx = 0; mod_idx < noisy_input.size(); mod_idx++) {
         noisy_input.at(mod_idx) = pow(noisy_input.at(mod_idx),e);
     }
-}
+}**/
 
 static void ppow(std::vector<double> & noisy_input,const std::vector<double> & e) {
     for(size_t mod_idx = 0; mod_idx < noisy_input.size(); mod_idx++) {
@@ -268,6 +269,8 @@ DCRTPolyImpl<BigVector> static SwitchCRTBasis1(const DCRTPoly & paramsP,
 }
 #endif
 **/
+
+/**
 std::vector<std::complex<double>> static Conjugate2(const std::vector<std::complex<double>>& vec) {
     uint32_t n = vec.size();
     std::vector<std::complex<double>> result(n);
@@ -276,8 +279,9 @@ std::vector<std::complex<double>> static Conjugate2(const std::vector<std::compl
     }
     result[0] = {vec[0].real(), -vec[0].imag()};
     return result;
-}
+}**/
 
+/**
 double static StdDev2(const std::vector<std::complex<double>>& vec, const std::vector<std::complex<double>>& conjugate) {
     uint32_t slots = vec.size();
     if (1 == slots) {
@@ -325,8 +329,9 @@ double static StdDev2(const std::vector<std::complex<double>>& vec, const std::v
     double stddev = 0.5 * std::sqrt(variance);
 
     return stddev;
-}
+}**/
 
+/**
 std::vector<double> static Decode(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double scalingFactor, ScalingTechnique scalTech,
                                 ExecutionMode executionMode) {
     double p       = encoding.GetEncodingParams()->GetPlaintextModulus();
@@ -495,11 +500,11 @@ std::vector<double> static Decode(CKKSPackedEncoding & encoding, size_t noiseSca
 
     return realsValue;
     //return false;
-}
+}**/
 
 
 
-
+/**
 double static getStdDev(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double scalingFactor, ScalingTechnique scalTech,
                  ExecutionMode executionMode) {
     double p       = encoding.GetEncodingParams()->GetPlaintextModulus();
@@ -550,10 +555,10 @@ double static getStdDev(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, dou
 
     double logstd = std::log2(stddev);
     return logstd;
-}
+}**/
 
 
-
+/**
 static DCRTPolyImpl<BigVector> ScaleAndRound(
         DCRTPoly input, const std::shared_ptr<ILDCRTParams<bigintdyn::ubint<unsigned long>>> paramsOutput, const std::vector<std::vector<NativeInteger>>& tOSHatInvModsDivsModo,
         const std::vector<double>& tOSHatInvModsDivsFrac, const std::vector<DoubleNativeInt>& modoBarretMu) {
@@ -684,13 +689,13 @@ static DCRTPolyImpl<BigVector> ScaleAndRound(
     return ans;
 }
 #endif
+**/
 
-
-
+/**
 void static Test(DCRTPoly & ciphertext,
         NativePoly* plaintext){
     *plaintext = ciphertext.ToNativePoly();
-}
+}**/
 
 /**
  * Generate an ILDCRTParams with a given number of parms, with cyphertext moduli

@@ -25,13 +25,13 @@ void handler(int sig) {
         signal(SIGSEGV, handler);
         std::cout << "Hello, World! " << std::endl;
         //DCRTPoly a = DCRTPoly();
-        unsigned int plain_bits = 15; //log t
-        unsigned int num_users = 1; //n
-        unsigned int iters = 1; //i
+        unsigned int plain_bits = 16; //log t
+        unsigned int num_users = 50; //n
+        unsigned int iters = 10; //i
         unsigned int k_prime = 1; //k
         Scheme scheme1 = NS;
 
-        unsigned int N = 1; //N
+        unsigned int N; //N
 
         int c;
           while((c = getopt(argc, argv, "t:n:i:k:N:")) != -1){
@@ -78,6 +78,9 @@ void handler(int sig) {
         }
 
         unsigned int MAX_CTEXTS_DEFAULT = 20;
+        MAX_CTEXTS_DEFAULT = N;
+        MAX_CTEXTS_DEFAULT = k_prime;
+        k_prime = MAX_CTEXTS_DEFAULT;
 
         //temp();
 
@@ -114,33 +117,44 @@ void handler(int sig) {
 
         pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
 
-        for (int i = 0; i < num_users; i++) {
+        for (unsigned int i = 0; i < num_users; i++) {
             std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 3);
             inputvec[2] = 5;
             std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 2);
 
-            std::cout << i << " input: " << inputvec << std::endl;
+            //std::cout << i << " input: " << inputvec << std::endl;
 
             pp.PolynomialEncryption(inputvec, expvec, i, poly_noise_times, poly_enc_times);
         }
 
 
         std::vector<double> decrypt_times;
+        std::vector<double> agg_times;
 
         std::vector<double> constants(pp.aggregator.plaintextParams.GetRingDimension()/2,2);
-        std::vector<double> outputvec = pp.PolynomialDecryption(constants, 1, decrypt_times);
+        std::vector<double> outputvec = pp.PolynomialDecryption(constants, iters, decrypt_times);
 
         std::cout << "Final output: " << outputvec << std::endl;
 
 
+        std::cout << "poly_noise_times " << '\n';
+        int i = 0;
         for(const double d : poly_noise_times){
-            //std::cout << "poly_noise_times " << d << '\n';
+            if (i % 100 == 0) std::cout << d << '\n';
+            i++;
         }
+        i = 0;
+        std::cout << "poly_enc_times " << '\n';
         for(const double d : poly_enc_times){
-            //std::cout << "poly_enc_times " << d << '\n';
+            if (i % 100 == 0) std::cout << d << '\n';
+            i++;
         }
+        //for (const double d: agg_times){
+        //    std::cout << "poly_agg_times " << d << '\n';
+        //}
+        std::cout << "decrypt_times " << '\n';
         for(const double d : decrypt_times){
-            //std::cout << "decrypt_times " << d << '\n';
+            std::cout << d << '\n';
         }
 
         return 0;
