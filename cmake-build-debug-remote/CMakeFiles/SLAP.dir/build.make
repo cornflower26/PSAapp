@@ -139,9 +139,9 @@ SLAP: CMakeFiles/SLAP.dir/PSA-cryptocontext.cpp.o
 SLAP: CMakeFiles/SLAP.dir/PSA-base-scheme.cpp.o
 SLAP: CMakeFiles/SLAP.dir/utils.cpp.o
 SLAP: CMakeFiles/SLAP.dir/build.make
-SLAP: /usr/local/lib/libOPENFHEpke.so.1.0.3
-SLAP: /usr/local/lib/libOPENFHEbinfhe.so.1.0.3
-SLAP: /usr/local/lib/libOPENFHEcore.so.1.0.3
+SLAP: /usr/local/lib/libOPENFHEpke.so.1.2.3
+SLAP: /usr/local/lib/libOPENFHEbinfhe.so.1.2.3
+SLAP: /usr/local/lib/libOPENFHEcore.so.1.2.3
 SLAP: CMakeFiles/SLAP.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ajanusze/SLAP/cmake-build-debug-remote/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable SLAP"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/SLAP.dir/link.txt --verbose=$(VERBOSE)

@@ -1,7 +1,10 @@
 /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/ninja -G Ninja -S /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP -B /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local
+-- FOUND PACKAGE OpenFHE
+-- OpenFHE Version: 1.1.1
+-- OpenFHE installed as shared libraries: ON
+-- OpenFHE include files location: /usr/local/include/openfhe
+-- OpenFHE lib files location: /usr/local/lib
+-- OpenFHE Native Backend size: 64
 -- Configuring done (0.1s)
 -- Generating done (0.0s)
 -- Build files have been written to: /Users/antoniajanuszewicz/Downloads/NDPSA/SLAP/cmake-build-local
-
-Problems were encountered while collecting compiler information:
-	clang: error: unsupported option '-fopenmp'

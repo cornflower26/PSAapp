@@ -125,10 +125,24 @@ CMakeFiles/SLAP.dir/PSA-base-scheme.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SLAP.dir/PSA-base-scheme.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ajanusze/SLAP/PSA-base-scheme.cpp -o CMakeFiles/SLAP.dir/PSA-base-scheme.cpp.s
 
+CMakeFiles/SLAP.dir/fhe_inference.cpp.o: CMakeFiles/SLAP.dir/flags.make
+CMakeFiles/SLAP.dir/fhe_inference.cpp.o: ../fhe_inference.cpp
+CMakeFiles/SLAP.dir/fhe_inference.cpp.o: CMakeFiles/SLAP.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/SLAP.dir/fhe_inference.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SLAP.dir/fhe_inference.cpp.o -MF CMakeFiles/SLAP.dir/fhe_inference.cpp.o.d -o CMakeFiles/SLAP.dir/fhe_inference.cpp.o -c /home/ajanusze/SLAP/fhe_inference.cpp
+
+CMakeFiles/SLAP.dir/fhe_inference.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SLAP.dir/fhe_inference.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ajanusze/SLAP/fhe_inference.cpp > CMakeFiles/SLAP.dir/fhe_inference.cpp.i
+
+CMakeFiles/SLAP.dir/fhe_inference.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SLAP.dir/fhe_inference.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ajanusze/SLAP/fhe_inference.cpp -o CMakeFiles/SLAP.dir/fhe_inference.cpp.s
+
 CMakeFiles/SLAP.dir/utils.cpp.o: CMakeFiles/SLAP.dir/flags.make
 CMakeFiles/SLAP.dir/utils.cpp.o: ../utils.cpp
 CMakeFiles/SLAP.dir/utils.cpp.o: CMakeFiles/SLAP.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/SLAP.dir/utils.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/SLAP.dir/utils.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SLAP.dir/utils.cpp.o -MF CMakeFiles/SLAP.dir/utils.cpp.o.d -o CMakeFiles/SLAP.dir/utils.cpp.o -c /home/ajanusze/SLAP/utils.cpp
 
 CMakeFiles/SLAP.dir/utils.cpp.i: cmake_force
@@ -139,13 +153,44 @@ CMakeFiles/SLAP.dir/utils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SLAP.dir/utils.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ajanusze/SLAP/utils.cpp -o CMakeFiles/SLAP.dir/utils.cpp.s
 
+CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.o: CMakeFiles/SLAP.dir/flags.make
+CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.o: ../psa_inference_polynomial_generator.cpp
+CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.o: CMakeFiles/SLAP.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.o -MF CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.o.d -o CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.o -c /home/ajanusze/SLAP/psa_inference_polynomial_generator.cpp
+
+CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ajanusze/SLAP/psa_inference_polynomial_generator.cpp > CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.i
+
+CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ajanusze/SLAP/psa_inference_polynomial_generator.cpp -o CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.s
+
+CMakeFiles/SLAP.dir/chunk_reader.cpp.o: CMakeFiles/SLAP.dir/flags.make
+CMakeFiles/SLAP.dir/chunk_reader.cpp.o: ../chunk_reader.cpp
+CMakeFiles/SLAP.dir/chunk_reader.cpp.o: CMakeFiles/SLAP.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/SLAP.dir/chunk_reader.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SLAP.dir/chunk_reader.cpp.o -MF CMakeFiles/SLAP.dir/chunk_reader.cpp.o.d -o CMakeFiles/SLAP.dir/chunk_reader.cpp.o -c /home/ajanusze/SLAP/chunk_reader.cpp
+
+CMakeFiles/SLAP.dir/chunk_reader.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/SLAP.dir/chunk_reader.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ajanusze/SLAP/chunk_reader.cpp > CMakeFiles/SLAP.dir/chunk_reader.cpp.i
+
+CMakeFiles/SLAP.dir/chunk_reader.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/SLAP.dir/chunk_reader.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ajanusze/SLAP/chunk_reader.cpp -o CMakeFiles/SLAP.dir/chunk_reader.cpp.s
+
 # Object files for target SLAP
 SLAP_OBJECTS = \
 "CMakeFiles/SLAP.dir/main.cpp.o" \
 "CMakeFiles/SLAP.dir/slaprns-scheme.cpp.o" \
 "CMakeFiles/SLAP.dir/PSA-cryptocontext.cpp.o" \
 "CMakeFiles/SLAP.dir/PSA-base-scheme.cpp.o" \
-"CMakeFiles/SLAP.dir/utils.cpp.o"
+"CMakeFiles/SLAP.dir/fhe_inference.cpp.o" \
+"CMakeFiles/SLAP.dir/utils.cpp.o" \
+"CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.o" \
+"CMakeFiles/SLAP.dir/chunk_reader.cpp.o"
 
 # External object files for target SLAP
 SLAP_EXTERNAL_OBJECTS =
@@ -154,13 +199,16 @@ SLAP: CMakeFiles/SLAP.dir/main.cpp.o
 SLAP: CMakeFiles/SLAP.dir/slaprns-scheme.cpp.o
 SLAP: CMakeFiles/SLAP.dir/PSA-cryptocontext.cpp.o
 SLAP: CMakeFiles/SLAP.dir/PSA-base-scheme.cpp.o
+SLAP: CMakeFiles/SLAP.dir/fhe_inference.cpp.o
 SLAP: CMakeFiles/SLAP.dir/utils.cpp.o
+SLAP: CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.o
+SLAP: CMakeFiles/SLAP.dir/chunk_reader.cpp.o
 SLAP: CMakeFiles/SLAP.dir/build.make
 SLAP: /usr/local/lib/libOPENFHEpke.so.1.2.1
 SLAP: /usr/local/lib/libOPENFHEbinfhe.so.1.2.1
 SLAP: /usr/local/lib/libOPENFHEcore.so.1.2.1
 SLAP: CMakeFiles/SLAP.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable SLAP"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable SLAP"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/SLAP.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -81,12 +81,12 @@ clean: CMakeFiles/SLAP.dir/clean
 CMakeFiles/SLAP.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target SLAP"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9 "Built target SLAP"
 .PHONY : CMakeFiles/SLAP.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/SLAP.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles 9
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/SLAP.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ajanusze/SLAP/cmake-build-debug-remote-second/CMakeFiles 0
 .PHONY : CMakeFiles/SLAP.dir/rule

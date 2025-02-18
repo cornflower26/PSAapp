@@ -45,6 +45,7 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/usr/local/include/openfhe"/>
+					<Add directory="/usr/local/include/openfhe/third-party/include"/>
 					<Add directory="/usr/local/include/openfhe/core"/>
 					<Add directory="/usr/local/include/openfhe/pke"/>
 					<Add directory="/usr/local/include/openfhe/binfhe"/>
@@ -71,6 +72,7 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/usr/local/include/openfhe"/>
+					<Add directory="/usr/local/include/openfhe/third-party/include"/>
 					<Add directory="/usr/local/include/openfhe/core"/>
 					<Add directory="/usr/local/include/openfhe/pke"/>
 					<Add directory="/usr/local/include/openfhe/binfhe"/>

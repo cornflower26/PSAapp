@@ -25,6 +25,7 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/usr/local/include/openfhe"/>
+					<Add directory="/usr/local/include/openfhe/third-party/include"/>
 					<Add directory="/usr/local/include/openfhe/core"/>
 					<Add directory="/usr/local/include/openfhe/pke"/>
 					<Add directory="/usr/local/include/openfhe/binfhe"/>
@@ -51,6 +52,7 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add directory="/usr/local/include/openfhe"/>
+					<Add directory="/usr/local/include/openfhe/third-party/include"/>
 					<Add directory="/usr/local/include/openfhe/core"/>
 					<Add directory="/usr/local/include/openfhe/pke"/>
 					<Add directory="/usr/local/include/openfhe/binfhe"/>
@@ -105,10 +107,19 @@
 		<Unit filename="/home/ajanusze/SLAP/PSA-cryptocontext.h">
 			<Option target="SLAP"/>
 		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/chunk_reader.cpp">
+			<Option target="SLAP"/>
+		</Unit>
 		<Unit filename="/home/ajanusze/SLAP/dgsampler.h">
 			<Option target="SLAP"/>
 		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/fhe_inference.cpp">
+			<Option target="SLAP"/>
+		</Unit>
 		<Unit filename="/home/ajanusze/SLAP/main.cpp">
+			<Option target="SLAP"/>
+		</Unit>
+		<Unit filename="/home/ajanusze/SLAP/psa_inference_polynomial_generator.cpp">
 			<Option target="SLAP"/>
 		</Unit>
 		<Unit filename="/home/ajanusze/SLAP/slaprns-scheme.cpp">

@@ -49,7 +49,10 @@ add_executable(SLAP main.cpp
         slaprns-scheme.cpp
         PSA-cryptocontext.cpp
         PSA-base-scheme.cpp
-        utils.cpp)
+        fhe_inference.cpp
+        utils.cpp
+        psa_inference_polynomial_generator.cpp
+        chunk_reader.cpp)
 
 
 

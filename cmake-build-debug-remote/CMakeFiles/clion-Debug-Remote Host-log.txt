@@ -1,4 +1,22 @@
 /usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/ajanusze/SLAP -B /home/ajanusze/SLAP/cmake-build-debug-remote
+-- FOUND PACKAGE OpenFHE
+-- OpenFHE Version: 1.2.3
+-- OpenFHE installed as shared libraries: ON
+-- OpenFHE include files location: /usr/local/include/openfhe
+-- OpenFHE lib files location: /usr/local/lib
+-- OpenFHE Native Backend size: 64
 -- Configuring done
--- Generating done
--- Build files have been written to: /home/ajanusze/SLAP/cmake-build-debug-remote
+CMake Error at CMakeLists.txt:43 (add_executable):
+  Cannot find source file:
+
+    fhe_inference.cpp
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .m .M .mm .h .hh .h++ .hm
+  .hpp .hxx .in .txx
+
+
+CMake Error at CMakeLists.txt:43 (add_executable):
+  No SOURCES given to target: SLAP
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.

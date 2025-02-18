@@ -177,6 +177,54 @@ PSA-cryptocontext.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/PSA-cryptocontext.cpp.s
 .PHONY : PSA-cryptocontext.cpp.s
 
+chunk_reader.o: chunk_reader.cpp.o
+.PHONY : chunk_reader.o
+
+# target to build an object file
+chunk_reader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/chunk_reader.cpp.o
+.PHONY : chunk_reader.cpp.o
+
+chunk_reader.i: chunk_reader.cpp.i
+.PHONY : chunk_reader.i
+
+# target to preprocess a source file
+chunk_reader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/chunk_reader.cpp.i
+.PHONY : chunk_reader.cpp.i
+
+chunk_reader.s: chunk_reader.cpp.s
+.PHONY : chunk_reader.s
+
+# target to generate assembly for a file
+chunk_reader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/chunk_reader.cpp.s
+.PHONY : chunk_reader.cpp.s
+
+fhe_inference.o: fhe_inference.cpp.o
+.PHONY : fhe_inference.o
+
+# target to build an object file
+fhe_inference.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/fhe_inference.cpp.o
+.PHONY : fhe_inference.cpp.o
+
+fhe_inference.i: fhe_inference.cpp.i
+.PHONY : fhe_inference.i
+
+# target to preprocess a source file
+fhe_inference.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/fhe_inference.cpp.i
+.PHONY : fhe_inference.cpp.i
+
+fhe_inference.s: fhe_inference.cpp.s
+.PHONY : fhe_inference.s
+
+# target to generate assembly for a file
+fhe_inference.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/fhe_inference.cpp.s
+.PHONY : fhe_inference.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -200,6 +248,30 @@ main.s: main.cpp.s
 main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/main.cpp.s
 .PHONY : main.cpp.s
+
+psa_inference_polynomial_generator.o: psa_inference_polynomial_generator.cpp.o
+.PHONY : psa_inference_polynomial_generator.o
+
+# target to build an object file
+psa_inference_polynomial_generator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.o
+.PHONY : psa_inference_polynomial_generator.cpp.o
+
+psa_inference_polynomial_generator.i: psa_inference_polynomial_generator.cpp.i
+.PHONY : psa_inference_polynomial_generator.i
+
+# target to preprocess a source file
+psa_inference_polynomial_generator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.i
+.PHONY : psa_inference_polynomial_generator.cpp.i
+
+psa_inference_polynomial_generator.s: psa_inference_polynomial_generator.cpp.s
+.PHONY : psa_inference_polynomial_generator.s
+
+# target to generate assembly for a file
+psa_inference_polynomial_generator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SLAP.dir/build.make CMakeFiles/SLAP.dir/psa_inference_polynomial_generator.cpp.s
+.PHONY : psa_inference_polynomial_generator.cpp.s
 
 slaprns-scheme.o: slaprns-scheme.cpp.o
 .PHONY : slaprns-scheme.o
@@ -264,9 +336,18 @@ help:
 	@echo "... PSA-cryptocontext.o"
 	@echo "... PSA-cryptocontext.i"
 	@echo "... PSA-cryptocontext.s"
+	@echo "... chunk_reader.o"
+	@echo "... chunk_reader.i"
+	@echo "... chunk_reader.s"
+	@echo "... fhe_inference.o"
+	@echo "... fhe_inference.i"
+	@echo "... fhe_inference.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... psa_inference_polynomial_generator.o"
+	@echo "... psa_inference_polynomial_generator.i"
+	@echo "... psa_inference_polynomial_generator.s"
 	@echo "... slaprns-scheme.o"
 	@echo "... slaprns-scheme.i"
 	@echo "... slaprns-scheme.s"
