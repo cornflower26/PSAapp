@@ -2,6 +2,9 @@
 // Created by Antonia Januszewicz on 2/17/25.
 //
 #include "fhe_inference.cpp"
+#ifndef GENERATOR
+
+#define GENERATOR
 
 // Coefficient structure
 struct VectorElement {
@@ -10,7 +13,7 @@ struct VectorElement {
 
 // Term with coefficient structure with exponent
 struct Term {
-    std::vector<std::pair<int, int>> variables;
+    std::vector<std::pair<int, int>> variables; //index, exponent
     double coefficient;
 };
 
@@ -22,7 +25,7 @@ using ExpressionMatrix = std::vector<std::vector<Expression>>;
 
 
 // Helper function to get canonical form of variables (sorted)
-std::vector<std::pair<int, int>> getCanonicalVariables(std::vector<std::pair<int, int>> vars) {
+static std::vector<std::pair<int, int>> getCanonicalVariables(std::vector<std::pair<int, int>> vars) {
     std::sort(vars.begin(), vars.end());
     return vars;
 }
@@ -58,7 +61,7 @@ struct TermKey {
 };
 
 // Helper function to add two expressions together with like term combination
-Expression addExpressions(const Expression& e1, const Expression& e2) {
+static Expression addExpressions(const Expression& e1, const Expression& e2) {
     Expression result;
 
     // Use map to combine like terms efficiently
@@ -92,7 +95,7 @@ Expression addExpressions(const Expression& e1, const Expression& e2) {
 }
 
 // Function to add two vectors of expressions
-std::vector<Expression> addVectors(
+static std::vector<Expression> addVectors(
         const std::vector<Expression>& vec1,
         const std::vector<Expression>& vec2) {
 
@@ -111,7 +114,7 @@ std::vector<Expression> addVectors(
     return result;
 }
 // Helper function to cube a single expression
-Expression cubeExpression(const Expression& expr) {
+static Expression cubeExpression(const Expression& expr) {
     Expression result;
 
     // First multiply expr * expr to get square
@@ -169,7 +172,7 @@ Expression cubeExpression(const Expression& expr) {
 }
 
 // Function to cube a vector of expressions
-std::vector<Expression> cubeVector(const std::vector<Expression>& vec) {
+static std::vector<Expression> cubeVector(const std::vector<Expression>& vec) {
     std::vector<Expression> result;
     result.reserve(vec.size());
 
@@ -181,7 +184,7 @@ std::vector<Expression> cubeVector(const std::vector<Expression>& vec) {
     return result;
 }
 
-Expression multiply_expression_by_scalar(const Expression& expr, double scalar) {
+static Expression multiply_expression_by_scalar(const Expression& expr, double scalar) {
     Expression result = expr;
     for (auto& term : result.terms) {
         term.coefficient *= scalar;
@@ -190,7 +193,7 @@ Expression multiply_expression_by_scalar(const Expression& expr, double scalar) 
 }
 
 // Function to multiply a vector of expressions by a scalar
-std::vector<Expression> multiplyVectorByScalar(
+static std::vector<Expression> multiplyVectorByScalar(
         const std::vector<Expression>& vec,
         double scalar) {
 
@@ -206,7 +209,7 @@ std::vector<Expression> multiplyVectorByScalar(
 }
 
 // Function to multiply a vector of expressions by a matrix of scalars
-std::vector<Expression> multiplyVectorByScalarMatrix(
+static std::vector<Expression> multiplyVectorByScalarMatrix(
         const std::vector<Expression>& vec,
         const std::vector<std::vector<double>>& matrix) {
 
@@ -241,7 +244,7 @@ std::vector<Expression> multiplyVectorByScalarMatrix(
 }
 
 // Matrix by vector multiplication
-Expression multiply_matrix_row_by_vector(const std::vector<double>& row, size_t vec_size) {
+static Expression multiply_matrix_row_by_vector(const std::vector<double>& row, size_t vec_size) {
     Expression result;
 
     for (size_t i = 0; i < row.size(); i++) {
@@ -258,7 +261,7 @@ Expression multiply_matrix_row_by_vector(const std::vector<double>& row, size_t 
 
 
 // Print the expressions
-void print_term(const Term& term, std::ofstream& file) {
+static void print_term(const Term& term, std::ofstream& file) {
     if (term.coefficient == 0) return;
 
     if (term.coefficient > 0 && term.coefficient != 1)
@@ -277,7 +280,7 @@ void print_term(const Term& term, std::ofstream& file) {
     }
 }
 
-void print_expression(const Expression& expr, std::ofstream &file) {
+static void print_expression(const Expression& expr, std::ofstream &file) {
     bool first = true;
     for (const auto& term : expr.terms) {
         if (!first && term.coefficient > 0) file << " + ";
@@ -288,7 +291,7 @@ void print_expression(const Expression& expr, std::ofstream &file) {
     file << "\n";
 }
 
-void print_matrix(const ExpressionMatrix& matrix, std::ofstream& file) {
+static void print_matrix(const ExpressionMatrix& matrix, std::ofstream& file) {
     for (const auto& row : matrix) {
         for (const auto& expr : row) {
             print_expression(expr, file);
@@ -298,7 +301,7 @@ void print_matrix(const ExpressionMatrix& matrix, std::ofstream& file) {
     }
 }
 // Function to extract coefficients from a vector of expressions
-std::vector<std::vector<double>> extractCoefficients(const std::vector<Expression>& expressions) {
+static std::vector<std::vector<double>> extractCoefficients(const std::vector<Expression>& expressions) {
     std::vector<std::vector<double>> coefficients;
     coefficients.reserve(expressions.size());
 
@@ -319,7 +322,7 @@ std::vector<std::vector<double>> extractCoefficients(const std::vector<Expressio
 }
 
 // Function to extract exponents of a specific variable from a vector of expressions
-std::vector<std::vector<int>> extractVariableExponents(
+static std::vector<std::vector<int>> extractVariableExponents(
         const std::vector<Expression>& expressions,
         int variableIndex) {
 
@@ -354,7 +357,64 @@ std::vector<std::vector<int>> extractVariableExponents(
     return exponents;
 }
 
-std::vector<Expression> multiply_matrix_by_vector(
+// Helper function to find the maximum variable index in an expression
+static int findMaxVariableIndex(const Expression& expr) {
+    int maxIndex = -1;
+    for (const Term& term : expr.terms) {
+        for (const auto& var : term.variables) {
+            maxIndex = std::max(maxIndex, var.first);
+        }
+    }
+    return maxIndex;
+}
+
+// Function to append two expression vectors with incremented variable indices for second vector
+static std::vector<Expression> appendExpressionVectorsWithNewVariables(
+        const std::vector<Expression>& vec1,
+        const std::vector<Expression>& vec2) {
+
+    if (vec1.size() != vec2.size()) {
+        throw std::invalid_argument("Vector sizes must match for appending");
+    }
+
+    std::vector<Expression> result;
+    result.reserve(vec1.size());
+
+    // Find maximum variable index across all expressions in vec1
+    int maxIndex = -1;
+    for (const Expression& expr : vec1) {
+        maxIndex = std::max(maxIndex, findMaxVariableIndex(expr));
+    }
+    maxIndex++; // Start new indices from here
+
+    // For each pair of expressions
+    for (size_t i = 0; i < vec1.size(); ++i) {
+        Expression combinedExpr;
+
+        // Add all terms from first expression as is
+        combinedExpr.terms = vec1[i].terms;
+
+        // Add terms from second expression with incremented variable indices
+        for (const Term& term : vec2[i].terms) {
+            Term newTerm;
+            newTerm.coefficient = term.coefficient;
+
+            // Increment variable indices
+            for (const auto& var : term.variables) {
+                newTerm.variables.push_back({var.first + maxIndex, var.second});
+            }
+
+            combinedExpr.terms.push_back(newTerm);
+        }
+
+        result.push_back(combinedExpr);
+    }
+
+    return result;
+}
+
+
+static std::vector<Expression> multiply_matrix_by_vector(
         const std::vector<std::vector<double>>& matrix,
         size_t vector_size) {
 
@@ -371,7 +431,7 @@ std::vector<Expression> multiply_matrix_by_vector(
 }
 
 
-int generate() {
+static int generate() {
     const int EMBEDDING_SIZE = 128;
     const int STEP_NUM = 128;
     int sample_num = 256;
@@ -415,45 +475,59 @@ int generate() {
     int batch_id = 0;
     std::cout << std::endl;
 
-    std::vector<std::vector<double>> matrix(128, std::vector<double>(128));
+    std::vector<std::vector<double>> ih_matrix(128, std::vector<double>(128));
     for (int i = 0; i < 128; i++) {
         std::vector<double> row(std::vector<double>(128));
         for (int j = 0; j < 128; j++) {
             row[j] = rnn_ih_t[i * 128 + j];
         }
-        matrix[i] = row;
+        ih_matrix[i] = row;
     }
-    std::vector<std::vector<double>> matrix2(2, std::vector<double>(128));
+    std::vector<std::vector<double>> hh_matrix(128, std::vector<double>(128));
+    for (int i = 0; i < 128; i++) {
+        std::vector<double> row(std::vector<double>(128));
+        for (int j = 0; j < 128; j++) {
+            row[j] = rnn_ih_t[i * 128 + j];
+        }
+        hh_matrix[i] = row;
+    }
+    std::vector<std::vector<double>> fc_matrix(2, std::vector<double>(128));
     for (int i = 0; i < 2; i++) {
         std::vector<double> row(std::vector<double>(128));
         for (int j = 0; j < 128; j++) {
             row[j] = fc_weight_t[i * 128 + j];
         }
-        matrix2[i] = row;
+        fc_matrix[i] = row;
     }
     std::cout << "Matrix formation " << std::endl;
-    auto rnn_1 = multiply_matrix_by_vector(matrix, 128);
+    auto rnn_ih = multiply_matrix_by_vector(ih_matrix, 128);
+    auto rnn_hh = multiply_matrix_by_vector(hh_matrix, 128);
     std::cout << "Finished matrix multiplication 1" << std::endl;
 
-    auto cube = cubeVector(rnn_1);
+    auto sumInputVectors = appendExpressionVectorsWithNewVariables(rnn_ih, rnn_hh);
+
+    auto cube = cubeVector(sumInputVectors);
     std::cout << "Finished cubing " << std::endl;
 
-    auto mid = multiplyVectorByScalar(cube, -0.10484599);
+    auto mid = multiplyVectorByScalar(cube, -0.00163574303018748);
     std::cout << "Finished first scalar multiplication " << std::endl;
-    auto mid2 = multiplyVectorByScalar(rnn_1, 0.86501289);
+    auto mid2 = multiplyVectorByScalar(sumInputVectors, 0.249476365628036);
     std::cout << "Finished second scalar multiplication " << std::endl;
 
     auto rnn_2 = addVectors(mid, mid2);
-    std::cout << "Finished vector addition " << std::endl;
+    std::cout << "Finished vector addition and Hidden Layer" << std::endl;
 
-    auto rnn_3 = multiplyVectorByScalarMatrix(rnn_2, matrix2);
-    std::cout << "Finished second matrix multiplication " << std::endl;
 
-    std::ofstream outFile("files/BigOutput.txt");
+
+    auto rnn_3 = multiply_matrix_by_vector(fc_matrix,128);
+    std::cout << "Finished matrix multiplication Fully Connected Layer" << std::endl;
+
+
+    std::ofstream outFile("BigOutput4.txt");
 
 
     std::cout << "Result vector:\n";
-    for (const auto &element: rnn_3) {
+    for (const auto &element: rnn_2) {
         if (outFile.is_open()) print_expression(element, outFile);
         //outFile << "term";
         outFile << " \n";
@@ -462,12 +536,13 @@ int generate() {
 // Close the file
     outFile.close();
 
-    std::ofstream outFile1("files/CoeffOutput.txt");
-    std::cout << "Coefficients: \n";
 
-    std::vector<std::vector<double>> a = extractCoefficients(rnn_3);
+    std::ofstream outFile1("CoeffHiddenOutput.txt");
+    std::cout << "Coefficients for hidden layer \n";
+
+    std::vector<std::vector<double>> hidden_coeff = extractCoefficients(rnn_2);
 //outFile1 << extractCoefficients(rnn_3);
-    for (std::vector<double> elements: a) {
+    for (std::vector<double> elements: hidden_coeff) {
         for (double element: elements) {
             outFile1 << element << ",";
         }
@@ -476,10 +551,45 @@ int generate() {
 
 // Close the file
     outFile1.close();
-    std::cout << "\n";
+
+    std::ofstream outFile2("CoeffFCOutput.txt");
+    std::cout << "Coefficients for FC Layer \n";
+
+    std::vector<std::vector<double>> fc_coeff = extractCoefficients(rnn_3);
+//outFile1 << extractCoefficients(rnn_3);
+    for (std::vector<double> elements: fc_coeff) {
+        for (double element: elements) {
+            outFile2 << element << ",";
+        }
+        outFile2 << "\n";
+    }
+
+// Close the file
+    outFile2.close();
+
+
+    std::cout << "Hidden variables\n";
+    for (int i = 0; i < 256; i++) {
+        std::string name = "x";
+        name.append(std::to_string(i));
+        name.append("variablehl.txt");
+        std::ofstream outFilen(name);
+        std::vector<std::vector<int>> b = extractVariableExponents(rnn_2, i + 1);
+            for (std::vector<int> elements: b) {
+                for (int element: elements) {
+                    outFilen << element << ",";
+                }
+                outFilen << "\n";
+            }
+        // Close the file
+        outFilen.close();
+    }
+
+    std::cout << "FC variables\n";
     for (int i = 0; i < 128; i++) {
-        std::string name = "files/x" + std::to_string(i);
-        name += "variable.txt";
+        std::string name = "x";
+        name.append(std::to_string(i));
+        name.append("variablefc.txt");
         std::ofstream outFilen(name);
         std::vector<std::vector<int>> b = extractVariableExponents(rnn_3, i + 1);
         for (std::vector<int> elements: b) {
@@ -488,14 +598,19 @@ int generate() {
             }
             outFilen << "\n";
         }
-        std::cout << "\n";
-
-
         // Close the file
         outFilen.close();
     }
+
+
 // Restore cout to its original state
-    std::cout << a.size() << " number of terms" << std::endl;
-    std::cout << a[0].size() << " number of columns " << std::endl;
+    std::cout << hidden_coeff.size() << " number of outputs for hidden" << std::endl;
+    std::cout << hidden_coeff[0].size() << " number of terms for hidden" << std::endl;
+
+    std::cout << fc_coeff.size() << " number of output for FC" << std::endl;
+    std::cout << fc_coeff[0].size() << " number of terms for FC " << std::endl;
+
+    return 1;
 }
 
+#endif GENERATOR
