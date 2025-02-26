@@ -247,110 +247,111 @@ int main() {
         batched_hidden_ref = result_ref;
     }
 
-    std::vector<double> embedding(EMBEDDING_SIZE*STEP_NUM);
-    for (int i = 0; i < STEP_NUM; i++) {
-        for (int j = 0; j < EMBEDDING_SIZE; j++) {
-            embedding[i * EMBEDDING_SIZE + j] = embedding_in[i * EMBEDDING_SIZE + j];
+    std::vector<std::pair<double, double>> inference;
+    for (int b = 0; b < 256; b++) {
+        std::vector<double> embedding(EMBEDDING_SIZE * STEP_NUM);
+        for (int i = 0; i < STEP_NUM; i++) {
+            for (int j = 0; j < EMBEDDING_SIZE; j++) {
+                embedding[i * EMBEDDING_SIZE + j] = embedding_in[(b*EMBEDDING_SIZE+i) * EMBEDDING_SIZE + j];
+            }
         }
-    }
 
-    int numInferences = STEP_NUM;
+        int numInferences = STEP_NUM;
 
-    std::pair<double, double> inference;
+        std::vector<double> layer_output(128, 0);
+        std::vector<double> layer_input(128, 0);
+        for (int k = 0; k < STEP_NUM; k++) {
+            std::cout << "step " << std::to_string(k + 1) << "/" << STEP_NUM << std::endl;
+            ChunkReader reader("CoeffHiddenOutput.txt", 256);
 
-    std::vector<double> layer_output(128,0);
-    std::vector<double> layer_input(128,0);
-    for (int k = 0; k < STEP_NUM; k++) {
-        std::cout << "step " << std::to_string(k+1) << "/" << STEP_NUM << std::endl;
-        ChunkReader reader("CoeffHiddenOutput.txt", 256);
+            int which = 0;
+            while (reader.hasNext()) {
+                PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
+                std::vector<double> poly_noise_times, poly_enc_times;
+                pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
 
-        int which = 0;
-        while (reader.hasNext()) {
+                std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 1);
+                //std::cout << pp.aggregator.plaintextParams.GetRingDimension() << expvec << std::endl;
+                //variables[i].nextChunk(expvec, flag);
+                std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2,
+                                             0);
+                for (int i = 0; i < 256; i++) {
+                    if (i < 128) inputvec[i] = embedding[k * EMBEDDING_SIZE + i];
+                    else inputvec[i] = layer_input[i % 128];
+                }
+                //std::cout << inputvec << std::endl;
+
+
+                pp.PolynomialEncryption(
+                        inputvec, expvec, 1, poly_noise_times, poly_enc_times);
+
+
+                std::vector<double> decrypt_times, agg_times;
+                std::vector<double> constants(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
+                bool flag = 0;
+                std::vector<double> chunk;
+                reader.nextChunk(chunk, flag);
+                for (int i = 0; i < chunk.size(); i++) constants[i] = chunk[i];
+                if (flag) which++;
+
+                //std::cout << constants << constants.size() << std::endl;
+                std::vector<double> outputvec = pp.PolynomialDecryption(constants, iters, decrypt_times);
+                for (int b = 0; b < 256; b++) layer_output[which] += outputvec[b];
+                //std::cout << " " << which << " : " << layer_output[which];
+            }
+
+            //std::cout << std::endl;
+            for (int a = 0; a < layer_output.size(); a++) layer_output[a] = activation(layer_output[a]);
+            std::cout << "Layer output: " << layer_output << std::endl;
+            layer_input = layer_output;
+
+            for (int a = 0; a < layer_output.size(); a++) layer_output[a] = 0;
+
+        }
+        std::cout << "Final Layer Result for RNN " << layer_input << std::endl;
+
+        ChunkReader reader2("CoeffFCOutput.txt", 128);
+        std::vector<double> fc_input = layer_input;
+        bool which2 = 0;
+        double total1, total2 = 0;
+        while (reader2.hasNext()) {
             PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
             std::vector<double> poly_noise_times, poly_enc_times;
             pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
 
             std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 1);
             //std::cout << pp.aggregator.plaintextParams.GetRingDimension() << expvec << std::endl;
-            //variables[i].nextChunk(expvec, flag);
+            bool flag = 0;
+            //variables2[i].nextChunk(expvec, flag);
             std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2,
                                          0);
-            for (int i = 0; i < 256; i++) {
-                if (i < 128) inputvec[i] = embedding[k * EMBEDDING_SIZE + i];
-                else inputvec[i] = layer_input[i % 128];
+            for (int i = 0; i < 128; i++) {
+                inputvec[i] = fc_input[i];
             }
-            //std::cout << inputvec << std::endl;
-
-
             pp.PolynomialEncryption(
                     inputvec, expvec, 1, poly_noise_times, poly_enc_times);
 
 
             std::vector<double> decrypt_times, agg_times;
             std::vector<double> constants(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
-            bool flag = 0;
             std::vector<double> chunk;
-            reader.nextChunk(chunk, flag);
+            reader2.nextChunk(chunk, flag);
             for (int i = 0; i < chunk.size(); i++) constants[i] = chunk[i];
-            if (flag) which++;
+            if (flag) which2 = 1;
 
-            //std::cout << constants << constants.size() << std::endl;
             std::vector<double> outputvec = pp.PolynomialDecryption(constants, iters, decrypt_times);
-            for (int b = 0; b < 256; b++) layer_output[which] += outputvec[b];
-            //std::cout << " " << which << " : " << layer_output[which];
+            if (!which2) for (int b = 0; b < outputvec.size(); b++) total1 += outputvec[b];
+            else for (int b = 0; b < outputvec.size(); b++) total2 += outputvec[b];
+            //std::cout << " " << which2 << " : " << total1;
         }
 
+        total1 += fc_bias_t[0];
+        total2 += fc_bias_t[1];
         //std::cout << std::endl;
-        for (int a = 0; a < layer_output.size();a++) layer_output[a] = activation(layer_output[a]);
-        std::cout << "Layer output: " << layer_output << std::endl;
-        layer_input = layer_output;
-
-        for (int a = 0; a < layer_output.size();a++) layer_output[a] = 0;
-
+        std::cout << "Output1 " << total1 << " and sigmoid " << sigmoid(total1);
+        std::cout << " Output2 " << total2 << " and sigmoid " << sigmoid(total2) << std::endl;
+        inference.push_back(std::pair<double, double>(sigmoid(total1), sigmoid(total2)));
     }
-    std::cout << "Final Layer Result for RNN " << layer_input << std::endl;
-
-    ChunkReader reader2("CoeffFCOutput.txt", 128);
-    std::vector<double> fc_input = layer_input;
-    bool which2 = 0;
-    double total1, total2 = 0;
-    while (reader2.hasNext()) {
-        PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
-        std::vector<double> poly_noise_times, poly_enc_times;
-        pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
-
-        std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 1);
-        //std::cout << pp.aggregator.plaintextParams.GetRingDimension() << expvec << std::endl;
-        bool flag = 0;
-        //variables2[i].nextChunk(expvec, flag);
-        std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2,
-                                     0);
-        for (int i = 0; i < 128; i++) {
-            inputvec[i] = fc_input[i];
-        }
-        pp.PolynomialEncryption(
-                inputvec, expvec, 1, poly_noise_times, poly_enc_times);
-
-
-        std::vector<double> decrypt_times, agg_times;
-        std::vector<double> constants(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
-        std::vector<double> chunk;
-        reader2.nextChunk(chunk, flag);
-        for (int i = 0; i < chunk.size(); i++) constants[i] = chunk[i];
-        if (flag) which2 =1;
-
-        std::vector<double> outputvec = pp.PolynomialDecryption(constants, iters, decrypt_times);
-        if (!which2) for (int b = 0; b < outputvec.size(); b++) total1 += outputvec[b];
-        else for (int b = 0; b < outputvec.size(); b++) total2 += outputvec[b];
-        //std::cout << " " << which2 << " : " << total1;
-    }
-
-    total1 += fc_bias_t[0];
-    total2 += fc_bias_t[1];
-    //std::cout << std::endl;
-    std::cout << "Output1 " << total1 << " and sigmoid " << sigmoid(total1);
-    std::cout << " Output2 " << total2 << " and sigmoid " << sigmoid(total2) << std::endl;
-    inference = std::pair<double, double>(sigmoid(total1),sigmoid(total2));
 
     // Run reference RNN computation
     std::vector<double> result_ref(batch_size * 2);
@@ -368,17 +369,17 @@ int main() {
     }
     std::cout << std::endl;
 
-    for (int k = 0;k < 1; ++k) {
+    for (int k = 0;k < 256; ++k) {
         std::cout << "gt: " << ground_truth[batch_id * batch_size + k] << " ref out: [" << result_ref[k] << " ," << result_ref[k + batch_size] << "]"
-                  << "ppsa out: [" << inference.first << " ," << inference.second << "]" << std::endl;
+                  << "ppsa out: [" << inference[k].first << " ," << inference[k].second << "]" << std::endl;
 
         ++num_inf;
         if (ground_truth[batch_id * batch_size + k] == 0) {
             if (result_ref[k] > 0.5) ++ num_ref_correct;
-            if (inference.first > 0.5) ++ num_fhe_correct;
+            if (inference[k].first > 0.5) ++ num_fhe_correct;
         } else {
             if (result_ref[k + batch_size] > 0.5) ++ num_ref_correct;
-            if (inference.second > 0.5) ++ num_fhe_correct;
+            if (inference[k].second > 0.5) ++ num_fhe_correct;
         }
     }
     std::cout << "ref accuracy:\t" << num_ref_correct << "/\t" << num_inf << "\t" << 100.0 * num_ref_correct / num_inf << "%" << std::endl
