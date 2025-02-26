@@ -153,7 +153,7 @@ int main() {
     //for (int i = 0;i < 1; ++i) {
     //    fhe_rnn(0);
     //}
-    generate();
+    //generate();
 
 
 
@@ -179,7 +179,7 @@ int main() {
     int b_id = 0;
 
     unsigned int plain_bits = 32; //log t
-    unsigned int num_users = 128; //n
+    unsigned int num_users = 1; //n
     unsigned int iters = 1; //i
     unsigned int k_prime = 1; //k
     Scheme scheme1 = NS;
@@ -255,98 +255,94 @@ int main() {
     }
 
     int numInferences = STEP_NUM;
+
     std::pair<double, double> inference;
-    ChunkReader reader("CoeffHiddenOutput.txt", 512);
-    std::vector<ChunkReader> variables;
-    variables.reserve(256);
-
-    for (int a = 0; a < 256; a++) {
-        std::string name = "x" + std::to_string(a);
-        name += "variablehl.txt";
-        variables.push_back(ChunkReader(name, 512));
-    }
-
 
     std::vector<double> layer_output(128,0);
     std::vector<double> layer_input(128,0);
     for (int k = 0; k < STEP_NUM; k++) {
-        std::cout << "step " << std::to_string(k) << "/" << STEP_NUM << std::endl;
+        std::cout << "step " << std::to_string(k+1) << "/" << STEP_NUM << std::endl;
+        ChunkReader reader("CoeffHiddenOutput.txt", 256);
+
         int which = 0;
         while (reader.hasNext()) {
             PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
             std::vector<double> poly_noise_times, poly_enc_times;
             pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
 
-            for (unsigned int i = 0; i < 256; i++) {
-                std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
-                bool flag = 0;
-                variables[i].nextChunk(expvec, flag);
-                double val = 0;
-                if (i < 128) val = embedding[k * EMBEDDING_SIZE + i];
-                else val = layer_input[i%128];
-
-                std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2,
-                                             val);
-                pp.PolynomialEncryption(
-                        inputvec, expvec, i, poly_noise_times, poly_enc_times);
-
+            std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 1);
+            //std::cout << pp.aggregator.plaintextParams.GetRingDimension() << expvec << std::endl;
+            //variables[i].nextChunk(expvec, flag);
+            std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2,
+                                         0);
+            for (int i = 0; i < 256; i++) {
+                if (i < 128) inputvec[i] = embedding[k * EMBEDDING_SIZE + i];
+                else inputvec[i] = layer_input[i % 128];
             }
+            //std::cout << inputvec << std::endl;
+
+
+            pp.PolynomialEncryption(
+                    inputvec, expvec, 1, poly_noise_times, poly_enc_times);
+
 
             std::vector<double> decrypt_times, agg_times;
             std::vector<double> constants(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
             bool flag = 0;
-            reader.nextChunk(constants, flag);
+            std::vector<double> chunk;
+            reader.nextChunk(chunk, flag);
+            for (int i = 0; i < chunk.size(); i++) constants[i] = chunk[i];
             if (flag) which++;
 
+            //std::cout << constants << constants.size() << std::endl;
             std::vector<double> outputvec = pp.PolynomialDecryption(constants, iters, decrypt_times);
-            for (int b = 0; b < outputvec.size(); b++) layer_output[which] += outputvec[b];
+            for (int b = 0; b < 256; b++) layer_output[which] += outputvec[b];
+            //std::cout << " " << which << " : " << layer_output[which];
         }
+
+        //std::cout << std::endl;
         for (int a = 0; a < layer_output.size();a++) layer_output[a] = activation(layer_output[a]);
         std::cout << "Layer output: " << layer_output << std::endl;
         layer_input = layer_output;
-        for (int a = 0; a < layer_output.size();a++) layer_output[a] = 0;
 
+        for (int a = 0; a < layer_output.size();a++) layer_output[a] = 0;
 
     }
     std::cout << "Final Layer Result for RNN " << layer_input << std::endl;
 
-    ChunkReader reader2("CoeffFCOutput.txt", 512);
-    std::vector<ChunkReader> variables2;
-    variables2.reserve(128);
-
-    for (int a = 0; a < 128; a++) {
-        std::string name = "x" + std::to_string(a);
-        name += "variablefc.txt";
-        variables2.push_back(ChunkReader(name, 512));
-    }
-
-    bool which = 0;
+    ChunkReader reader2("CoeffFCOutput.txt", 128);
+    std::vector<double> fc_input = layer_input;
+    bool which2 = 0;
     double total1, total2 = 0;
     while (reader2.hasNext()) {
         PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
         std::vector<double> poly_noise_times, poly_enc_times;
         pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
 
-        for (unsigned int i = 0; i < 128; i++) {
-            std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
-            bool flag = 0;
-            variables2[i].nextChunk(expvec, flag);
-            std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2,
-                                         layer_input[i]);
-            pp.PolynomialEncryption(
-                    inputvec, expvec, i, poly_noise_times, poly_enc_times);
-
+        std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 1);
+        //std::cout << pp.aggregator.plaintextParams.GetRingDimension() << expvec << std::endl;
+        bool flag = 0;
+        //variables2[i].nextChunk(expvec, flag);
+        std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2,
+                                     0);
+        for (int i = 0; i < 128; i++) {
+            inputvec[i] = fc_input[i];
         }
+        pp.PolynomialEncryption(
+                inputvec, expvec, 1, poly_noise_times, poly_enc_times);
+
 
         std::vector<double> decrypt_times, agg_times;
         std::vector<double> constants(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
-        bool flag = 0;
-        reader.nextChunk(constants, flag);
-        if (flag) which =1;
+        std::vector<double> chunk;
+        reader2.nextChunk(chunk, flag);
+        for (int i = 0; i < chunk.size(); i++) constants[i] = chunk[i];
+        if (flag) which2 =1;
 
         std::vector<double> outputvec = pp.PolynomialDecryption(constants, iters, decrypt_times);
-        if (which) for (int b = 0; b < outputvec.size(); b++) total1 += outputvec[b];
+        if (!which2) for (int b = 0; b < outputvec.size(); b++) total1 += outputvec[b];
         else for (int b = 0; b < outputvec.size(); b++) total2 += outputvec[b];
+        //std::cout << " " << which2 << " : " << total1;
     }
 
     total1 += fc_bias_t[0];
@@ -355,7 +351,6 @@ int main() {
     std::cout << "Output1 " << total1 << " and sigmoid " << sigmoid(total1);
     std::cout << " Output2 " << total2 << " and sigmoid " << sigmoid(total2) << std::endl;
     inference = std::pair<double, double>(sigmoid(total1),sigmoid(total2));
-
 
     // Run reference RNN computation
     std::vector<double> result_ref(batch_size * 2);
