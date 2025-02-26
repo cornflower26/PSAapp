@@ -506,16 +506,16 @@ static int generate() {
 
     auto sumInputVectors = appendExpressionVectorsWithNewVariables(rnn_ih, rnn_hh);
 
-    auto cube = cubeVector(sumInputVectors);
-    std::cout << "Finished cubing " << std::endl;
+    //auto cube = cubeVector(sumInputVectors);
+    //std::cout << "Finished cubing " << std::endl;
 
-    auto mid = multiplyVectorByScalar(cube, -0.00163574303018748);
-    std::cout << "Finished first scalar multiplication " << std::endl;
-    auto mid2 = multiplyVectorByScalar(sumInputVectors, 0.249476365628036);
-    std::cout << "Finished second scalar multiplication " << std::endl;
+    //auto mid = multiplyVectorByScalar(cube, -0.00163574303018748);
+    //std::cout << "Finished first scalar multiplication " << std::endl;
+    //auto mid2 = multiplyVectorByScalar(sumInputVectors, 0.249476365628036);
+    //std::cout << "Finished second scalar multiplication " << std::endl;
 
-    auto rnn_2 = addVectors(mid, mid2);
-    std::cout << "Finished vector addition and Hidden Layer" << std::endl;
+    //auto rnn_2 = addVectors(mid, mid2);
+    //std::cout << "Finished vector addition and Hidden Layer" << std::endl;
 
 
 
@@ -527,7 +527,7 @@ static int generate() {
 
 
     std::cout << "Result vector:\n";
-    for (const auto &element: rnn_2) {
+    for (const auto &element: sumInputVectors) {
         if (outFile.is_open()) print_expression(element, outFile);
         //outFile << "term";
         outFile << " \n";
@@ -540,7 +540,7 @@ static int generate() {
     std::ofstream outFile1("CoeffHiddenOutput.txt");
     std::cout << "Coefficients for hidden layer \n";
 
-    std::vector<std::vector<double>> hidden_coeff = extractCoefficients(rnn_2);
+    std::vector<std::vector<double>> hidden_coeff = extractCoefficients(sumInputVectors);
 //outFile1 << extractCoefficients(rnn_3);
     for (std::vector<double> elements: hidden_coeff) {
         for (double element: elements) {
@@ -574,7 +574,7 @@ static int generate() {
         name.append(std::to_string(i));
         name.append("variablehl.txt");
         std::ofstream outFilen(name);
-        std::vector<std::vector<int>> b = extractVariableExponents(rnn_2, i + 1);
+        std::vector<std::vector<int>> b = extractVariableExponents(sumInputVectors, i + 1);
             for (std::vector<int> elements: b) {
                 for (int element: elements) {
                     outFilen << element << ",";

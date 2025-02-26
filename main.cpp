@@ -7,391 +7,34 @@
 #include <unistd.h>
 #include <math/dftransform.h>
 #include "PSA-cryptocontext.h"
-#include "chunk_reader.cpp"
-#include "psa_inference_polynomial_generator.cpp"
-using namespace lbcrypto;
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <cmath>
+#include <algorithm>
 
-constexpr size_t EMBEDDING_SIZE = 128;
+using namespace std;
 
-std::vector<std::vector<float>> readVectorsFromCSV(const std::string& filename) {
-    std::vector<std::vector<float>> vectors;
-    std::ifstream file(filename);
+// Constants
+const double C = 1.0; // Regularization parameter
+const double tol = 1e-3; // Tolerance for errors
+const double eps = 1e-3; // Small value for numerical comparisons
 
-    if (!file.is_open()) {
-        throw std::runtime_error("Unable to open file: " + filename);
-    }
+// Global variables
+vector<vector<double>> points; // Training points
+vector<int> target; // Labels (+1, -1)
+vector<double> alpha; // Lagrange multipliers
+vector<double> w; // Weight vector (for linear SVM)
+double b = 0.0; // Bias
+int numChanged; // Number of changes in each iteration
 
-    std::vector<float> currentVector;
-    std::string currentNumber;
-    char c;
-    bool hasData = false;
-
-    while (file.get(c)) {
-        hasData = true;
-
-        if (c == ',') {
-            // Process number at comma
-            if (!currentNumber.empty()) {
-                try {
-                    currentVector.push_back(std::stof(currentNumber));
-                } catch (const std::invalid_argument& e) {
-                    std::cerr << "Warning: Invalid float value found: " << currentNumber << std::endl;
-                }
-                currentNumber.clear();
-            }
-        }
-        else if (c == '\n' || c == '\r') {
-            // Process number at line end
-            if (!currentNumber.empty()) {
-                try {
-                    currentVector.push_back(std::stof(currentNumber));
-                } catch (const std::invalid_argument& e) {
-                    std::cerr << "Warning: Invalid float value found: " << currentNumber << std::endl;
-                }
-                currentNumber.clear();
-            }
-
-            // Add vector if it's not empty and reset
-            if (!currentVector.empty()) {
-                vectors.push_back(currentVector);
-                currentVector.clear();
-            }
-
-            // Handle \r\n line endings
-            if (c == '\r') {
-                file.get(c);
-                if (c != '\n') {
-                    file.putback(c);
-                }
-            }
-        }
-        else if (std::isspace(c)) {
-            // Skip other whitespace
-            continue;
-        }
-        else {
-            // Build number string
-            currentNumber += c;
-        }
-    }
-
-    // Handle last number if file doesn't end with newline
-    if (!currentNumber.empty()) {
-        try {
-            currentVector.push_back(std::stof(currentNumber));
-        } catch (const std::invalid_argument& e) {
-            std::cerr << "Warning: Invalid float value found: " << currentNumber << std::endl;
-        }
-    }
-
-    // Handle last vector if file doesn't end with newline
-    if (!currentVector.empty()) {
-        vectors.push_back(currentVector);
-    }
-
-    // Check if file was empty
-    if (!hasData) {
-        std::cerr << "Warning: Empty file" << std::endl;
-    }
-
-    file.close();
-    return vectors;
+// Linear kernel
+double kernel(const vector<double>& x1, const vector<double>& x2) {
+    double result = 0.0;
+    for (size_t i = 0; i < x1.size(); i++)
+        result += x1[i] * x2[i];
+    return result;
 }
-
-
-// Function to read embeddings from a binary file
-// Returns vector of vectors containing the embeddings
-// Throws runtime_error if file operations fail
-std::vector<std::vector<float>> read_embeddings(const std::string& filename, size_t num_rows) {
-    std::ifstream input(filename, std::ios::binary);
-    if (!input) {
-        throw std::runtime_error("Could not open input file: " + filename);
-    }
-
-    // Vector to store embeddings
-    std::vector<std::vector<float>> embeddings;
-    embeddings.reserve(num_rows);
-
-    // Temporary buffer for reading one row
-    std::vector<float> row(EMBEDDING_SIZE);
-
-    // Read requested number of rows
-    for (size_t i = 0; i < num_rows; ++i) {
-        if (!input.read(reinterpret_cast<char*>(row.data()),
-                        EMBEDDING_SIZE * sizeof(float))) {
-            if (input.eof()) {
-                throw std::runtime_error("File contains fewer than " +
-                                         std::to_string(num_rows) + " rows");
-            } else {
-                throw std::runtime_error("Failed to read row " +
-                                         std::to_string(i + 1));
-            }
-        }
-        embeddings.push_back(row);
-    }
-
-    return embeddings;
-}
-
-
-// Optional: Helper function to print embeddings
-void print_embeddings(const std::vector<std::vector<float>>& embeddings) {
-    std::cout << std::fixed << std::setprecision(6);
-    for (const auto& row : embeddings) {
-        for (size_t i = 0; i < EMBEDDING_SIZE; ++i) {
-            if (i > 0) std::cout << " ";
-            std::cout << row[i];
-        }
-        std::cout << "\n";
-    }
-}
-
-
-
-int main() {
-    std::cout << "Hello Word 95" << std::endl;
-    //for (int i = 0;i < 1; ++i) {
-    //    fhe_rnn(0);
-    //}
-    generate();
-
-
-
-    try{
-        auto embeddings = read_embeddings("../train/test_input/embedding_batch_0.bin", 1);
-        print_embeddings(embeddings);
-
-        // Example of how to access values programmatically
-        if (!embeddings.empty() && !embeddings[0].empty()) {
-            float first_value = embeddings[0][0];
-            std::cout << "First value: " << first_value << "\n";
-        }
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << "\n";
-        return 1;
-    }
-
-    const int EMBEDDING_SIZE = 128;
-    const int STEP_NUM = 128;
-    int sample_num = 256;
-    usint numSlots = (1<<15);
-    int b_id = 0;
-
-    unsigned int plain_bits = 32; //log t
-    unsigned int num_users = 128; //n
-    unsigned int iters = 1; //i
-    unsigned int k_prime = 1; //k
-    Scheme scheme1 = NS;
-
-    // Retrieve weight from .bin files
-    std::string embedding_file_name = std::string("../train/test_input/embedding_batch_") + std::to_string(b_id) + std::string(".bin");
-    std::string ground_truth_file_name = std::string("../train/test_input/ground_truth_batch_") + std::to_string(b_id) + std::string(".bin");
-    float *rnn_ih_t = new float[EMBEDDING_SIZE * STEP_NUM];
-    float *rnn_hh_t = new float[STEP_NUM * STEP_NUM];
-    float *fc_weight_t = new float[2 * STEP_NUM];
-    float *fc_bias_t = new float[2];
-    float *embedding_in = new float[sample_num * STEP_NUM * EMBEDDING_SIZE];
-    float *ground_truth = new float[sample_num];
-    FILE *file;
-    file = fopen("../train/trained_rnn_ih.bin", "rb");
-    fread(rnn_ih_t, sizeof(float), EMBEDDING_SIZE * STEP_NUM, file);
-    fclose(file);
-    file = fopen("../train/trained_rnn_hh.bin", "rb");
-    fread(rnn_hh_t, sizeof(float), STEP_NUM * STEP_NUM, file);
-    fclose(file);
-    file = fopen("../train/trained_fc_weight.bin", "rb");
-    fread(fc_weight_t, sizeof(float), 2 * STEP_NUM, file);
-    fclose(file);
-    file = fopen("../train/trained_fc_bias.bin", "rb");
-    fread(fc_bias_t, sizeof(float), 2, file);
-    fclose(file);
-    file = fopen(embedding_file_name.c_str(), "rb");
-    fread(embedding_in, sizeof(float), sample_num * STEP_NUM * EMBEDDING_SIZE, file);
-    fclose(file);
-    file = fopen(ground_truth_file_name.c_str(), "rb");
-    fread(ground_truth, sizeof(float), sample_num, file);
-    fclose(file);
-    usint batch_size = numSlots / EMBEDDING_SIZE;
-    // Pack the plaintext matrix in diagnal order
-
-    std::vector<double> batched_embedding(batch_size * EMBEDDING_SIZE);
-    std::vector<double> batched_hidden_ref(batch_size * STEP_NUM);
-
-    int batch_id = 0;
-    std::cout << std::endl;
-
-    //std::vector<std::vector<float>> a = readVectorsFromCSV("../files/CoeffOutput.txt");
-    //std::cout << "Coefficient size " << a.size()<< std::endl;
-    //std::cout << "Coefficients per thing " << a[0].size() << " " << a[1].size() << std::endl;
-
-    // Run reference RNN computation
-    for (int i = 0;i < STEP_NUM; ++i) {
-        for (int j = 0;j < batch_size; ++j) {
-            for (int k = 0;k < EMBEDDING_SIZE; ++k) {
-                batched_embedding[k * batch_size + j] = embedding_in[((j + batch_id * batch_size) * EMBEDDING_SIZE + i) * EMBEDDING_SIZE + k];
-            }
-        }
-        std::vector<double> result_ref(batch_size * STEP_NUM);
-        for (int j = 0; j < 128; ++j) {
-            for (int k = 0; k < batch_size; ++k) {
-                for (int l = 0; l < 128; ++l) {
-                    result_ref[j * batch_size + k] += batched_embedding[l * batch_size + k] * rnn_ih_t[j * 128 + l];
-                    result_ref[j * batch_size + k] += batched_hidden_ref[l * batch_size + k] * rnn_hh_t[j * 128 + l];
-                }
-                // Tanh activation
-                result_ref[j * batch_size + k] = activation(result_ref[j * batch_size + k]);
-
-            }
-        }
-        batched_hidden_ref = result_ref;
-    }
-
-    std::vector<double> embedding(EMBEDDING_SIZE*STEP_NUM);
-        for (int i = 0; i < STEP_NUM; i++) {
-            for (int j = 0; j < EMBEDDING_SIZE; j++) {
-                embedding[i * EMBEDDING_SIZE + j] = embedding_in[i * EMBEDDING_SIZE + j];
-            }
-        }
-
-    int numInferences = STEP_NUM;
-    std::pair<double, double> inference;
-    ChunkReader reader("CoeffHiddenOutput.txt", 512);
-    std::vector<ChunkReader> variables;
-    variables.reserve(256);
-
-    for (int a = 0; a < 256; a++) {
-        std::string name = "x" + std::to_string(a);
-        name += "variablehl.txt";
-        variables.push_back(ChunkReader(name, 512));
-    }
-
-
-    std::vector<double> layer_output(128,0);
-    std::vector<double> layer_input(128,0);
-    for (int k = 0; k < STEP_NUM; k++) {
-        std::cout << "step " << std::to_string(k) << "/" << STEP_NUM << std::endl;
-        int which = 0;
-        while (reader.hasNext()) {
-            PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
-            std::vector<double> poly_noise_times, poly_enc_times;
-            pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
-
-            for (unsigned int i = 0; i < 256; i++) {
-                std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
-                bool flag = 0;
-                variables[i].nextChunk(expvec, flag);
-                double val = 0;
-                if (i < 128) val = embedding[k * EMBEDDING_SIZE + i];
-                else val = layer_input[i%128];
-
-                std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2,
-                                                 val);
-                pp.PolynomialEncryption(
-                            inputvec, expvec, i, poly_noise_times, poly_enc_times);
-
-            }
-
-            std::vector<double> decrypt_times, agg_times;
-            std::vector<double> constants(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
-            bool flag = 0;
-            reader.nextChunk(constants, flag);
-            if (flag) which++;
-
-            std::vector<double> outputvec = pp.PolynomialDecryption(constants, iters, decrypt_times);
-            for (int b = 0; b < outputvec.size(); b++) layer_output[which] += outputvec[b];
-        }
-        std::cout << "Layer output: " << layer_output << std::endl;
-        layer_input = layer_output;
-        for (int a = 0; a < layer_output.size();a++) layer_output[a] = 0;
-    }
-    std::cout << "Final Layer Result for RNN " << layer_input << std::endl;
-
-    ChunkReader reader2("CoeffFCOutput.txt", 512);
-    std::vector<ChunkReader> variables2;
-    variables2.reserve(128);
-
-    for (int a = 0; a < 128; a++) {
-        std::string name = "x" + std::to_string(a);
-        name += "variablefc.txt";
-        variables2.push_back(ChunkReader(name, 512));
-    }
-
-    bool which = 0;
-    double total1, total2 = 0;
-    while (reader2.hasNext()) {
-        PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
-        std::vector<double> poly_noise_times, poly_enc_times;
-        pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
-
-        for (unsigned int i = 0; i < 128; i++) {
-            std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
-            bool flag = 0;
-            variables2[i].nextChunk(expvec, flag);
-            std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2,
-                                         layer_input[i]);
-            pp.PolynomialEncryption(
-                    inputvec, expvec, i, poly_noise_times, poly_enc_times);
-
-        }
-
-        std::vector<double> decrypt_times, agg_times;
-        std::vector<double> constants(pp.aggregator.plaintextParams.GetRingDimension() / 2, 0);
-        bool flag = 0;
-        reader.nextChunk(constants, flag);
-        if (flag) which =1;
-
-        std::vector<double> outputvec = pp.PolynomialDecryption(constants, iters, decrypt_times);
-        if (which) for (int b = 0; b < outputvec.size(); b++) total1 += outputvec[b];
-        else for (int b = 0; b < outputvec.size(); b++) total2 += outputvec[b];
-    }
-    
-    total1 += fc_bias_t[0];
-    total2 += fc_bias_t[1];
-    //std::cout << std::endl;
-    std::cout << "Output1 " << total1 << " and sigmoid " << sigmoid(total1);
-    std::cout << " Output2 " << total2 << " and sigmoid " << sigmoid(total2) << std::endl;
-    inference = std::pair<double, double>(sigmoid(total1),sigmoid(total2));
-
-
-    // Run reference RNN computation
-    std::vector<double> result_ref(batch_size * 2);
-    for (int j = 0;j < 2; ++j) {
-        for (int k = 0;k < batch_size; ++k) {
-            for (int l = 0;l < 128; ++l) {
-                result_ref[j * batch_size + k] += batched_hidden_ref[l * batch_size + k] * fc_weight_t[j * 128 + l];
-            }
-            result_ref[j * batch_size + k] += fc_bias_t[j];
-
-            // Sigmoid activation
-            result_ref[j * batch_size + k] = sigmoid(result_ref[j * batch_size + k]);
-            //result_fhe[j * batch_size + k] = sigmoid(fhe_result_pt->GetRealPackedValue()[j * batch_size + k]);
-        }
-    }
-    std::cout << std::endl;
-
-    for (int k = 0;k < 1; ++k) {
-        std::cout << "gt: " << ground_truth[batch_id * batch_size + k] << " ref out: [" << result_ref[k] << " ," << result_ref[k + batch_size] << "]"
-                  << "ppsa out: [" << inference.first << " ," << inference.second << "]" << std::endl;
-
-        ++num_inf;
-        if (ground_truth[batch_id * batch_size + k] == 0) {
-            if (result_ref[k] > 0.5) ++ num_ref_correct;
-            if (inference.first > 0.5) ++ num_fhe_correct;
-        } else {
-            if (result_ref[k + batch_size] > 0.5) ++ num_ref_correct;
-            if (inference.second > 0.5) ++ num_fhe_correct;
-        }
-    }
-    std::cout << "ref accuracy:\t" << num_ref_correct << "/\t" << num_inf << "\t" << 100.0 * num_ref_correct / num_inf << "%" << std::endl
-              << "fhe accuracy:\t" << num_fhe_correct << "/\t" << num_inf << "\t" << 100.0 * num_fhe_correct / num_inf << "%" << std::endl;
-
-
-    std::cout << "Hello world" << std::endl;
-
-    return 1;
-}
-
 
 void handler(int sig) {
     void *array[10];
@@ -406,17 +49,17 @@ void handler(int sig) {
     exit(1);
 }
 
-int othermain(int argc, char ** argv) {
+double slap(int argc, char **argv, std::vector<std::vector<double>>& inputmatrix) {
     signal(SIGSEGV, handler);
     std::cout << "Hello, World! " << std::endl;
     //DCRTPoly a = DCRTPoly();
-    unsigned int plain_bits = 16; //log t
-    unsigned int num_users = 50; //n
-    unsigned int iters = 10; //i
+    unsigned int plain_bits = 15; //log t
+    unsigned int num_users = 6; //n
+    unsigned int iters = 1; //i
     unsigned int k_prime = 1; //k
     Scheme scheme1 = NS;
 
-    unsigned int N; //N
+    unsigned int N = 1; //N
 
     int c;
     while((c = getopt(argc, argv, "t:n:i:k:N:")) != -1){
@@ -463,34 +106,6 @@ int othermain(int argc, char ** argv) {
     }
 
     unsigned int MAX_CTEXTS_DEFAULT = 20;
-    MAX_CTEXTS_DEFAULT = N;
-    MAX_CTEXTS_DEFAULT = k_prime;
-    k_prime = MAX_CTEXTS_DEFAULT;
-
-    //temp();
-
-    //Code for testing SLAP, which isn't what this paper is about
-
-    /**
-    PSACryptocontext p = PSACryptocontext(plain_bits, num_users, iters, scheme1);
-    std::vector<double> noise_times;
-    std::vector<double> enc_times;
-    std::vector<double> dec_times;
-    p.TestEncryption(iters, false, noise_times, enc_times);
-
-    p.TestDecryption(iters,dec_times);
-
-    for(const double d : noise_times){
-        std::cout << "noise_times " << d << '\n';
-    }
-    for(const double d : enc_times){
-        std::cout << "enc_times " << d << '\n';
-    }
-    for(const double d : dec_times){
-        std::cout << "dec_times " << d << '\n';
-    }
-     **/
-
 
     PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
 
@@ -502,46 +117,266 @@ int othermain(int argc, char ** argv) {
 
     pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
 
-    for (unsigned int i = 0; i < num_users; i++) {
-        std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 3);
-        inputvec[2] = 5;
-        std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, 2);
+    std::vector<double> expvec(inputmatrix[0].size(), 1);
 
-        //std::cout << i << " input: " << inputvec << std::endl;
-
-        pp.PolynomialEncryption(inputvec, expvec, i, poly_noise_times, poly_enc_times);
+    for (int i = 0; i < num_users; i++) {
+        //std::cout << i << " input: " << inputmatrix[i] << std::endl;
+        pp.PolynomialEncryption(inputmatrix[i], expvec, i, poly_noise_times, poly_enc_times);
     }
 
-
     std::vector<double> decrypt_times;
-    std::vector<double> agg_times;
 
-    std::vector<double> constants(pp.aggregator.plaintextParams.GetRingDimension()/2,2);
-    std::vector<double> outputvec = pp.PolynomialDecryption(constants, iters, decrypt_times);
+    std::vector<double> constants(num_users, 1);
+    std::vector<double> outputvec = pp.PolynomialDecryption(constants, 1, decrypt_times);
 
     std::cout << "Final output: " << outputvec << std::endl;
 
-
-    std::cout << "poly_noise_times " << '\n';
-    int i = 0;
     for(const double d : poly_noise_times){
-        if (i % 100 == 0) std::cout << d << '\n';
-        i++;
+        //std::cout << "poly_noise_times " << d << '\n';
     }
-    i = 0;
-    std::cout << "poly_enc_times " << '\n';
     for(const double d : poly_enc_times){
-        if (i % 100 == 0) std::cout << d << '\n';
-        i++;
+        //std::cout << "poly_enc_times " << d << '\n';
     }
-    //for (const double d: agg_times){
-    //    std::cout << "poly_agg_times " << d << '\n';
-    //}
-    std::cout << "decrypt_times " << '\n';
     for(const double d : decrypt_times){
-        std::cout << d << '\n';
+        //std::cout << "decrypt_times " << d << '\n';
     }
 
+    double sum = std::accumulate(outputvec.begin(), outputvec.end(), 0);
+
+    return sum;
+}
+
+double SVMOutputonpoint(int argc, char **argv, int k){
+    double u = kernel(w, points[k]) - b;
+    return u;
+}
+
+// SVM output for a given point
+double objectiveFunction(int argc, char **argv, std::vector<double>& alphavec, std::vector<int>& targetvec, std::vector<std::vector<double>>& pointsvec) {
+
+    size_t n_size = 15; // So that the vector size is 15 * 16 = 240 < 256
+    double result = 0;
+
+    std::vector<double> onevec(n_size, 1);
+    std::vector<double> minusonevec(n_size, -1);
+
+    size_t samples = targetvec.size()/n_size;
+
+    for(size_t s = 0; s < samples; s += n_size){
+
+        std::vector<std::vector<double>> inputmatrix(6);
+
+        for (size_t i = 0; i < n_size; ++i) {
+            for (size_t j = 0; j < n_size; ++j) {
+                inputmatrix[0].push_back(targetvec[s + i]);
+            }
+        }
+        inputmatrix[0].insert(inputmatrix[0].end(), onevec.begin(), onevec.end());
+
+        for (size_t i = 0; i < n_size; ++i) {
+            for (size_t j = 0; j < n_size; ++j) {
+                inputmatrix[1].push_back(targetvec[s + j]);
+            }
+        }
+        inputmatrix[1].insert(inputmatrix[1].end(), onevec.begin(), onevec.end());
+
+        for (size_t i = 0; i < n_size; ++i) {
+            for (size_t j = 0; j < n_size; ++j) {
+                inputmatrix[2].push_back(kernel(pointsvec[s + i], pointsvec[s + j]));
+            }
+        }
+        inputmatrix[2].insert(inputmatrix[2].end(), onevec.begin(), onevec.end());
+
+        for (size_t i = 0; i < n_size; ++i) {
+            for (size_t j = 0; j < n_size; ++j) {
+                inputmatrix[3].push_back(targetvec[s + i]);
+            }
+        }
+        inputmatrix[3].insert(inputmatrix[3].end(), onevec.begin(), onevec.end());
+
+        for (size_t i = 0; i < n_size; ++i) {
+            for (size_t j = 0; j < n_size; ++j) {
+                inputmatrix[4].push_back(targetvec[s + j]);
+            }
+        }
+        inputmatrix[4].insert(inputmatrix[4].end(), minusonevec.begin(), minusonevec.end());
+
+        for (size_t i = 0; i < n_size; ++i) {
+            for (size_t j = 0; j < n_size; ++j) {
+                inputmatrix[5].push_back(0.5);
+            }
+        }
+        inputmatrix[5].insert(inputmatrix[5].end(), alphavec.begin() + s, alphavec.begin() + s + n_size - 1);
+
+        result += slap(argc, argv, inputmatrix);
+    }
+
+    return result;
+}
+
+// TakeStep method
+bool takeStep(int argc, char **argv, int i1, int i2) {
+    if (i1 == i2) return false;
+
+    double alpha1 = alpha[i1], alpha2 = alpha[i2];
+    int y1 = target[i1], y2 = target[i2];
+    double E1 = SVMOutputonpoint(argc, argv, i1) - y1;
+    double E2 = SVMOutputonpoint(argc, argv, i2) - y2;
+    double s = y1 * y2;
+
+    double L, H;
+    if (y1 != y2) {
+        L = max(0.0, alpha2 - alpha1);
+        H = min(C, C + alpha2 - alpha1);
+    } else {
+        L = max(0.0, alpha2 + alpha1 - C);
+        H = min(C, alpha2 + alpha1);
+    }
+    if (L == H) return false;
+
+    double k11 = kernel(points[i1], points[i1]);
+    double k12 = kernel(points[i1], points[i2]);
+    double k22 = kernel(points[i2], points[i2]);
+    double eta = k11 + k22 - 2 * k12;
+
+    double a2;
+    if (eta > 0) {
+        a2 = alpha2 + y2 * (E1 - E2) / eta;
+        if (a2 < L) a2 = L;
+        else if (a2 > H) a2 = H;
+    } else {
+        std::vector<double> alphavec_L = alpha;
+        alphavec_L[i2] = L;
+        double Lobj = objectiveFunction(argc, argv, alphavec_L, target, points);
+
+        std::vector<double> alphavec_H = alpha;
+        alphavec_H[i2] = H;
+        double Hobj = objectiveFunction(argc, argv, alphavec_H, target, points);
+
+        if (Lobj < Hobj - eps) a2 = L;
+        else if (Lobj > Hobj + eps) a2 = H;
+        else {
+            a2 = alpha2;
+        }
+    }
+
+    if (abs(a2 - alpha2) < eps * (a2 + alpha2 + eps)) return false;
+
+    double a1 = alpha1 + s * (alpha2 - a2);
+
+    // Update threshold b
+    double b1 = E1 + y1 * (a1 - alpha1) * k11 + y2 * (a2 - alpha2) * k12 + b;
+    double b2 = E2 + y1 * (a1 - alpha1) * k12 + y2 * (a2 - alpha2) * k22 + b;
+    if (0 < a1 && a1 < C) b = b1;
+    else if (0 < a2 && a2 < C) b = b2;
+    else b = (b1 + b2) / 2;
+
+    // Update weights w
+
+    for (size_t i = 0; i < w.size(); i++) {
+        w[i] += y1 * (a1 - alpha1) * points[i1][i] + y2 * (a2 - alpha2) * points[i2][i];
+    }
+
+    alpha[i1] = a1;
+    alpha[i2] = a2;
+
+    return true;
+}
+
+int examineExample(int argc, char **argv, int i2){
+    double y2 = target[i2];
+    double alpha2 = alpha[i2];
+    double E2 = SVMOutputonpoint(argc, argv, i2) - y2;
+    double r2 = E2 * y2;
+
+    if ((r2 < -tol && alpha2 < C) || (r2 > tol && alpha2 > 0)){
+        for (size_t i1 = 0; i1 < alpha.size(); ++i1) {
+            if (takeStep(argc, argv, i1, i2)) return 1;
+        }
+    }
+    return 0;
+}
+
+// SMO method
+void SMO(int argc, char **argv) {
+    numChanged = 0;
+    bool examineAll = true;
+
+    while (numChanged > 0 || examineAll) {
+        numChanged = 0;
+        if (examineAll) {
+            for (size_t i = 0; i < points[0].size(); i++)
+                numChanged += examineExample(argc, argv, i);
+        } else {
+            for (size_t i = 0; i < points[0].size(); i++)
+                if (alpha[i] != 0 && alpha[i] < C)
+                    numChanged += examineExample(argc, argv, i);
+        }
+
+        if (examineAll) examineAll = false;
+        else if (numChanged == 0) examineAll = true;
+    }
+}
+
+void loadCSV(const string& filename, vector<vector<double>>& points, vector<int>& target) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Error opening file: " << filename << endl;
+        exit(1);
+    }
+
+    string line;
+
+    // Skip the header row
+    getline(file, line);
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string value;
+        vector<double> point;
+        int label;
+
+        // Read features (semicolon-delimited)
+        for (int i = 0; i < 11; i++) { // First 11 columns are features
+            getline(ss, value, ';'); // Use semicolon as the delimiter
+            point.push_back(stod(value)); // Convert to double
+        }
+
+        // Read label (quality)
+        getline(ss, value, ';'); // Last column
+        int quality = stoi(value); // Convert to integer
+
+        // Transform quality into binary labels (+1 for good, -1 for not good)
+        label = (quality >= 6) ? 1 : -1;
+
+        points.push_back(point);
+        target.push_back(label);
+    }
+
+    file.close();
+}
+
+int main(int argc, char **argv){
+    // Load the dataset
+    loadCSV("winequality-red.csv", points, target);
+
+    // Initialize alpha and weight vectors
+    alpha = vector<double>(points[0].size(), 0.0);
+    w = vector<double>(points[0].size(), 0.0);
+
+    // Run the SMO algorithm
+    SMO(argc, argv);
+
+    // Display results
+    cout << "Final alpha values:" << endl;
+    for (double a : alpha) cout << a << " ";
+    cout << endl;
+
+    cout << "Bias (b): " << b << endl;
+
+    cout << "Weight vector (w): ";
+    for (double wi : w) cout << wi << " ";
+    cout << endl;
 
     return 0;
 }
