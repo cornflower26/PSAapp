@@ -39,7 +39,7 @@ else()
     link_libraries( ${OpenFHE_SHARED_LIBRARIES} )
 endif()
 
-add_executable(SLAP main.cpp
+add_executable(SLAP
         PSA-base-scheme.h
         PSA-constants.h
         slaprns-scheme.h
@@ -51,7 +51,8 @@ add_executable(SLAP main.cpp
         fhe_inference.cpp
         utils.cpp
         psa_inference_polynomial_generator.cpp
-        chunk_reader.cpp)
+        chunk_reader.cpp
+        psa_inference.cpp)
 
 
 
