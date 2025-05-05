@@ -1,0 +1,21 @@
+Hello Word 95
+
+Matrix formation 
+Finished matrix multiplication 1
+Finished cubing 
+Finished first scalar multiplication 
+Finished second scalar multiplication 
+Finished vector addition and Hidden Layer
+Finished matrix multiplication Fully Connected Layer
+Result vector:
+Coefficients for hidden layer 
+Coefficients for FC Layer 
+Hidden variables
+FC variables
+128 number of outputs for hidden
+357686 number of terms for hidden
+2 number of output for FC
+128 number of terms for FC 
+Command exited with non-zero status 1
+1481.43user 351.31system 3:03:29elapsed 16%CPU (0avgtext+0avgdata 7506972maxresident)k
+195972296inputs+48963720outputs (5259985major+42625079minor)pagefaults 0swaps

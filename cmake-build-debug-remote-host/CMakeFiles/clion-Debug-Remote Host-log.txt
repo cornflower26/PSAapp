@@ -1,0 +1,10 @@
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/ajanusze/SLAP -B /home/ajanusze/SLAP/cmake-build-debug-remote-host
+-- FOUND PACKAGE OpenFHE
+-- OpenFHE Version: 1.2.3
+-- OpenFHE installed as shared libraries: ON
+-- OpenFHE include files location: /usr/local/include/openfhe
+-- OpenFHE lib files location: /usr/local/lib
+-- OpenFHE Native Backend size: 64
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ajanusze/SLAP/cmake-build-debug-remote-host

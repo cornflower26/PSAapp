@@ -1,0 +1,3 @@
+/home/ajanusze/SLAP/cmake-build-debug-personal/CMakeFiles/rebuild_cache.dir
+/home/ajanusze/SLAP/cmake-build-debug-personal/CMakeFiles/edit_cache.dir
+/home/ajanusze/SLAP/cmake-build-debug-personal/CMakeFiles/SLAP.dir

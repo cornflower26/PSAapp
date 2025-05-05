@@ -50,9 +50,7 @@ add_executable(SLAP
         PSA-base-scheme.cpp
         fhe_inference.cpp
         utils.cpp
-        psa_inference_polynomial_generator.cpp
-        chunk_reader.cpp
-        psa_inference.cpp)
+        linearPCA.cpp)
 
 
 

@@ -1,17 +1,10 @@
-//#include <core/lattice/lat-hal.h>
-//#include <pke/openfhe.h>
 #include <iostream>
-#include <getopt.h>
-#include <execinfo.h>
-#include <signal.h>
-#include <unistd.h>
-#include <math/dftransform.h>
-#include "PSA-cryptocontext.h"
 #include <vector>
-#include <fstream>
-#include <sstream>
 #include <cmath>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <chrono>
 
 using namespace std;
 
@@ -36,192 +29,52 @@ double kernel(const vector<double>& x1, const vector<double>& x2) {
     return result;
 }
 
-void handler(int sig) {
-    void *array[10];
-    size_t size;
-
-    // get void*'s for all entries on the stack
-    size = backtrace(array, 10);
-
-    // print out all the frames to stderr
-    fprintf(stderr, "Error: signal %d:\n", sig);
-    backtrace_symbols_fd(array, size, STDERR_FILENO);
-    exit(1);
-}
-
-double slap(int argc, char **argv, std::vector<std::vector<double>>& inputmatrix) {
-    signal(SIGSEGV, handler);
-    std::cout << "Hello, World! " << std::endl;
-    //DCRTPoly a = DCRTPoly();
-    unsigned int plain_bits = 15; //log t
-    unsigned int num_users = 6; //n
-    unsigned int iters = 1; //i
-    unsigned int k_prime = 1; //k
-    Scheme scheme1 = NS;
-
-    unsigned int N = 1; //N
-
-    int c;
-    while((c = getopt(argc, argv, "t:n:i:k:N:")) != -1){
-        switch(c){
-            case 't':{
-                plain_bits = atoi(optarg);
-                break;
-            }
-            case 'n':{
-                num_users = atoi(optarg);
-                break;
-            }
-            case 'i':{
-                iters = atoi(optarg);
-                break;
-            }
-            case 'k':{
-                k_prime = atoi(optarg);
-                break;
-            }
-            case 'N':{
-                N = atoi(optarg);
-                break;
-            }
-            default:{
-                std::cout << "Invalid argument: " << c;
-                if(optarg != nullptr){
-                    std::cout << ' ' << optarg;
-                }
-                std::cout << std::endl;
-                return 1;
-            }
-        }
-    }
-
-    if(!plain_bits){
-        throw std::runtime_error("Must have nonempty plaintext space");
-    }
-    if(!num_users){
-        throw std::runtime_error("Must have at least some users");
-    }
-    if(!iters){
-        throw std::runtime_error("Must have at least some iterations");
-    }
-
-    unsigned int MAX_CTEXTS_DEFAULT = 20;
-
-    PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
-
-    std::vector<double> poly_noise_times;
-    std::vector<double> poly_enc_times;
-
-    //pp.TestPolynomialEncryption(true, iters, poly_noise_times, poly_enc_times);
-    // pp.TestPolynomialEncryption(1, MAX_CTEXTS_DEFAULT, poly_noise_times, poly_enc_times);
-
-    pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
-
-    std::vector<double> expvec(inputmatrix[0].size(), 1);
-
-    for (int i = 0; i < num_users; i++) {
-        //std::cout << i << " input: " << inputmatrix[i] << std::endl;
-        pp.PolynomialEncryption(inputmatrix[i], expvec, i, poly_noise_times, poly_enc_times);
-    }
-
-    std::vector<double> decrypt_times;
-
-    std::vector<double> constants(num_users, 1);
-    std::vector<double> outputvec = pp.PolynomialDecryption(constants, 1, decrypt_times);
-
-    std::cout << "Final output: " << outputvec << std::endl;
-
-    for(const double d : poly_noise_times){
-        //std::cout << "poly_noise_times " << d << '\n';
-    }
-    for(const double d : poly_enc_times){
-        //std::cout << "poly_enc_times " << d << '\n';
-    }
-    for(const double d : decrypt_times){
-        //std::cout << "decrypt_times " << d << '\n';
-    }
-
-    double sum = std::accumulate(outputvec.begin(), outputvec.end(), 0);
-
-    return sum;
-}
-
-double SVMOutputonpoint(int argc, char **argv, int k){
+// SVM output for a given point
+double SVMOutputonpoint(int k){
     double u = kernel(w, points[k]) - b;
     return u;
 }
 
-// SVM output for a given point
-double objectiveFunction(int argc, char **argv, std::vector<double>& alphavec, std::vector<int>& targetvec, std::vector<std::vector<double>>& pointsvec) {
+// Classification
+int classification(const vector<double>& new_point) {
+    double decision_value = kernel(w, new_point) - b;
 
-    size_t n_size = 15; // So that the vector size is 15 * 16 = 240 < 256
-    double result = 0;
-
-    std::vector<double> onevec(n_size, 1);
-    std::vector<double> minusonevec(n_size, -1);
-
-    size_t samples = targetvec.size()/n_size;
-
-    for(size_t s = 0; s < samples; s += n_size){
-
-        std::vector<std::vector<double>> inputmatrix(6);
-
-        for (size_t i = 0; i < n_size; ++i) {
-            for (size_t j = 0; j < n_size; ++j) {
-                inputmatrix[0].push_back(targetvec[s + i]);
-            }
-        }
-        inputmatrix[0].insert(inputmatrix[0].end(), onevec.begin(), onevec.end());
-
-        for (size_t i = 0; i < n_size; ++i) {
-            for (size_t j = 0; j < n_size; ++j) {
-                inputmatrix[1].push_back(targetvec[s + j]);
-            }
-        }
-        inputmatrix[1].insert(inputmatrix[1].end(), onevec.begin(), onevec.end());
-
-        for (size_t i = 0; i < n_size; ++i) {
-            for (size_t j = 0; j < n_size; ++j) {
-                inputmatrix[2].push_back(kernel(pointsvec[s + i], pointsvec[s + j]));
-            }
-        }
-        inputmatrix[2].insert(inputmatrix[2].end(), onevec.begin(), onevec.end());
-
-        for (size_t i = 0; i < n_size; ++i) {
-            for (size_t j = 0; j < n_size; ++j) {
-                inputmatrix[3].push_back(targetvec[s + i]);
-            }
-        }
-        inputmatrix[3].insert(inputmatrix[3].end(), onevec.begin(), onevec.end());
-
-        for (size_t i = 0; i < n_size; ++i) {
-            for (size_t j = 0; j < n_size; ++j) {
-                inputmatrix[4].push_back(targetvec[s + j]);
-            }
-        }
-        inputmatrix[4].insert(inputmatrix[4].end(), minusonevec.begin(), minusonevec.end());
-
-        for (size_t i = 0; i < n_size; ++i) {
-            for (size_t j = 0; j < n_size; ++j) {
-                inputmatrix[5].push_back(0.5);
-            }
-        }
-        inputmatrix[5].insert(inputmatrix[5].end(), alphavec.begin() + s, alphavec.begin() + s + n_size - 1);
-
-        result += slap(argc, argv, inputmatrix);
+    if (decision_value > 0) {
+        return 1;
+    } else {
+        return -1;
     }
+}
+
+// Objective function
+double objectiveFunction(std::vector<double>& alphavec, std::vector<int>& targetvec, std::vector<std::vector<double>>& pointsvec) {
+
+    double sum = 0;
+    double sum_alpha = 0;
+
+    for (size_t i = 0; i < targetvec.size(); i++){
+        for (size_t j = 0; j < targetvec.size(); j++){
+            sum += targetvec[i] * targetvec[j] * kernel(points[i], points[j]) * alphavec[i] * alphavec[j];
+        }
+    }
+
+    for (size_t i = 0; i < targetvec.size(); i++){
+        sum_alpha += alphavec[i];
+    }
+
+    double result = 0.5 * sum - sum_alpha;
 
     return result;
 }
 
 // TakeStep method
-bool takeStep(int argc, char **argv, int i1, int i2) {
+bool takeStep(int i1, int i2) {
     if (i1 == i2) return false;
 
     double alpha1 = alpha[i1], alpha2 = alpha[i2];
     int y1 = target[i1], y2 = target[i2];
-    double E1 = SVMOutputonpoint(argc, argv, i1) - y1;
-    double E2 = SVMOutputonpoint(argc, argv, i2) - y2;
+    double E1 = SVMOutputonpoint(i1) - y1;
+    double E2 = SVMOutputonpoint(i2) - y2;
     double s = y1 * y2;
 
     double L, H;
@@ -247,11 +100,11 @@ bool takeStep(int argc, char **argv, int i1, int i2) {
     } else {
         std::vector<double> alphavec_L = alpha;
         alphavec_L[i2] = L;
-        double Lobj = objectiveFunction(argc, argv, alphavec_L, target, points);
+        double Lobj = objectiveFunction(alphavec_L, target, points);
 
         std::vector<double> alphavec_H = alpha;
         alphavec_H[i2] = H;
-        double Hobj = objectiveFunction(argc, argv, alphavec_H, target, points);
+        double Hobj = objectiveFunction(alphavec_H, target, points);
 
         if (Lobj < Hobj - eps) a2 = L;
         else if (Lobj > Hobj + eps) a2 = H;
@@ -283,22 +136,22 @@ bool takeStep(int argc, char **argv, int i1, int i2) {
     return true;
 }
 
-int examineExample(int argc, char **argv, int i2){
+int examineExample(int i2){
     double y2 = target[i2];
     double alpha2 = alpha[i2];
-    double E2 = SVMOutputonpoint(argc, argv, i2) - y2;
+    double E2 = SVMOutputonpoint(i2) - y2;
     double r2 = E2 * y2;
 
     if ((r2 < -tol && alpha2 < C) || (r2 > tol && alpha2 > 0)){
         for (size_t i1 = 0; i1 < alpha.size(); ++i1) {
-            if (takeStep(argc, argv, i1, i2)) return 1;
+            if (takeStep(i1, i2)) return 1;
         }
     }
     return 0;
 }
 
 // SMO method
-void SMO(int argc, char **argv) {
+void SMO() {
     numChanged = 0;
     bool examineAll = true;
 
@@ -306,11 +159,11 @@ void SMO(int argc, char **argv) {
         numChanged = 0;
         if (examineAll) {
             for (size_t i = 0; i < points[0].size(); i++)
-                numChanged += examineExample(argc, argv, i);
+                numChanged += examineExample(i);
         } else {
             for (size_t i = 0; i < points[0].size(); i++)
                 if (alpha[i] != 0 && alpha[i] < C)
-                    numChanged += examineExample(argc, argv, i);
+                    numChanged += examineExample(i);
         }
 
         if (examineAll) examineAll = false;
@@ -356,16 +209,17 @@ void loadCSV(const string& filename, vector<vector<double>>& points, vector<int>
     file.close();
 }
 
-int main(int argc, char **argv){
+int main(){
+    auto start = std::chrono::high_resolution_clock::now();
     // Load the dataset
-    loadCSV("winequality-red.csv", points, target);
+    loadCSV("../winequality-white-acc1.csv", points, target);
 
     // Initialize alpha and weight vectors
     alpha = vector<double>(points[0].size(), 0.0);
     w = vector<double>(points[0].size(), 0.0);
 
     // Run the SMO algorithm
-    SMO(argc, argv);
+    SMO();
 
     // Display results
     cout << "Final alpha values:" << endl;
@@ -377,6 +231,27 @@ int main(int argc, char **argv){
     cout << "Weight vector (w): ";
     for (double wi : w) cout << wi << " ";
     cout << endl;
+
+    auto end = std::chrono::high_resolution_clock::now();
+
+    vector<vector<double>> points_acc;
+    vector<int> target_acc;
+    loadCSV("../winequality-white-acc2.csv", points_acc, target_acc);
+
+    vector<double> smo_values;
+    for (size_t i = 0; i < target_acc.size(); ++i) {
+        smo_values.push_back(classification(points_acc[i]) - target_acc[i]);
+    }
+
+    double zeros = std::count(smo_values.begin(), smo_values.end(), 0);
+    double accuracy_percentage = (zeros / smo_values.size()) * 100;
+
+    std::cout << "Training samples: " << target.size() << std::endl;
+    std::cout << "Testing samples: " << target_acc.size() << std::endl;
+    cout << "Accuracy: " << accuracy_percentage << "%" << endl;
+
+    std::chrono::duration<double, std::milli> duration = end - start;
+    std::cout << "Run time: " << duration.count() << " ms" << std::endl;
 
     return 0;
 }

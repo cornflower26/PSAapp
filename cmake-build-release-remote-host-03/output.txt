@@ -1,0 +1,7 @@
+Hello Word 95
+
+Matrix formation 
+Finished matrix multiplication 1
+Command terminated by signal 9
+87.83user 37.93system 2:05.96elapsed 99%CPU (0avgtext+0avgdata 129598800maxresident)k
+3448inputs+8outputs (20major+48257265minor)pagefaults 0swaps

@@ -1,0 +1,3 @@
+/home/ajanusze/SLAP/cmake-build-debug-remote-host-05/CMakeFiles/rebuild_cache.dir
+/home/ajanusze/SLAP/cmake-build-debug-remote-host-05/CMakeFiles/edit_cache.dir
+/home/ajanusze/SLAP/cmake-build-debug-remote-host-05/CMakeFiles/SLAP.dir

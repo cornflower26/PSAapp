@@ -1,0 +1,150 @@
+Hello Word 95
+
+Matrix formation 
+Finished matrix multiplication 1
+Finished cubing 
+Finished first scalar multiplication 
+Finished second scalar multiplication 
+Finished vector addition and Hidden Layer
+Finished matrix multiplication Fully Connected Layer
+Coefficients for hidden layer 
+Coefficients for FC Layer 
+Hidden variables
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+FC variables
+128 number of outputs for hidden
+357686 number of terms for hidden
+2 number of output for FC
+128 number of terms for FC 
+terminate called after throwing an instance of 'std::length_error'
+  what():  basic_string::append
+Command terminated by signal 6
+626.62user 158.38system 1:27:07elapsed 15%CPU (0avgtext+0avgdata 7478888maxresident)k
+90546392inputs+1108112outputs (2098320major+22646470minor)pagefaults 0swaps
