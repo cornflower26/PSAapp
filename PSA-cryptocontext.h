@@ -43,21 +43,28 @@ public:
     DiscreteLaplacianGenerator dl;
 
     PSACryptocontext(unsigned int t, unsigned int n,
-                    unsigned int i, Scheme scheme1);
+                     unsigned int i, Scheme scheme1);
 
     void calculateParams();
 
     void genSlapScheme();
 
     void TestEncryption(const unsigned int iters, const bool do_noise, std::vector<double>& noise_times,
-                    std::vector<double>& enc_times);
+                        std::vector<double>& enc_times);
 
     void TestDecryption(const unsigned int iters, std::vector<double> & dec_times);
 
     void TestPolynomialEncryption(const bool do_noise, const unsigned int iters, std::vector<double>& noise_times,
-                        std::vector<double>& enc_times);
+                                  std::vector<double>& enc_times);
+
+    void PolynomialEnvSetup(std::vector<double>& noise_times, std::vector<double>& enc_times);
+
+    void PolynomialEncryption(std::vector<double> &inputvec, std::vector<double> &expvec, const unsigned int iter, std::vector<double>& noise_times,
+                              std::vector<double>& enc_times);
 
     void TestPolynomialDecryption(const unsigned int iters, std::vector<double> & dec_times);
+
+    std::vector<double> PolynomialDecryption(std::vector<double> &constants, const unsigned int iters, std::vector<double> & dec_times);
 
 
 };

@@ -10,6 +10,7 @@
 
 using namespace lbcrypto;
 
+
 // Function to calculate the Hamming weight
 static unsigned int hammingWeight(unsigned int n) {
     unsigned int count = 0;
@@ -20,7 +21,7 @@ static unsigned int hammingWeight(unsigned int n) {
     return count;
 }
 
-
+/**
 static std::vector<double> Polynomial_to_double_encoding(const DCRTPoly & p){
     std::vector<double> ret;
     ret.resize(p.GetModulus().ConvertToInt());
@@ -28,8 +29,8 @@ static std::vector<double> Polynomial_to_double_encoding(const DCRTPoly & p){
         ret[i] = p[i].ConvertToDouble();
     }
     return ret;
-}
-
+}**/
+/**
 static DCRTPoly encoding_to_Polynomial(const Plaintext & vals, const DCRTPoly parms){
     DCRTPoly ret = parms.CloneParametersOnly();
     auto intermediate1 = vals->GetPackedValue();
@@ -40,8 +41,8 @@ static DCRTPoly encoding_to_Polynomial(const Plaintext & vals, const DCRTPoly pa
     }
     ret.SetValues(intermediate2, EVALUATION);
     return ret;
-}
-
+}**/
+/**
 static void ppow(DCRTPoly & rop, const  DCRTPoly& a, const uint64_t exp) {
     auto values = a.GetAllElements();
     BigVector ans(values.size(), 5);
@@ -63,33 +64,39 @@ static void ppow(DCRTPoly & rop, const  DCRTPoly& a, const uint64_t exp) {
         rop.SetElementAtIndex(mod_idx, values[mod_idx]);
 
     }
-}
-
+}**/
+/**
 static void ppow(std::vector<double> & noisy_input,const uint64_t e) {
     for(size_t mod_idx = 0; mod_idx < noisy_input.size(); mod_idx++) {
         noisy_input.at(mod_idx) = pow(noisy_input.at(mod_idx),e);
+    }
+}**/
+
+static void ppow(std::vector<double> & noisy_input,const std::vector<double> & e) {
+    for(size_t mod_idx = 0; mod_idx < noisy_input.size(); mod_idx++) {
+        noisy_input.at(mod_idx) = pow(noisy_input.at(mod_idx),e[mod_idx]);
     }
 }
 
 static size_t choose_parameters(unsigned int required_q) {
     size_t n;
+    //Ok
+    if (required_q <= 27) {n = 1 << 10;}
+        //This is the problematic one
+    else if (required_q <= 54) {n = 1 << 11;}
         //Ok
-        if (required_q <= 27) {n = 1 << 10;}
-            //This is the problematic one
-        else if (required_q <= 54) {n = 1 << 11;}
-            //Ok
-        else if (required_q <= 109) {n = 1 << 12;}
-            //Ok
-        else if (required_q <= 218) { n = 1 << 13;}
-            //Also problematic
-        else if (required_q <= 438) { n = 1 << 14;}
-            //Also problematic
-        else if (required_q <= 881) { n = 1 << 15;}
-        else {n = 0;}
-        return n;
-    }
+    else if (required_q <= 109) {n = 1 << 12;}
+        //Ok
+    else if (required_q <= 218) { n = 1 << 13;}
+        //Also problematic
+    else if (required_q <= 438) { n = 1 << 14;}
+        //Also problematic
+    else if (required_q <= 881) { n = 1 << 15;}
+    else {n = 0;}
+    return n;
+}
 
-    static size_t numTowers(unsigned int required_q){
+static size_t numTowers(unsigned int required_q){
     if (required_q <= 27){
         return 1;
     }
@@ -262,6 +269,8 @@ DCRTPolyImpl<BigVector> static SwitchCRTBasis1(const DCRTPoly & paramsP,
 }
 #endif
 **/
+
+/**
 std::vector<std::complex<double>> static Conjugate2(const std::vector<std::complex<double>>& vec) {
     uint32_t n = vec.size();
     std::vector<std::complex<double>> result(n);
@@ -270,8 +279,9 @@ std::vector<std::complex<double>> static Conjugate2(const std::vector<std::compl
     }
     result[0] = {vec[0].real(), -vec[0].imag()};
     return result;
-}
+}**/
 
+/**
 double static StdDev2(const std::vector<std::complex<double>>& vec, const std::vector<std::complex<double>>& conjugate) {
     uint32_t slots = vec.size();
     if (1 == slots) {
@@ -319,9 +329,10 @@ double static StdDev2(const std::vector<std::complex<double>>& vec, const std::v
     double stddev = 0.5 * std::sqrt(variance);
 
     return stddev;
-}
+}**/
 
-std::vector<std::complex<double>> static Decode(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double scalingFactor, ScalingTechnique scalTech,
+/**
+std::vector<double> static Decode(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double scalingFactor, ScalingTechnique scalTech,
                                 ExecutionMode executionMode) {
     double p       = encoding.GetEncodingParams()->GetPlaintextModulus();
     double powP    = 0.0;
@@ -429,11 +440,13 @@ std::vector<std::complex<double>> static Decode(CKKSPackedEncoding & encoding, s
         //  }
         // }
 
+        std::cout << logstd << " bits of precision " << std::endl;
+        std::cout << p << " precision "<< std::endl;
         //   If less than 5 bits of precision is observed
-        if (logstd > p - 5.0)
-            OPENFHE_THROW(math_error,
-                          "The decryption failed because the approximation error is "
-                          "too high. Check the parameters. ");
+        //if (logstd > p - 5.0)
+        //    OPENFHE_THROW(math_error,
+        //                  "The decryption failed because the approximation error is "
+        //                  "too high. Check the parameters. ");
 
         // real values
         std::vector<std::complex<double>> realValues(slots);
@@ -456,7 +469,7 @@ std::vector<std::complex<double>> static Decode(CKKSPackedEncoding & encoding, s
         for (size_t i = 0; i < slots; ++i) {
             double real = scale * (curValues[i].real() + conjugate[i].real());
             // real += powP * dgg.GenerateIntegerKarney(0.0, stddev);
-            //real += powP * d(g);
+            real += powP * d(g);
             double imag = scale * (curValues[i].imag() + conjugate[i].imag());
             // imag += powP * dgg.GenerateIntegerKarney(0.0, stddev);
             imag += powP * d(g);
@@ -478,17 +491,74 @@ std::vector<std::complex<double>> static Decode(CKKSPackedEncoding & encoding, s
         //m_logError = std::round(std::log2(stddev * std::sqrt(2 * slots)));
 
         //TODO
-        return realValues;
+        //return curValues;
     }
 
-    return curValues;
+    std::vector<double> realsValue(curValues.size());
+    std::transform(curValues.begin(), curValues.end(), curValues.begin(),
+                   [](std::complex<double> da) { return da.real(); });
+
+    return realsValue;
     //return false;
-}
+}**/
 
 
 
+/**
+double static getStdDev(CKKSPackedEncoding & encoding, size_t noiseScaleDeg, double scalingFactor, ScalingTechnique scalTech,
+                 ExecutionMode executionMode) {
+    double p       = encoding.GetEncodingParams()->GetPlaintextModulus();
+    double powP    = 0.0;
+    uint32_t Nh    = encoding.GetElementRingDimension() / 2;
+    uint32_t slots = encoding.GetSlots();
+    uint32_t gap   = Nh / slots;
+    //value.clear();
+    std::vector<std::complex<double>> curValues(slots);
+
+    if (true) {
+        if (scalTech == FLEXIBLEAUTO || scalTech == FLEXIBLEAUTOEXT)
+            powP = pow(scalingFactor, -1);
+        else
+            powP = pow(2, -p);
+
+        const NativeInteger& q = encoding.GetElementModulus().ConvertToInt();
+        NativeInteger qHalf    = q >> 1;
+
+        std::cout << std::endl << "[ ";
+        for (size_t i = 0, idx = 0; i < slots; ++i, idx += gap) {
+            std::complex<double> cur;
+
+            if (encoding.GetElement<NativePoly>()[idx] > qHalf)
+                cur.real(-((q - encoding.GetElement<NativePoly>()[idx])).ConvertToDouble());
+            else
+                cur.real((encoding.GetElement<NativePoly>()[idx]).ConvertToDouble());
+
+            if (encoding.GetElement<NativePoly>()[idx + Nh] > qHalf)
+                cur.imag(-((q - encoding.GetElement<NativePoly>()[idx + Nh])).ConvertToDouble());
+            else
+                cur.imag((encoding.GetElement<NativePoly>()[idx + Nh]).ConvertToDouble());
+
+            curValues[i] = cur;
+            std::cout << " " << cur;
+        }
+        std::cout << " ]" << std::endl;
+    }
+
+    // compute m(1/X) corresponding to Conj(z), where z is the decoded vector
+    auto conjugate = Conjugate2(curValues);
+    std::cout << "Conjugate " << conjugate << std::endl;
+
+    // Estimate standard deviation from 1/2 (m(X) - m(1/x)),
+    // which corresponds to Im(z)
+    double stddev = StdDev2(curValues, conjugate);
+    std::cout << "Standard Deviation " << stddev << std::endl;
+
+    double logstd = std::log2(stddev);
+    return logstd;
+}**/
 
 
+/**
 static DCRTPolyImpl<BigVector> ScaleAndRound(
         DCRTPoly input, const std::shared_ptr<ILDCRTParams<bigintdyn::ubint<unsigned long>>> paramsOutput, const std::vector<std::vector<NativeInteger>>& tOSHatInvModsDivsModo,
         const std::vector<double>& tOSHatInvModsDivsFrac, const std::vector<DoubleNativeInt>& modoBarretMu) {
@@ -619,13 +689,13 @@ static DCRTPolyImpl<BigVector> ScaleAndRound(
     return ans;
 }
 #endif
+**/
 
-
-
+/**
 void static Test(DCRTPoly & ciphertext,
         NativePoly* plaintext){
     *plaintext = ciphertext.ToNativePoly();
-}
+}**/
 
 /**
  * Generate an ILDCRTParams with a given number of parms, with cyphertext moduli
@@ -634,7 +704,43 @@ void static Test(DCRTPoly & ciphertext,
  * @param numOfTower - # of polynomials
  * @param pbits - number of bits in the prime, to start with
  * @return
- */
+
+template <typename I>
+static std::shared_ptr<ILDCRTParams<I>> GenerateDCRTParams(usint m, usint numOfTower, usint pbits) {
+    OPENFHE_DEBUG_FLAG(false);
+    OPENFHE_DEBUG("in GenerateDCRTParams");
+    OPENFHE_DEBUGEXP(m);
+    OPENFHE_DEBUGEXP(numOfTower);
+    OPENFHE_DEBUGEXP(pbits);
+    if (numOfTower == 0) {
+        OPENFHE_THROW(math_error, "Can't make parms with numOfTower == 0");
+    }
+
+    std::vector<NativeInteger> moduli(numOfTower);
+    std::vector<NativeInteger> rootsOfUnity(numOfTower);
+
+    NativeInteger q = FirstPrime<NativeInteger>(pbits, m);
+    I modulus(1);
+
+    usint j = 0;
+    OPENFHE_DEBUGEXP(q);
+
+    for (;;) {
+        moduli[j]       = q;
+        rootsOfUnity[j] = RootOfUnity(m, q);
+        modulus         = modulus * I(q.ConvertToInt());
+        OPENFHE_DEBUG("j " << j << " modulus " << q << " rou " << rootsOfUnity[j]);
+        if (++j == numOfTower)
+            break;
+
+        q = NextPrime(q, m);
+    }
+
+    auto params = std::make_shared<ILDCRTParams<I>>(m, moduli, rootsOfUnity);
+
+    return params;
+}*/
+
 template <typename I>
 static std::shared_ptr<ILDCRTParams<I>> GenerateDCRTParams(usint m, usint numOfTower, usint pbits) {
     OPENFHE_DEBUG_FLAG(false);
@@ -670,5 +776,6 @@ static std::shared_ptr<ILDCRTParams<I>> GenerateDCRTParams(usint m, usint numOfT
 
     return params;
 }
+
 
 #endif

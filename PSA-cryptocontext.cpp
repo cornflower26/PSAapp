@@ -57,7 +57,7 @@ void PSACryptocontext::genSlapScheme() {
 
     auto q = aggregator.ciphertextParams.GetModulus();
     N = aggregator.ciphertextParams.GetCyclotomicOrder();
-            //ctext_parms->poly_mod_degree();
+    //ctext_parms->poly_mod_degree();
 
     unsigned int plain_mod_size = plainBits < PLAIN_MOD_SIZE_MAX ? plainBits : PLAIN_MOD_SIZE_MAX;
     //unsigned int num_plain_moduli = plainBits / packingSize;
@@ -67,10 +67,10 @@ void PSACryptocontext::genSlapScheme() {
 
     //std::cout << "Plain bits is " << plainBits << std::endl;
     //std::cout << "Plain_mod_size is " << plain_mod_size << std::endl;
-   // std::cout << "Num_plain_moduli is " << num_plain_moduli << std::endl;
+    // std::cout << "Num_plain_moduli is " << num_plain_moduli << std::endl;
     //std::cout << "N is " << N << std::endl;
     std::shared_ptr<ILDCRTParams<BigInteger>> parms = GenerateDCRTParams<BigInteger>(N,
-                numTowers(plain_mod_size),plain_mod_size);
+                                                                                     numTowers(plain_mod_size),plain_mod_size);
     aggregator.plaintextParams = DCRTPoly(parms,EVALUATION);
     aggregator.plaintextParams.SetValuesToZero();
 
@@ -87,6 +87,7 @@ void PSACryptocontext::genSlapScheme() {
 
     aggregator.delta_mod_q.resize(kPrime);
     aggregator.t_mod_q.resize(kPrime);
+    aggregator.scale_mod_t.resize(kPrime);
 
 
     //BigInteger tmp;
@@ -112,12 +113,13 @@ void PSACryptocontext::genSlapScheme() {
         aggregator.delta_mod_q.at(i) %= qi;
         aggregator.t_mod_q.at(i) = t;
         aggregator.t_mod_q.at(i) %= qi;
+        aggregator.scale_mod_t.at(i) = t/qi;
     }
 
 }
 
 PSACryptocontext::PSACryptocontext(unsigned int t,
-                                 unsigned int n, unsigned int i, Scheme scheme1) : aggregator(scheme1, scale) {
+                                   unsigned int n, unsigned int i, Scheme scheme1) : aggregator(scheme1, scale) {
     plainBits = t;
     //packingSize = w;
     numUsers = n;
@@ -158,7 +160,7 @@ PSACryptocontext::PSACryptocontext(unsigned int t,
 }
 
 void PSACryptocontext::TestEncryption(const unsigned int iters, const bool do_noise, std::vector<double>& noise_times,
-                    std::vector<double>& enc_times){
+                                      std::vector<double>& enc_times){
     ciphertexts.clear();
     noise_times.clear();
     enc_times.clear();
@@ -182,8 +184,8 @@ void PSACryptocontext::TestEncryption(const unsigned int iters, const bool do_no
         double noise_time, enc_time;
         plaintexts.push_back(input);
         result = aggregator.Encrypt(input, privateKeys[i], publicKey,
-                         do_noise,
-                         noise_time, enc_time);
+                                    do_noise,
+                                    noise_time, enc_time);
         //std::cout << "Ciphertext for aggregation " << result << std::endl;
         ciphertexts.push_back(result);
         noise_times.push_back(noise_time);
@@ -194,7 +196,7 @@ void PSACryptocontext::TestEncryption(const unsigned int iters, const bool do_no
 }
 
 void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsigned int iters, std::vector<double>& noise_times,
-                              std::vector<double>& enc_times){
+                                                std::vector<double>& enc_times){
     //ciphertexts.clear();
     //plaintexts.clear();
     noise_times.clear();
@@ -203,6 +205,7 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
     aggregationKey.SetValuesToZero();
     aggregator.PublicKey(publicKey, ts);
     std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,500);
+    std::vector<double> expvec(aggregator.plaintextParams.GetRingDimension()/2,1);
     //std::vector<double> inputvec = dl.GenerateIntVector(aggregator.plaintextParams.GetRingDimension()/2, 1, GAUSS);
     noise_times.reserve(iters);
     enc_times.reserve(iters);
@@ -225,8 +228,8 @@ void PSACryptocontext::TestPolynomialEncryption(const bool do_noise, const unsig
         double noise_time, enc_time;
         //std::cout << inputvec << std::endl;
         result = aggregator.PolynomialEncrypt(inputvec, privateKeys.at(i % privateKeys.size()), publicKey,
-                              do_noise,
-                              noise_time, enc_time, 1);
+                                              do_noise,
+                                              noise_time, enc_time, expvec);
         if(i < numUsers){
             ciphertexts.push_back(result); //Hope this copies it
             //std::cout << result << std::endl;
@@ -269,12 +272,13 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
 //    dl.addRandomNoise(aggregationKey, this->scale, UNIFORM);
 
     std::vector<double> result;
+    std::vector<double> constants(aggregator.plaintextParams.GetRingDimension()/2,1);
 
     for(unsigned int i = 0; i < iters; i++){
         double dec_time;
-        double agg_time;
+        //double agg_time;
         auto begin = std::chrono::steady_clock::now();
-        result = aggregator.PolynomialDecrypt(ciphertexts, aggregationKey, publicKey, dec_time, numUsers);
+        result = aggregator.PolynomialDecrypt(ciphertexts, constants, aggregationKey, publicKey, dec_time, numUsers);
         auto end = std::chrono::steady_clock::now();
         //std::cout << "Decryption result for PPSA " << result << std::endl;
         //No clue what this was supposed to do.
@@ -282,13 +286,63 @@ void PSACryptocontext::TestPolynomialDecryption(const unsigned int iters, std::v
         if (i == 0){
             for (int j = 0; j < mult_res.size(); j++){
                 mult_res.at(j) *= res.at(j);
-            } 
-        } 
+            }
+        }
         else {mult_res = res;}
         */
         //os << res << '\n';
         dec_times.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count());
 
+    }
+    return;
+}
+
+std::vector<double> PSACryptocontext::PolynomialDecryption(std::vector<double> &constants, const unsigned int iters, std::vector<double> & dec_times){
+    //agg_times.clear();
+    //agg_times.reserve(iters);
+    dec_times.clear();
+    dec_times.reserve(iters);
+    std::vector<double> result;
+
+    for(unsigned int i = 0; i < iters; i++){
+        double dec_time;
+        auto begin = std::chrono::steady_clock::now();
+        result = aggregator.PolynomialDecrypt(ciphertexts, constants, aggregationKey, publicKey, dec_time, numUsers);
+        auto end = std::chrono::steady_clock::now();
+        //dec_times.push_back(dec_time);
+        dec_times.push_back(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count());
+
+    }
+    return result;
+}
+
+
+void PSACryptocontext::PolynomialEncryption(std::vector<double> &inputvec, std::vector<double> &expvec, const unsigned int iter, std::vector<double>& noise_times,
+                                            std::vector<double>& enc_times){
+    DCRTPoly result = aggregator.ciphertextParams.CloneParametersOnly();
+    result.SetValuesToZero();
+    double noise_time, enc_time;
+    result = aggregator.PolynomialEncrypt(inputvec, privateKeys.at(iter % privateKeys.size()), publicKey,
+                                          true,
+                                          noise_time, enc_time, expvec);
+    ciphertexts.push_back(result); //Hope this copies it
+    noise_times.push_back(noise_time);
+    enc_times.push_back(enc_time);
+    return;
+}
+
+void PSACryptocontext::PolynomialEnvSetup(std::vector<double>& noise_times, std::vector<double>& enc_times){
+    noise_times.clear();
+    enc_times.clear();
+    aggregationKey = aggregator.ciphertextParams.CloneParametersOnly();
+    aggregationKey.SetValuesToZero();
+    aggregator.PublicKey(publicKey, ts);
+    //std::vector<double> inputvec(aggregator.plaintextParams.GetRingDimension()/2,500);
+    noise_times.reserve(iters);
+    enc_times.reserve(iters);
+    aggregator.SecretKey(aggregationKey, privateKeys, numUsers);
+    if(privateKeys.empty()){
+        throw std::logic_error("Must have at least one private key! (Probably at least 2...)");
     }
     return;
 }

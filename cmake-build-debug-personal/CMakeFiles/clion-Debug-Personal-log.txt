@@ -1,0 +1,5 @@
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=/usr/bin/clang++-11 -G "CodeBlocks - Unix Makefiles" -S /home/ajanusze/tmp/tmp.9AUwQ2RZ7q/SLAP -B /home/ajanusze/tmp/tmp.9AUwQ2RZ7q/SLAP/cmake-build-debug-personal
+/usr/bin/cmake: /usr/local/lib/libcurl.so.4: no version information available (required by /usr/bin/cmake)
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ajanusze/tmp/tmp.9AUwQ2RZ7q/SLAP/cmake-build-debug-personal

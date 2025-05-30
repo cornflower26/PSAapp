@@ -34,8 +34,8 @@ public:
                              const bool do_noise,
                              double & noise_time, double & enc_time) = 0;
 
-     DCRTPoly NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey) {return DCRTPoly();};
-     DCRTPoly MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey) {return DCRTPoly();};
+    DCRTPoly NSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey) {return DCRTPoly();};
+    DCRTPoly MSEncrypt(const DCRTPoly plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey) {return DCRTPoly();};
 
     virtual DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
                              double & dec_time, unsigned int num_additions=0) = 0;
@@ -51,14 +51,14 @@ public:
 
 
     DCRTPoly PolynomialEncrypt(const std::vector<double> plaintext, const DCRTPoly privateKey, const DCRTPoly publicKey,
-                                        bool do_noise, double & noise_time,
-                                        double & enc_time, const uint64_t e){ return DCRTPoly();};
+                               bool do_noise, double & noise_time,
+                               double & enc_time, const uint64_t e){ return DCRTPoly();};
 
     std::vector<double> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const DCRTPoly publicKey,
-                                 double & dec_time, unsigned int num_additions=0){ return std::vector<double>();}
+                                          double & dec_time, unsigned int num_additions=0){ return std::vector<double>();}
 
     std::vector<double> PolynomialDecrypt(std::vector<DCRTPoly> ciphertexts, const DCRTPoly aggregationKey, const uint64_t ts,
-                                         double & dec_time, unsigned int num_additions=0){ return std::vector<double>();}
+                                          double & dec_time, unsigned int num_additions=0){ return std::vector<double>();}
 
     virtual ~PSAScheme() {};
 };

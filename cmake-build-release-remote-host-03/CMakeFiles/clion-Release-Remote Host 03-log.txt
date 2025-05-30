@@ -1,0 +1,4 @@
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -S /home/ajanusze/tmp/tmp.ALwFOUro6I/SLAP -B /home/ajanusze/tmp/tmp.ALwFOUro6I/SLAP/cmake-build-release-remote-host-03
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ajanusze/tmp/tmp.ALwFOUro6I/SLAP/cmake-build-release-remote-host-03

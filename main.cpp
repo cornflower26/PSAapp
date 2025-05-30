@@ -21,113 +21,173 @@ void handler(int sig) {
     exit(1);
 }
 
-    int main(int argc, char ** argv) {
-        signal(SIGSEGV, handler);
-        //std::cout << "Hello, World!" << std::endl;
-        //DCRTPoly a = DCRTPoly();
-        unsigned int plain_bits = 8; //log t
-        unsigned int num_users = 1; //n
-        unsigned int iters = 1; //i
-        unsigned int k_prime = 1; //k
-        Scheme scheme1 = NS;
+void FHE_test(int num_users){
+    std::cout << "Hello, FHE World! " << std::endl;
+    CryptoContext<DCRTPoly> cc;
+    KeyPair<DCRTPoly> keys;
+    //Encode Data
+    uint32_t scaleModSize = 50;
+    uint32_t batchSize = 32;
+    CCParams<CryptoContextCKKSRNS> parameters;
 
-        unsigned int N = 1; //N
+    SecretKeyDist secretKeyDist = UNIFORM_TERNARY;
+    parameters.SetSecretKeyDist(secretKeyDist);
 
-        int c;
-          while((c = getopt(argc, argv, "t:n:i:k:N:")) != -1){
-            switch(c){
-            case 't':{
-                plain_bits = atoi(optarg);
-                break;
-            }
-        case 'n':{
-                num_users = atoi(optarg);
-                break;
-            }
-        case 'i':{
-                iters = atoi(optarg);
-                break;
-            }
-        case 'k':{
-                k_prime = atoi(optarg);
-                break;
-            }
-        case 'N':{
-                N = atoi(optarg);
-                break;
-            }
-        default:{
-            std::cout << "Invalid argument: " << c;
-            if(optarg != nullptr){
-                std::cout << ' ' << optarg;
-            }
-            std::cout << std::endl;
-            return 1;
-        }
-            }
-          }
+    parameters.SetSecurityLevel(HEStd_NotSet);
+    parameters.SetRingDim(1 << 12);
 
-        if(!plain_bits){
-            throw std::runtime_error("Must have nonempty plaintext space");
-        }  
-        if(!num_users){
-            throw std::runtime_error("Must have at least some users");
-        }
-        if(!iters){
-            throw std::runtime_error("Must have at least some iterations");
-        }
+    parameters.SetScalingModSize(scaleModSize);
+    parameters.SetBatchSize(batchSize);
 
-        unsigned int MAX_CTEXTS_DEFAULT = 20;
+    std::vector<uint32_t> levelBudget = {4, 4};
+    uint32_t levelsAvailableAfterBootstrap = 10;
+    usint depth = levelsAvailableAfterBootstrap + FHECKKSRNS::GetBootstrapDepth(levelBudget, secretKeyDist);
+    parameters.SetMultiplicativeDepth(depth);
 
-        //temp();
+    cc = (GenCryptoContext(parameters));
 
-        //Code for testing SLAP, which isn't what this paper is about
+    cc->Enable(PKE);
+    cc->Enable(KEYSWITCH);
+    cc->Enable(LEVELEDSHE);
+    cc->Enable(ADVANCEDSHE);
+    cc->Enable(lbcrypto::FHE);
+    //std::cout << "CKKS scheme " << i << " is using ring dimension " << cc[i]->GetRingDimension() << std::endl;
 
-        /**
-        PSACryptocontext p = PSACryptocontext(plain_bits, num_users, iters, scheme1);
-        std::vector<double> noise_times;
-        std::vector<double> enc_times;
-        std::vector<double> dec_times;
-        p.TestEncryption(iters, false, noise_times, enc_times);
+    usint ringDim = cc->GetRingDimension();
+    usint numSlots = ringDim / 2;
+    cc->EvalBootstrapSetup(levelBudget);
 
-        p.TestDecryption(iters,dec_times);
+    keys = (cc->KeyGen());
+    cc->EvalMultKeyGen(keys.secretKey);
+    cc->EvalBootstrapKeyGen(keys.secretKey, numSlots);
 
-        for(const double d : noise_times){
-            std::cout << "noise_times " << d << '\n';
-        }
-        for(const double d : enc_times){
-            std::cout << "enc_times " << d << '\n';
-        }
-        for(const double d : dec_times){
-            std::cout << "dec_times " << d << '\n';
-        }
-         **/
+    std::vector<Ciphertext<DCRTPoly>> encryptedData;
+    for (int i =  0; i < num_users; i++){
+        int in = i;
+        if (i == 0) in = 1;
 
-
-        PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
-
-        std::vector<double> poly_noise_times;
-        std::vector<double> poly_enc_times;
-
-        pp.TestPolynomialEncryption(true, iters, poly_noise_times, poly_enc_times);
-        // pp.TestPolynomialEncryption(1, MAX_CTEXTS_DEFAULT, poly_noise_times, poly_enc_times);
-
-        std::vector<double> decrypt_times;
-
-
-        pp.TestPolynomialDecryption(iters, decrypt_times);
-
-
-        for(const double d : poly_noise_times){
-            //std::cout << "poly_noise_times " << d << '\n';
-        }
-        for(const double d : poly_enc_times){
-            //std::cout << "poly_enc_times " << d << '\n';
-        }
-        for(const double d : decrypt_times){
-            //std::cout << "decrypt_times " << d << '\n';
-        }
-
-        return 0;
+        std::vector<double> inputvec(16, 0);
+        inputvec[0] = in;
+        //std::cout << "Input: " << i << inputvec << std::endl;
+        Ciphertext<DCRTPoly> element;
+        Plaintext pt = cc->MakeCKKSPackedPlaintext(inputvec);
+        auto add = cc->Encrypt(keys.publicKey, pt);
+        encryptedData.push_back(add);
     }
+
+    std::string result;
+    double final = 0;
+    std::vector<Ciphertext<DCRTPoly>> res;
+    res.push_back(encryptedData[0]);
+
+    for (int i = 1; i < num_users; i++) {
+        //std::cout << "Computing multiplication " << i << " at depth " << encryptedData[i]->GetLevel() <<std::endl;
+        if (depth - encryptedData[i]->GetLevel() < 1) cc->EvalBootstrap(encryptedData[i]);
+        auto temp = cc->EvalMult(encryptedData[0],encryptedData[i]);
+        res.push_back(temp);
+    }
+    std::vector<double> intermediate_values;
+    for (int i = 1; i < num_users; i++) {
+        Plaintext plain;
+        cc->Decrypt(keys.secretKey, res[i], &plain);
+        auto finvec = plain->GetCKKSPackedValue();
+        //std::cout << "Full value " << finvec << std::endl;
+        intermediate_values.push_back(finvec[0].real());
+    }
+    for (size_t i = 0; i < num_users; i++) final += intermediate_values[i];
+    std::cout << "Final FHE value " << final << std::endl;
+}
+
+void PPSA_test(int num_users){
+    std::cout << "Hello, PPSA World! " << std::endl;
+    //DCRTPoly a = DCRTPoly();
+    unsigned int plain_bits = 20; //log t
+    unsigned int iters = 1; //i
+    unsigned int k_prime = 1; //k
+    Scheme scheme1 = NS;
+
+    unsigned int N; //N
+
+    if(!plain_bits){
+        throw std::runtime_error("Must have nonempty plaintext space");
+    }
+    if(!num_users){
+        throw std::runtime_error("Must have at least some users");
+    }
+    if(!iters){
+        throw std::runtime_error("Must have at least some iterations");
+    }
+
+    unsigned int MAX_CTEXTS_DEFAULT = 20;
+    MAX_CTEXTS_DEFAULT = N;
+    MAX_CTEXTS_DEFAULT = k_prime;
+    k_prime = MAX_CTEXTS_DEFAULT;
+
+    //temp();
+
+    //Code for testing SLAP, which isn't what this paper is about
+    int prob_num_times = num_users/(512) +1;
+
+
+    PSACryptocontext pp = PSACryptocontext(plain_bits, num_users, iters, scheme1);
+    int num_times = num_users/(pp.aggregator.plaintextParams.GetRingDimension() / 2) +1;
+    std::vector<double> poly_noise_times;
+    std::vector<double> poly_enc_times;
+
+    //pp.TestPolynomialEncryption(true, iters, poly_noise_times, poly_enc_times);
+    // pp.TestPolynomialEncryption(1, MAX_CTEXTS_DEFAULT, poly_noise_times, poly_enc_times);
+
+    pp.PolynomialEnvSetup(poly_noise_times, poly_enc_times);
+    int q = 0;
+
+    for (unsigned int i = 0; i < num_users; i++) {
+        //for (unsigned int j = 0; j < num_times; j++) {
+            int in = i;
+            int exp = 0;
+            if (i == 0) {
+                in = 1;
+                exp = 1;
+            }
+
+            std::vector<double> inputvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, in);
+            std::vector<double> expvec(pp.aggregator.plaintextParams.GetRingDimension() / 2, exp);
+
+            //if (i/(pp.aggregator.plaintextParams.GetRingDimension() / 2) == j)
+                expvec[i % (pp.aggregator.plaintextParams.GetRingDimension() / 2)] = 1;
+            //else expvec[i] = 1;
+
+            //std::cout << i << " input: " << inputvec << " exp: " << expvec << std::endl;
+
+            pp.PolynomialEncryption(inputvec, expvec, i, poly_noise_times, poly_enc_times);
+            q++;
+        //}
+    }
+
+
+    //std::cout << "Prob time " << prob_num_times*num_users << " actual inputs " << q << std::endl;
+    std::vector<double> decrypt_times;
+    std::vector<double> agg_times;
+
+    //std::cout << "MOST IMPORTANT NUMBER" << pp.aggregator.plaintextParams.GetRingDimension()/2 << std::endl;
+    std::vector<double> constants(pp.aggregator.plaintextParams.GetRingDimension()/2,1);
+    std::vector<double> outputvec = pp.PolynomialDecryption(constants, iters, decrypt_times);
+    double final = 0;
+
+    for (size_t i = 0; i < num_users; i++) final += outputvec[i];
+    std::cout << "Final PPSA output: " << outputvec << std::endl;
+
+}
+
+int main(int argc, char ** argv) {
+    signal(SIGSEGV, handler);
+
+    unsigned int num_users = 9216; //n
+
+    //PPSA_test(num_users);
+    FHE_test(num_users);
+
+    return 0;
+}
+
+
 

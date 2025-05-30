@@ -18,6 +18,7 @@ private:
 public:
     std::vector<BigInteger> delta_mod_q;
     std::vector<BigInteger> t_mod_q;
+    std::vector<BigInteger> scale_mod_t;
     std::vector<DoubleNativeInt> ComputeShit(DCRTPoly & plaintext);
 
 
@@ -26,8 +27,8 @@ public:
     void Init();
 
     DCRTPoly Encrypt(const DCRTPoly& plaintext, const DCRTPoly &privateKey, const DCRTPoly &publicKey,
-                             const bool do_noise,
-                             double & noise_time, double & enc_time) override;
+                     const bool do_noise,
+                     double & noise_time, double & enc_time) override;
 
     DCRTPoly NSEncrypt(const DCRTPoly &plaintext, const DCRTPoly& privateKey, const DCRTPoly &publicKey);
     DCRTPoly MSEncrypt(const DCRTPoly& plaintext, const DCRTPoly& privateKey, const DCRTPoly& publicKey);
@@ -36,7 +37,7 @@ public:
                      double & dec_time, unsigned int num_additions=0) override;
 
     DCRTPoly Decrypt(const std::vector<DCRTPoly>& ciphertexts, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
-                      double & dec_time, unsigned int num_additions=0) override;
+                     double & dec_time, unsigned int num_additions=0) override;
 
 
     DCRTPoly NSDecrypt(const std::vector<DCRTPoly>& ciphertexts,const DCRTPoly& aggregationKey, const DCRTPoly &publicKey,
@@ -50,12 +51,12 @@ public:
 
     DCRTPoly PolynomialEncrypt(const std::vector<double>& plaintext, const DCRTPoly &privateKey, const DCRTPoly& publicKey,
                                bool do_noise, double & noise_time,
-                               double & enc_time, const uint64_t e);
+                               double & enc_time, const std::vector<double>& e);
 
-    std::vector<double> PolynomialDecrypt(const std::vector<DCRTPoly> &ciphertexts, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
+    std::vector<double> PolynomialDecrypt(const std::vector<DCRTPoly> &ciphertexts,std::vector<double> &constants, const DCRTPoly &aggregationKey, const DCRTPoly& publicKey,
                                           double & dec_time, unsigned int num_additions=0);
 
-    std::vector<double> PolynomialDecrypt(const std::vector<DCRTPoly> &ciphertexts, const DCRTPoly& aggregationKey, const uint64_t ts,
+    std::vector<double> PolynomialDecrypt(const std::vector<DCRTPoly> &ciphertexts, std::vector<double> &constants, const DCRTPoly& aggregationKey, const uint64_t ts,
                                           double & dec_time, unsigned int num_additions=0);
 
 
