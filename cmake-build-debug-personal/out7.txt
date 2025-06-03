@@ -1,0 +1,4 @@
+Hello, FHE World! 
+Command terminated by signal 9
+20568.80user 839.53system 1:18:25elapsed 454%CPU (0avgtext+0avgdata 7540852maxresident)k
+85134552inputs+8outputs (929022major+29004671minor)pagefaults 0swaps

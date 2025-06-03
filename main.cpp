@@ -181,10 +181,11 @@ void PPSA_test(int num_users){
 int main(int argc, char ** argv) {
     signal(SIGSEGV, handler);
 
-    unsigned int num_users = 9216; //n
+    unsigned int num_users = 115200; //n
+    std::cout << "Num users " << num_users << std::endl;
 
-    //PPSA_test(num_users);
-    FHE_test(num_users);
+    PPSA_test(num_users);
+    //FHE_test(num_users);
 
     return 0;
 }

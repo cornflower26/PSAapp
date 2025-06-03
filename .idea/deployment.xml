@@ -9,6 +9,7 @@
           </mappings>
           <excludedPaths>
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release-remote-host-03" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-remote05" />
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-local" />
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-personal" />
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-remote-host-03" />
@@ -22,6 +23,21 @@
           </mappings>
           <excludedPaths>
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release-remote-host-03" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-remote05" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-local" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-personal" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-remote-host-03" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+      <paths name="Remote Host 05 (dfcaffe3-9d5d-453f-8625-5167a349eb2e)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/tmp.dhUqe6ecU7/SLAP" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-release-remote-host-03" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-remote05" />
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-local" />
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-personal" />
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug-remote-host-03" />

@@ -1,0 +1,4 @@
+Hello, FHE World! 
+Final FHE value 4.24627e+07
+28087.02user 1189.67system 3:00:28elapsed 270%CPU (0avgtext+0avgdata 7527200maxresident)k
+89870888inputs+16outputs (2556565major+34439690minor)pagefaults 0swaps

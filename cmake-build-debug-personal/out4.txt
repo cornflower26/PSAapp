@@ -1,0 +1,5 @@
+Hello, FHE World! 
+Final FHE value 2.94874e+07
+Command terminated by signal 15
+22432.48user 966.49system 1:07:17elapsed 579%CPU (0avgtext+0avgdata 7559792maxresident)k
+70853976inputs+16outputs (1688525major+28266015minor)pagefaults 0swaps
